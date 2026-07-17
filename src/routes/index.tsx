@@ -11,10 +11,47 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const onboarded = useStore((s) => s.onboarded);
+  return onboarded ? <Dashboard /> : <Onboarding />;
+}
+
+function Onboarding() {
+  const { setUserName, setOnboarded } = useStore();
+  const [nameInput, setNameInput] = useState("");
+  return (
+    <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
+      <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">Kairos</div>
+      <h1 className="text-4xl font-heading font-black leading-tight mb-4">
+        Chegou a hora de <span className="text-discipline">parar de adiar</span>.
+      </h1>
+      <p className="text-muted-foreground text-sm mb-8 text-pretty">
+        Como você quer ser chamado? A disciplina começa pelo compromisso com seu próprio nome.
+      </p>
+      <input
+        value={nameInput}
+        onChange={(e) => setNameInput(e.target.value)}
+        placeholder="Seu nome"
+        className="w-full bg-surface border border-border rounded-xl px-4 py-4 text-lg font-medium mb-4 focus:outline-none focus:border-discipline"
+      />
+      <button
+        disabled={!nameInput.trim()}
+        onClick={() => {
+          setUserName(nameInput.trim());
+          setOnboarded(true);
+          toast.success("Bem-vindo. Sua jornada começa agora.");
+        }}
+        className="w-full py-5 bg-white text-black font-heading font-black text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-30"
+      >
+        COMEÇAR
+      </button>
+    </div>
+  );
+}
+
+function Dashboard() {
   const navigate = useNavigate();
   const {
-    userName, setUserName, setOnboarded, onboarded,
-    tasks, sessions, xp, streak, completedToday, tickDay,
+    userName, tasks, sessions, xp, streak, completedToday, tickDay,
     dailyMissionCompleted, markDailyMission,
   } = useStore();
 
@@ -25,53 +62,23 @@ function Home() {
     return () => clearInterval(t);
   }, [tickDay]);
 
-  // Onboarding
-  const [nameInput, setNameInput] = useState("");
-  if (!onboarded) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
-        <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">Kairos</div>
-        <h1 className="text-4xl font-heading font-black leading-tight mb-4">
-          Chegou a hora de <span className="text-discipline">parar de adiar</span>.
-        </h1>
-        <p className="text-muted-foreground text-sm mb-8 text-pretty">
-          Como você quer ser chamado? A disciplina começa pelo compromisso com seu próprio nome.
-        </p>
-        <input
-          value={nameInput}
-          onChange={(e) => setNameInput(e.target.value)}
-          placeholder="Seu nome"
-          className="w-full bg-surface border border-border rounded-xl px-4 py-4 text-lg font-medium mb-4 focus:outline-none focus:border-discipline"
-        />
-        <button
-          disabled={!nameInput.trim()}
-          onClick={() => {
-            setUserName(nameInput.trim());
-            setOnboarded(true);
-            toast.success("Bem-vindo. Sua jornada começa agora.");
-          }}
-          className="w-full py-5 bg-white text-black font-heading font-black text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-30"
-        >
-          COMEÇAR
-        </button>
-      </div>
-    );
-  }
+  const quote = useMemo(() => pickDaily(startQuotes), []);
+  const insight = useMemo(() => generateInsight(sessions, tasks), [sessions, tasks]);
+  const mission = useMemo(() => pickDaily(dailyMissions), []);
 
   const greeting = now.getHours() < 12 ? "Bom dia" : now.getHours() < 18 ? "Boa tarde" : "Boa noite";
   const dateStr = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "short" });
   const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-  const todayTasks = tasks; // in real app filter by repetition
+  const todayTasks = tasks;
   const done = completedToday.length;
   const total = Math.max(todayTasks.length, 1);
   const progress = Math.round((done / total) * 100);
 
   const level = xpToLevel(xp);
-  const quote = useMemo(() => pickDaily(startQuotes), []);
-  const insight = useMemo(() => generateInsight(sessions, tasks), [sessions, tasks]);
-  const mission = useMemo(() => pickDaily(dailyMissions), []);
   const missionDone = dailyMissionCompleted === new Date().toISOString().slice(0, 10);
+
+
 
   const nextTask = todayTasks.find((t) => !completedToday.includes(t.id));
 
