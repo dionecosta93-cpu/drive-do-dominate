@@ -21,12 +21,17 @@ function NewTask() {
   const [category, setCategory] = useState<Category>("trabalho");
   const [priority, setPriority] = useState<Priority>("media");
   const [time, setTime] = useState("09:00");
+  const [scheduledDate, setScheduledDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
   const [estimated, setEstimated] = useState(30);
   const [max, setMax] = useState(60);
   const [repetition, setRepetition] = useState<Repetition>("nenhuma");
   const [difficulty, setDifficulty] = useState(5);
   const [reward, setReward] = useState("");
   const [consequence, setConsequence] = useState("");
+
 
   const submit = () => {
     if (!name.trim()) { toast.error("Dê um nome à missão."); return; }
