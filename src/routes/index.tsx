@@ -70,17 +70,20 @@ function Dashboard() {
   const dateStr = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "short" });
   const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-  const todayTasks = tasks;
-  const done = completedToday.length;
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayTasks = useMemo(
+    () => todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time)),
+    [tasks, todayKey],
+  );
+  const done = todayTasks.filter((t) => completedToday.includes(t.id)).length;
   const total = Math.max(todayTasks.length, 1);
   const progress = Math.round((done / total) * 100);
 
   const level = xpToLevel(xp);
-  const missionDone = dailyMissionCompleted === new Date().toISOString().slice(0, 10);
-
-
+  const missionDone = dailyMissionCompleted === todayKey;
 
   const nextTask = todayTasks.find((t) => !completedToday.includes(t.id));
+
 
   return (
     <div className="px-5 pt-8">
