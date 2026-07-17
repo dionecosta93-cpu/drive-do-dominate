@@ -20,6 +20,7 @@ export interface Task {
   createdAt: number;
   scheduledDate: string; // YYYY-MM-DD — for non-repeating; rolled over if not done
   lastCompletedDate?: string; // YYYY-MM-DD — last time it was completed (any repetition)
+  rolloverCount?: number; // how many times it was pushed to the next day
 }
 
 export const todaysTasks = (tasks: Task[], today: string): Task[] => {
@@ -216,7 +217,7 @@ export const useStore = create<State>()(
         // Roll over any non-repeating task scheduled before today that wasn't completed today
         const rolledTasks = state.tasks.map((t) =>
           t.repetition === "nenhuma" && t.scheduledDate < today && t.lastCompletedDate !== t.scheduledDate
-            ? { ...t, scheduledDate: today }
+            ? { ...t, scheduledDate: today, rolloverCount: (t.rolloverCount ?? 0) + 1 }
             : t,
         );
         if (state.lastActiveDay && state.lastActiveDay !== today) {
