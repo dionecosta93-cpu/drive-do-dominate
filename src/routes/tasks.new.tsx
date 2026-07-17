@@ -21,6 +21,10 @@ function NewTask() {
   const [category, setCategory] = useState<Category>("trabalho");
   const [priority, setPriority] = useState<Priority>("media");
   const [time, setTime] = useState("09:00");
+  const [scheduledDate, setScheduledDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
   const [estimated, setEstimated] = useState(30);
   const [max, setMax] = useState(60);
   const [repetition, setRepetition] = useState<Repetition>("nenhuma");
@@ -28,15 +32,17 @@ function NewTask() {
   const [reward, setReward] = useState("");
   const [consequence, setConsequence] = useState("");
 
+
   const submit = () => {
     if (!name.trim()) { toast.error("Dê um nome à missão."); return; }
     addTask({
-      name: name.trim(), category, priority, time,
+      name: name.trim(), category, priority, time, scheduledDate,
       estimatedMinutes: estimated, maxMinutes: max, repetition,
       difficulty, reward: reward.trim(), consequence: consequence.trim(),
     });
     toast.success("Missão registrada. Agora execute.");
     navigate({ to: "/" });
+
   };
 
   return (
@@ -75,11 +81,23 @@ function NewTask() {
           </Field>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Data">
+            <input type="date" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} disabled={repetition !== "nenhuma"}
+              className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline disabled:opacity-50" />
+          </Field>
           <Field label="Horário">
             <input type="time" value={time} onChange={(e) => setTime(e.target.value)}
               className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline" />
           </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Estimado (min)">
+            <input type="number" min={1} value={estimated} onChange={(e) => setEstimated(Number(e.target.value))}
+              className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline" />
+          </Field>
+
           <Field label="Estimado (min)">
             <input type="number" min={1} value={estimated} onChange={(e) => setEstimated(Number(e.target.value))}
               className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline" />
