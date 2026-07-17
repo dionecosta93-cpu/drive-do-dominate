@@ -86,6 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Elimine a procrastinação. Construa disciplina. Cada tarefa concluída é uma vitória sobre o seu eu de ontem." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Kairos — Disciplina Diária" },
+      { name: "twitter:description", content: "Elimine a procrastinação. Construa disciplina. Cada tarefa concluída é uma vitória sobre o seu eu de ontem." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5f2b0c2-6eef-4ba0-ba98-621de9d56d53/id-preview-309c0f41--78678352-62c3-41a1-82e8-97a44d1170f9.lovable.app-1784311259762.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5f2b0c2-6eef-4ba0-ba98-621de9d56d53/id-preview-309c0f41--78678352-62c3-41a1-82e8-97a44d1170f9.lovable.app-1784311259762.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
