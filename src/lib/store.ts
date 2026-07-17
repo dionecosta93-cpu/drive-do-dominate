@@ -194,6 +194,7 @@ export const useStore = create<State>()(
           longestStreak: Math.max(state.longestStreak, newStreak),
           lastActiveDay: today,
           achievements: newAch,
+          tasks: state.tasks.map((t) => (t.id === session.taskId ? { ...t, lastCompletedDate: today } : t)),
         });
         return session;
       },
@@ -212,17 +213,23 @@ export const useStore = create<State>()(
       tickDay: () => {
         const state = get();
         const today = todayKey();
+        // Roll over any non-repeating task scheduled before today that wasn't completed today
+        const rolledTasks = state.tasks.map((t) =>
+          t.repetition === "nenhuma" && t.scheduledDate < today && t.lastCompletedDate !== t.scheduledDate
+            ? { ...t, scheduledDate: today }
+            : t,
+        );
         if (state.lastActiveDay && state.lastActiveDay !== today) {
-          // check if yesterday was active
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
           const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
           if (state.lastActiveDay !== yKey) {
-            // broke streak
-            set({ streak: 0, completedToday: [] });
+            set({ streak: 0, completedToday: [], tasks: rolledTasks });
           } else {
-            set({ completedToday: [] });
+            set({ completedToday: [], tasks: rolledTasks });
           }
+        } else {
+          set({ tasks: rolledTasks });
         }
       },
 
