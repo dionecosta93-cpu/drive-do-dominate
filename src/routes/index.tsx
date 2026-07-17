@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore, xpToLevel } from "@/lib/store";
+import { useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
 import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight } from "lucide-react";
