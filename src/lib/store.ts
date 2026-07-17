@@ -143,7 +143,7 @@ export const useStore = create<State>()(
 
       addTask: (t) =>
         set((s) => ({
-          tasks: [...s.tasks, { ...t, id: genId(), createdAt: Date.now() }],
+          tasks: [...s.tasks, { scheduledDate: todayKey(), ...t, id: genId(), createdAt: Date.now() }],
         })),
 
       updateTask: (id, patch) =>
