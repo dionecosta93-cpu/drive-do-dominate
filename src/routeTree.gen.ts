@@ -9,10 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VaultRouteImport } from './routes/vault'
+import { Route as StatsRouteImport } from './routes/stats'
+import { Route as MotivationRouteImport } from './routes/motivation'
+import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksIndexRouteImport } from './routes/tasks.index'
 import { Route as TasksNewRouteImport } from './routes/tasks.new'
+import { Route as FocusTaskIdRouteImport } from './routes/focus.$taskId'
 
+const VaultRoute = VaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatsRoute = StatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotivationRoute = MotivationRouteImport.update({
+  id: '/motivation',
+  path: '/motivation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AchievementsRoute = AchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -28,39 +53,117 @@ const TasksNewRoute = TasksNewRouteImport.update({
   path: '/tasks/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FocusTaskIdRoute = FocusTaskIdRouteImport.update({
+  id: '/focus/$taskId',
+  path: '/focus/$taskId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
+  '/motivation': typeof MotivationRoute
+  '/stats': typeof StatsRoute
+  '/vault': typeof VaultRoute
+  '/focus/$taskId': typeof FocusTaskIdRoute
   '/tasks/new': typeof TasksNewRoute
   '/tasks/': typeof TasksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
+  '/motivation': typeof MotivationRoute
+  '/stats': typeof StatsRoute
+  '/vault': typeof VaultRoute
+  '/focus/$taskId': typeof FocusTaskIdRoute
   '/tasks/new': typeof TasksNewRoute
   '/tasks': typeof TasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
+  '/motivation': typeof MotivationRoute
+  '/stats': typeof StatsRoute
+  '/vault': typeof VaultRoute
+  '/focus/$taskId': typeof FocusTaskIdRoute
   '/tasks/new': typeof TasksNewRoute
   '/tasks/': typeof TasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tasks/new' | '/tasks/'
+  fullPaths:
+    | '/'
+    | '/achievements'
+    | '/motivation'
+    | '/stats'
+    | '/vault'
+    | '/focus/$taskId'
+    | '/tasks/new'
+    | '/tasks/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tasks/new' | '/tasks'
-  id: '__root__' | '/' | '/tasks/new' | '/tasks/'
+  to:
+    | '/'
+    | '/achievements'
+    | '/motivation'
+    | '/stats'
+    | '/vault'
+    | '/focus/$taskId'
+    | '/tasks/new'
+    | '/tasks'
+  id:
+    | '__root__'
+    | '/'
+    | '/achievements'
+    | '/motivation'
+    | '/stats'
+    | '/vault'
+    | '/focus/$taskId'
+    | '/tasks/new'
+    | '/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AchievementsRoute: typeof AchievementsRoute
+  MotivationRoute: typeof MotivationRoute
+  StatsRoute: typeof StatsRoute
+  VaultRoute: typeof VaultRoute
+  FocusTaskIdRoute: typeof FocusTaskIdRoute
   TasksNewRoute: typeof TasksNewRoute
   TasksIndexRoute: typeof TasksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vault': {
+      id: '/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/motivation': {
+      id: '/motivation'
+      path: '/motivation'
+      fullPath: '/motivation'
+      preLoaderRoute: typeof MotivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/achievements': {
+      id: '/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AchievementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,11 +185,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/focus/$taskId': {
+      id: '/focus/$taskId'
+      path: '/focus/$taskId'
+      fullPath: '/focus/$taskId'
+      preLoaderRoute: typeof FocusTaskIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AchievementsRoute: AchievementsRoute,
+  MotivationRoute: MotivationRoute,
+  StatsRoute: StatsRoute,
+  VaultRoute: VaultRoute,
+  FocusTaskIdRoute: FocusTaskIdRoute,
   TasksNewRoute: TasksNewRoute,
   TasksIndexRoute: TasksIndexRoute,
 }
