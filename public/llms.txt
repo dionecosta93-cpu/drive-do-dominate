@@ -1,0 +1,12 @@
+# Kairos
+
+> Aplicativo de disciplina diária que transforma tarefas em vitórias mensuráveis.
+
+## Pages
+- [Início](/): Painel principal com progresso do dia, tarefas prioritárias e missão diária.
+- [Tarefas](/tasks): Lista de missões cadastradas.
+- [Nova Tarefa](/tasks/new): Cadastro de tarefa com recompensa e consequência.
+- [Estatísticas](/stats): Horas produtivas, sequências e evolução de XP.
+- [Cofre da Vitória](/vault): Registro de aprendizados e sentimentos por tarefa.
+- [Conquistas](/achievements): Painel de nível, XP e medalhas.
+- [Biblioteca Motivacional](/motivation): Frases separadas por Disciplina, Negócios, Treino, Estudo, Vida e Persistência.
