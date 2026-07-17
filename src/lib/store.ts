@@ -18,7 +18,25 @@ export interface Task {
   reward: string;
   consequence: string;
   createdAt: number;
+  scheduledDate: string; // YYYY-MM-DD — for non-repeating; rolled over if not done
+  lastCompletedDate?: string; // YYYY-MM-DD — last time it was completed (any repetition)
+  rolloverCount?: number; // how many times it was pushed to the next day
 }
+
+export const todaysTasks = (tasks: Task[], today: string): Task[] => {
+  const d = new Date(today + "T00:00:00");
+  const dow = d.getDay(); // 0=Sun..6=Sat
+  return tasks.filter((t) => {
+    if (t.repetition === "diaria") return true;
+    if (t.repetition === "dias-uteis") return dow >= 1 && dow <= 5;
+    if (t.repetition === "semanal") {
+      const created = new Date(t.createdAt);
+      return created.getDay() === dow;
+    }
+    // nenhuma
+    return t.scheduledDate === today;
+  });
+};
 
 export interface CompletedSession {
   id: string;
@@ -63,7 +81,7 @@ interface State {
 
   setUserName: (n: string) => void;
   setOnboarded: (b: boolean) => void;
-  addTask: (t: Omit<Task, "id" | "createdAt">) => void;
+  addTask: (t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string }) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   removeTask: (id: string) => void;
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
@@ -126,7 +144,7 @@ export const useStore = create<State>()(
 
       addTask: (t) =>
         set((s) => ({
-          tasks: [...s.tasks, { ...t, id: genId(), createdAt: Date.now() }],
+          tasks: [...s.tasks, { scheduledDate: todayKey(), ...t, id: genId(), createdAt: Date.now() }],
         })),
 
       updateTask: (id, patch) =>
@@ -177,6 +195,7 @@ export const useStore = create<State>()(
           longestStreak: Math.max(state.longestStreak, newStreak),
           lastActiveDay: today,
           achievements: newAch,
+          tasks: state.tasks.map((t) => (t.id === session.taskId ? { ...t, lastCompletedDate: today } : t)),
         });
         return session;
       },
@@ -195,17 +214,23 @@ export const useStore = create<State>()(
       tickDay: () => {
         const state = get();
         const today = todayKey();
+        // Roll over any non-repeating task scheduled before today that wasn't completed today
+        const rolledTasks = state.tasks.map((t) =>
+          t.repetition === "nenhuma" && t.scheduledDate < today && t.lastCompletedDate !== t.scheduledDate
+            ? { ...t, scheduledDate: today, rolloverCount: (t.rolloverCount ?? 0) + 1 }
+            : t,
+        );
         if (state.lastActiveDay && state.lastActiveDay !== today) {
-          // check if yesterday was active
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
           const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
           if (state.lastActiveDay !== yKey) {
-            // broke streak
-            set({ streak: 0, completedToday: [] });
+            set({ streak: 0, completedToday: [], tasks: rolledTasks });
           } else {
-            set({ completedToday: [] });
+            set({ completedToday: [], tasks: rolledTasks });
           }
+        } else {
+          set({ tasks: rolledTasks });
         }
       },
 

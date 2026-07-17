@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useStore, todaysTasks } from "@/lib/store";
 import { randomStartQuote } from "@/lib/quotes";
 import { Pause, Play, Check, X } from "lucide-react";
 import { toast } from "sonner";
@@ -14,8 +14,13 @@ type Phase = "breathe" | "quote" | "running" | "paused" | "done";
 function FocusMode() {
   const { taskId } = Route.useParams();
   const navigate = useNavigate();
-  const { tasks, completeSession, addReflection } = useStore();
+  const { tasks, completeSession, addReflection, completedToday } = useStore();
   const task = tasks.find((t) => t.id === taskId);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const nextTask = useMemo(() => {
+    const list = todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time));
+    return list.find((t) => t.id !== taskId && !completedToday.includes(t.id));
+  }, [tasks, taskId, completedToday, todayKey]);
 
   const [phase, setPhase] = useState<Phase>("breathe");
   const [breatheLeft, setBreatheLeft] = useState(5);
@@ -192,15 +197,28 @@ function FocusMode() {
             />
           </div>
 
-          <button
-            onClick={() => {
-              if (feeling || reflection) addReflection(session.id, feeling, reflection);
-              navigate({ to: "/" });
-            }}
-            className="w-full py-4 bg-white text-black font-heading font-black text-base rounded-2xl active:scale-[0.98] transition-transform"
-          >
-            VOLTAR
-          </button>
+          <div className="space-y-2">
+            {nextTask && (
+              <button
+                onClick={() => {
+                  if (feeling || reflection) addReflection(session.id, feeling, reflection);
+                  navigate({ to: "/focus/$taskId", params: { taskId: nextTask.id } });
+                }}
+                className="w-full py-4 bg-discipline text-black font-heading font-black text-base rounded-2xl active:scale-[0.98] transition-transform"
+              >
+                PRÓXIMA MISSÃO →
+              </button>
+            )}
+            <button
+              onClick={() => {
+                if (feeling || reflection) addReflection(session.id, feeling, reflection);
+                navigate({ to: "/" });
+              }}
+              className="w-full py-4 bg-white text-black font-heading font-black text-base rounded-2xl active:scale-[0.98] transition-transform"
+            >
+              {nextTask ? "VOLTAR AO PAINEL" : "DIA CONCLUÍDO"}
+            </button>
+          </div>
         </div>
       </FullScreen>
     );

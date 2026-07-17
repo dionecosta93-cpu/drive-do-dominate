@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore, xpToLevel } from "@/lib/store";
+import { useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
 import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight } from "lucide-react";
@@ -70,17 +70,20 @@ function Dashboard() {
   const dateStr = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "short" });
   const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-  const todayTasks = tasks;
-  const done = completedToday.length;
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayTasks = useMemo(
+    () => todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time)),
+    [tasks, todayKey],
+  );
+  const done = todayTasks.filter((t) => completedToday.includes(t.id)).length;
   const total = Math.max(todayTasks.length, 1);
   const progress = Math.round((done / total) * 100);
 
   const level = xpToLevel(xp);
-  const missionDone = dailyMissionCompleted === new Date().toISOString().slice(0, 10);
-
-
+  const missionDone = dailyMissionCompleted === todayKey;
 
   const nextTask = todayTasks.find((t) => !completedToday.includes(t.id));
+
 
   return (
     <div className="px-5 pt-8">
@@ -187,12 +190,18 @@ function Dashboard() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">{t.time} · {t.category}</span>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-[11px] font-mono font-bold tracking-widest text-discipline">{t.time}</span>
+                      <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">{t.category}</span>
                       <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
                         t.priority === "alta" ? "bg-struggle/20 text-struggle" :
                         t.priority === "media" ? "bg-warning/20 text-warning" : "bg-muted text-muted-foreground"
                       }`}>{t.priority}</span>
+                      {!!t.rolloverCount && !isDone && (
+                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-struggle/15 text-struggle border border-struggle/30">
+                          ↻ adiada {t.rolloverCount}x
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-base font-heading font-bold leading-tight truncate">{t.name}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
