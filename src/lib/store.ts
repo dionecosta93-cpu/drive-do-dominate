@@ -80,7 +80,7 @@ interface State {
 
   setUserName: (n: string) => void;
   setOnboarded: (b: boolean) => void;
-  addTask: (t: Omit<Task, "id" | "createdAt">) => void;
+  addTask: (t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string }) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   removeTask: (id: string) => void;
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
