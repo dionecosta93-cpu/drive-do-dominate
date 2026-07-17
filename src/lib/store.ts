@@ -18,7 +18,24 @@ export interface Task {
   reward: string;
   consequence: string;
   createdAt: number;
+  scheduledDate: string; // YYYY-MM-DD — for non-repeating; rolled over if not done
+  lastCompletedDate?: string; // YYYY-MM-DD — last time it was completed (any repetition)
 }
+
+export const todaysTasks = (tasks: Task[], today: string): Task[] => {
+  const d = new Date(today + "T00:00:00");
+  const dow = d.getDay(); // 0=Sun..6=Sat
+  return tasks.filter((t) => {
+    if (t.repetition === "diaria") return true;
+    if (t.repetition === "dias-uteis") return dow >= 1 && dow <= 5;
+    if (t.repetition === "semanal") {
+      const created = new Date(t.createdAt);
+      return created.getDay() === dow;
+    }
+    // nenhuma
+    return t.scheduledDate === today;
+  });
+};
 
 export interface CompletedSession {
   id: string;
