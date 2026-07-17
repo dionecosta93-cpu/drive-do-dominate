@@ -36,12 +36,13 @@ function NewTask() {
   const submit = () => {
     if (!name.trim()) { toast.error("Dê um nome à missão."); return; }
     addTask({
-      name: name.trim(), category, priority, time,
+      name: name.trim(), category, priority, time, scheduledDate,
       estimatedMinutes: estimated, maxMinutes: max, repetition,
       difficulty, reward: reward.trim(), consequence: consequence.trim(),
     });
     toast.success("Missão registrada. Agora execute.");
     navigate({ to: "/" });
+
   };
 
   return (
