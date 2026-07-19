@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { library } from "@/lib/quotes";
 import { useState } from "react";
 
-export const Route = createFileRoute("/motivation")({
+export const Route = createFileRoute("/_authenticated/motivation")({
   component: Motivation,
   head: () => ({ meta: [{ title: "Motivação — Kairos" }, { name: "description", content: "Biblioteca de frases separadas por Disciplina, Negócios, Treino, Estudo, Vida e Persistência." }] }),
 });

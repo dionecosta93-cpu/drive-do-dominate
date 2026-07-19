@@ -3,10 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
-import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight } from "lucide-react";
+import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/")({
+
+export const Route = createFileRoute("/_authenticated/")({
   component: Home,
 });
 
@@ -18,9 +20,16 @@ function Home() {
 function Onboarding() {
   const { setUserName, setOnboarded } = useStore();
   const [nameInput, setNameInput] = useState("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data.user?.user_metadata as { display_name?: string; full_name?: string; name?: string } | undefined;
+      const guess = meta?.display_name || meta?.full_name || meta?.name || data.user?.email?.split("@")[0] || "";
+      if (guess) setNameInput(guess);
+    });
+  }, []);
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
-      <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">Kairos</div>
+      <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">Disciplina Absoluta</div>
       <h1 className="text-4xl font-heading font-black leading-tight mb-4">
         Chegou a hora de <span className="text-discipline">parar de adiar</span>.
       </h1>
@@ -47,6 +56,7 @@ function Onboarding() {
     </div>
   );
 }
+
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -88,28 +98,41 @@ function Dashboard() {
   return (
     <div className="px-5 pt-8">
       {/* Header */}
-      <header className="flex justify-between items-start mb-8 animate-rise">
-        <div>
+      <header className="flex justify-between items-start mb-8 animate-rise gap-3">
+        <div className="min-w-0">
           <p className="text-muted-foreground text-[10px] font-mono uppercase tracking-widest mb-1">
             {dateStr} · {timeStr}
           </p>
-          <h1 className="text-2xl font-heading font-extrabold tracking-tight uppercase">
+          <h1 className="text-2xl font-heading font-extrabold tracking-tight uppercase truncate">
             {greeting}, {userName || "atleta"}.
           </h1>
         </div>
-        <Link
-          to="/achievements"
-          className="flex items-center gap-2 bg-discipline/10 border border-discipline/25 px-3 py-1.5 rounded-full"
-        >
-          <span className="text-discipline font-bold text-xs">NÍVEL {level.level}</span>
-          <div className="w-8 h-1.5 bg-discipline/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-discipline shadow-[0_0_8px_rgba(34,197,94,0.6)]"
-              style={{ width: `${(level.current / level.needed) * 100}%` }}
-            />
-          </div>
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to="/achievements"
+            className="flex items-center gap-2 bg-discipline/10 border border-discipline/25 px-3 py-1.5 rounded-full"
+          >
+            <span className="text-discipline font-bold text-xs">NÍVEL {level.level}</span>
+            <div className="w-8 h-1.5 bg-discipline/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-discipline shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                style={{ width: `${(level.current / level.needed) * 100}%` }}
+              />
+            </div>
+          </Link>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate({ to: "/auth" });
+            }}
+            aria-label="Sair"
+            className="size-9 grid place-items-center rounded-full border border-border bg-surface text-muted-foreground hover:text-struggle hover:border-struggle/40 transition"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </div>
       </header>
+
 
       {/* Progress + Quote */}
       <section className="mb-8 animate-rise" style={{ animationDelay: "60ms" }}>

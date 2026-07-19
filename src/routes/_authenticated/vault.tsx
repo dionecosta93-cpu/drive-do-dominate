@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useStore } from "@/lib/store";
 import { Trophy } from "lucide-react";
 
-export const Route = createFileRoute("/vault")({
+export const Route = createFileRoute("/_authenticated/vault")({
   component: Vault,
   head: () => ({ meta: [{ title: "Cofre da Vitória — Kairos" }, { name: "description", content: "Reveja suas vitórias e o que aprendeu com cada tarefa cumprida." }] }),
 });

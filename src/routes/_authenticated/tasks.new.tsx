@@ -4,7 +4,7 @@ import { useStore, type Category, type Priority, type Repetition } from "@/lib/s
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
 
-export const Route = createFileRoute("/tasks/new")({
+export const Route = createFileRoute("/_authenticated/tasks/new")({
   component: NewTask,
   head: () => ({ meta: [{ title: "Nova tarefa — Kairos" }, { name: "description", content: "Defina uma missão com recompensa e consequência." }] }),
 });

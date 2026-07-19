@@ -3,7 +3,7 @@ import { useStore, xpToLevel } from "@/lib/store";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, Tooltip, CartesianGrid } from "recharts";
 import { useMemo } from "react";
 
-export const Route = createFileRoute("/stats")({
+export const Route = createFileRoute("/_authenticated/stats")({
   component: Stats,
   head: () => ({ meta: [{ title: "Estatísticas — Kairos" }, { name: "description", content: "Veja sua evolução, tempo produtivo e disciplina em números." }] }),
 });

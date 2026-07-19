@@ -9,91 +9,109 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VaultRouteImport } from './routes/vault'
-import { Route as StatsRouteImport } from './routes/stats'
-import { Route as MotivationRouteImport } from './routes/motivation'
-import { Route as AchievementsRouteImport } from './routes/achievements'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as TasksIndexRouteImport } from './routes/tasks.index'
-import { Route as TasksNewRouteImport } from './routes/tasks.new'
-import { Route as FocusTaskIdRouteImport } from './routes/focus.$taskId'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
+import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
+import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
+import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
+import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
+import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
+import { Route as AuthenticatedFocusTaskIdRouteImport } from './routes/_authenticated/focus.$taskId'
 
-const VaultRoute = VaultRouteImport.update({
-  id: '/vault',
-  path: '/vault',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatsRoute = StatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MotivationRoute = MotivationRouteImport.update({
-  id: '/motivation',
-  path: '/motivation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AchievementsRoute = AchievementsRouteImport.update({
-  id: '/achievements',
-  path: '/achievements',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const TasksIndexRoute = TasksIndexRouteImport.update({
+const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
+  id: '/motivation',
+  path: '/motivation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAchievementsRoute =
+  AuthenticatedAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const TasksNewRoute = TasksNewRouteImport.update({
+const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
   id: '/tasks/new',
   path: '/tasks/new',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const FocusTaskIdRoute = FocusTaskIdRouteImport.update({
-  id: '/focus/$taskId',
-  path: '/focus/$taskId',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedFocusTaskIdRoute =
+  AuthenticatedFocusTaskIdRouteImport.update({
+    id: '/focus/$taskId',
+    path: '/focus/$taskId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/achievements': typeof AchievementsRoute
-  '/motivation': typeof MotivationRoute
-  '/stats': typeof StatsRoute
-  '/vault': typeof VaultRoute
-  '/focus/$taskId': typeof FocusTaskIdRoute
-  '/tasks/new': typeof TasksNewRoute
-  '/tasks/': typeof TasksIndexRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/achievements': typeof AuthenticatedAchievementsRoute
+  '/motivation': typeof AuthenticatedMotivationRoute
+  '/stats': typeof AuthenticatedStatsRoute
+  '/vault': typeof AuthenticatedVaultRoute
+  '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
+  '/tasks/new': typeof AuthenticatedTasksNewRoute
+  '/tasks/': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/achievements': typeof AchievementsRoute
-  '/motivation': typeof MotivationRoute
-  '/stats': typeof StatsRoute
-  '/vault': typeof VaultRoute
-  '/focus/$taskId': typeof FocusTaskIdRoute
-  '/tasks/new': typeof TasksNewRoute
-  '/tasks': typeof TasksIndexRoute
+  '/auth': typeof AuthRoute
+  '/achievements': typeof AuthenticatedAchievementsRoute
+  '/motivation': typeof AuthenticatedMotivationRoute
+  '/stats': typeof AuthenticatedStatsRoute
+  '/vault': typeof AuthenticatedVaultRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
+  '/tasks/new': typeof AuthenticatedTasksNewRoute
+  '/tasks': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/achievements': typeof AchievementsRoute
-  '/motivation': typeof MotivationRoute
-  '/stats': typeof StatsRoute
-  '/vault': typeof VaultRoute
-  '/focus/$taskId': typeof FocusTaskIdRoute
-  '/tasks/new': typeof TasksNewRoute
-  '/tasks/': typeof TasksIndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
+  '/_authenticated/motivation': typeof AuthenticatedMotivationRoute
+  '/_authenticated/stats': typeof AuthenticatedStatsRoute
+  '/_authenticated/vault': typeof AuthenticatedVaultRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
+  '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
+  '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/achievements'
     | '/motivation'
     | '/stats'
@@ -103,107 +121,137 @@ export interface FileRouteTypes {
     | '/tasks/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/auth'
     | '/achievements'
     | '/motivation'
     | '/stats'
     | '/vault'
+    | '/'
     | '/focus/$taskId'
     | '/tasks/new'
     | '/tasks'
   id:
     | '__root__'
-    | '/'
-    | '/achievements'
-    | '/motivation'
-    | '/stats'
-    | '/vault'
-    | '/focus/$taskId'
-    | '/tasks/new'
-    | '/tasks/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/achievements'
+    | '/_authenticated/motivation'
+    | '/_authenticated/stats'
+    | '/_authenticated/vault'
+    | '/_authenticated/'
+    | '/_authenticated/focus/$taskId'
+    | '/_authenticated/tasks/new'
+    | '/_authenticated/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AchievementsRoute: typeof AchievementsRoute
-  MotivationRoute: typeof MotivationRoute
-  StatsRoute: typeof StatsRoute
-  VaultRoute: typeof VaultRoute
-  FocusTaskIdRoute: typeof FocusTaskIdRoute
-  TasksNewRoute: typeof TasksNewRoute
-  TasksIndexRoute: typeof TasksIndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/vault': {
-      id: '/vault'
-      path: '/vault'
-      fullPath: '/vault'
-      preLoaderRoute: typeof VaultRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/stats': {
-      id: '/stats'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof StatsRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/motivation': {
-      id: '/motivation'
-      path: '/motivation'
-      fullPath: '/motivation'
-      preLoaderRoute: typeof MotivationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/achievements': {
-      id: '/achievements'
-      path: '/achievements'
-      fullPath: '/achievements'
-      preLoaderRoute: typeof AchievementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/tasks/': {
-      id: '/tasks/'
+    '/_authenticated/vault': {
+      id: '/_authenticated/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof AuthenticatedVaultRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/stats': {
+      id: '/_authenticated/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof AuthenticatedStatsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/motivation': {
+      id: '/_authenticated/motivation'
+      path: '/motivation'
+      fullPath: '/motivation'
+      preLoaderRoute: typeof AuthenticatedMotivationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/achievements': {
+      id: '/_authenticated/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks/': {
+      id: '/_authenticated/tasks/'
       path: '/tasks'
       fullPath: '/tasks/'
-      preLoaderRoute: typeof TasksIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/tasks/new': {
-      id: '/tasks/new'
+    '/_authenticated/tasks/new': {
+      id: '/_authenticated/tasks/new'
       path: '/tasks/new'
       fullPath: '/tasks/new'
-      preLoaderRoute: typeof TasksNewRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedTasksNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/focus/$taskId': {
-      id: '/focus/$taskId'
+    '/_authenticated/focus/$taskId': {
+      id: '/_authenticated/focus/$taskId'
       path: '/focus/$taskId'
       fullPath: '/focus/$taskId'
-      preLoaderRoute: typeof FocusTaskIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedFocusTaskIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
+  AuthenticatedMotivationRoute: typeof AuthenticatedMotivationRoute
+  AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
+  AuthenticatedVaultRoute: typeof AuthenticatedVaultRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedFocusTaskIdRoute: typeof AuthenticatedFocusTaskIdRoute
+  AuthenticatedTasksNewRoute: typeof AuthenticatedTasksNewRoute
+  AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
+  AuthenticatedMotivationRoute: AuthenticatedMotivationRoute,
+  AuthenticatedStatsRoute: AuthenticatedStatsRoute,
+  AuthenticatedVaultRoute: AuthenticatedVaultRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedFocusTaskIdRoute: AuthenticatedFocusTaskIdRoute,
+  AuthenticatedTasksNewRoute: AuthenticatedTasksNewRoute,
+  AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AchievementsRoute: AchievementsRoute,
-  MotivationRoute: MotivationRoute,
-  StatsRoute: StatsRoute,
-  VaultRoute: VaultRoute,
-  FocusTaskIdRoute: FocusTaskIdRoute,
-  TasksNewRoute: TasksNewRoute,
-  TasksIndexRoute: TasksIndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
