@@ -10,10 +10,14 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { attachCloudSyncForUser, detachCloudSync } from "@/lib/cloud-sync";
+import { useStore } from "@/lib/store";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "@/components/bottom-nav";
+
 
 function NotFoundComponent() {
   return (
@@ -79,17 +83,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#050505" },
-      { title: "Kairos — Disciplina Diária" },
-      { name: "description", content: "Elimine a procrastinação. Construa disciplina. Cada tarefa concluída é uma vitória sobre o seu eu de ontem." },
-      { name: "author", content: "Kairos" },
-      { property: "og:title", content: "Kairos — Disciplina Diária" },
-      { property: "og:description", content: "Elimine a procrastinação. Construa disciplina. Cada tarefa concluída é uma vitória sobre o seu eu de ontem." },
+      { title: "Disciplina Absoluta — Domine seu dia" },
+      { name: "description", content: "Elimine a procrastinação e construa disciplina absoluta. Rotina, foco, metas, hábitos e recompensas — tudo sincronizado na nuvem." },
+      { name: "author", content: "Disciplina Absoluta" },
+      { property: "og:title", content: "Disciplina Absoluta — Domine seu dia" },
+      { property: "og:description", content: "Elimine a procrastinação e construa disciplina absoluta. Rotina, foco, metas, hábitos e recompensas — tudo sincronizado na nuvem." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Kairos — Disciplina Diária" },
-      { name: "twitter:description", content: "Elimine a procrastinação. Construa disciplina. Cada tarefa concluída é uma vitória sobre o seu eu de ontem." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5f2b0c2-6eef-4ba0-ba98-621de9d56d53/id-preview-309c0f41--78678352-62c3-41a1-82e8-97a44d1170f9.lovable.app-1784311259762.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5f2b0c2-6eef-4ba0-ba98-621de9d56d53/id-preview-309c0f41--78678352-62c3-41a1-82e8-97a44d1170f9.lovable.app-1784311259762.png" },
+      { name: "twitter:title", content: "Disciplina Absoluta — Domine seu dia" },
+      { name: "twitter:description", content: "Elimine a procrastinação e construa disciplina absoluta." },
+
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -124,8 +127,28 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const hideNav = pathname.startsWith("/focus");
+  const hideNav = pathname.startsWith("/focus") || pathname.startsWith("/auth");
+
+  useEffect(() => {
+    // Hydrate current session immediately (in case page loaded already signed in).
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) void attachCloudSyncForUser(data.user.id);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_OUT") {
+        detachCloudSync();
+        useStore.getState().reset();
+        router.invalidate();
+        return;
+      }
+      if (session?.user) void attachCloudSyncForUser(session.user.id);
+      router.invalidate();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -141,3 +164,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
