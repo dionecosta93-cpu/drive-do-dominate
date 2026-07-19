@@ -118,11 +118,21 @@ function Dashboard() {
                 className="h-full bg-discipline shadow-[0_0_8px_rgba(34,197,94,0.6)]"
                 style={{ width: `${(level.current / level.needed) * 100}%` }}
               />
-
-            />
-          </div>
-        </Link>
+            </div>
+          </Link>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate({ to: "/auth" });
+            }}
+            aria-label="Sair"
+            className="size-9 grid place-items-center rounded-full border border-border bg-surface text-muted-foreground hover:text-struggle hover:border-struggle/40 transition"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </div>
       </header>
+
 
       {/* Progress + Quote */}
       <section className="mb-8 animate-rise" style={{ animationDelay: "60ms" }}>
