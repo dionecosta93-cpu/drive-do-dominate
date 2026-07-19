@@ -3,8 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
-import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight } from "lucide-react";
+import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Home,
@@ -18,9 +20,16 @@ function Home() {
 function Onboarding() {
   const { setUserName, setOnboarded } = useStore();
   const [nameInput, setNameInput] = useState("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data.user?.user_metadata as { display_name?: string; full_name?: string; name?: string } | undefined;
+      const guess = meta?.display_name || meta?.full_name || meta?.name || data.user?.email?.split("@")[0] || "";
+      if (guess) setNameInput(guess);
+    });
+  }, []);
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
-      <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">Kairos</div>
+      <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">Disciplina Absoluta</div>
       <h1 className="text-4xl font-heading font-black leading-tight mb-4">
         Chegou a hora de <span className="text-discipline">parar de adiar</span>.
       </h1>
@@ -47,6 +56,7 @@ function Onboarding() {
     </div>
   );
 }
+
 
 function Dashboard() {
   const navigate = useNavigate();
