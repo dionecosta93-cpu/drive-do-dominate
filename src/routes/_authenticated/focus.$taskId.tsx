@@ -5,7 +5,7 @@ import { randomStartQuote } from "@/lib/quotes";
 import { Pause, Play, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/focus/$taskId")({
+export const Route = createFileRoute("/_authenticated/focus/$taskId")({
   component: FocusMode,
 });
 

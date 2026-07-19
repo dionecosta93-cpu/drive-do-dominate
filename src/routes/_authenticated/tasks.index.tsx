@@ -3,7 +3,7 @@ import { useStore } from "@/lib/store";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/tasks/")({
+export const Route = createFileRoute("/_authenticated/tasks/")({
   component: TasksList,
   head: () => ({ meta: [{ title: "Tarefas — Kairos" }, { name: "description", content: "Gerencie suas tarefas diárias com propósito e consequência." }] }),
 });

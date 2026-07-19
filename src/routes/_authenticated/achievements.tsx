@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useStore, xpToLevel } from "@/lib/store";
 import { Lock, Trophy } from "lucide-react";
 
-export const Route = createFileRoute("/achievements")({
+export const Route = createFileRoute("/_authenticated/achievements")({
   component: Achievements,
   head: () => ({ meta: [{ title: "Conquistas — Kairos" }, { name: "description", content: "Painel de evolução, XP, nível e medalhas desbloqueadas." }] }),
 });
