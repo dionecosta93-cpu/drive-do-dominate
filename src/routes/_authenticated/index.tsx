@@ -98,24 +98,27 @@ function Dashboard() {
   return (
     <div className="px-5 pt-8">
       {/* Header */}
-      <header className="flex justify-between items-start mb-8 animate-rise">
-        <div>
+      <header className="flex justify-between items-start mb-8 animate-rise gap-3">
+        <div className="min-w-0">
           <p className="text-muted-foreground text-[10px] font-mono uppercase tracking-widest mb-1">
             {dateStr} · {timeStr}
           </p>
-          <h1 className="text-2xl font-heading font-extrabold tracking-tight uppercase">
+          <h1 className="text-2xl font-heading font-extrabold tracking-tight uppercase truncate">
             {greeting}, {userName || "atleta"}.
           </h1>
         </div>
-        <Link
-          to="/achievements"
-          className="flex items-center gap-2 bg-discipline/10 border border-discipline/25 px-3 py-1.5 rounded-full"
-        >
-          <span className="text-discipline font-bold text-xs">NÍVEL {level.level}</span>
-          <div className="w-8 h-1.5 bg-discipline/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-discipline shadow-[0_0_8px_rgba(34,197,94,0.6)]"
-              style={{ width: `${(level.current / level.needed) * 100}%` }}
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to="/achievements"
+            className="flex items-center gap-2 bg-discipline/10 border border-discipline/25 px-3 py-1.5 rounded-full"
+          >
+            <span className="text-discipline font-bold text-xs">NÍVEL {level.level}</span>
+            <div className="w-8 h-1.5 bg-discipline/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-discipline shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                style={{ width: `${(level.current / level.needed) * 100}%` }}
+              />
+
             />
           </div>
         </Link>
