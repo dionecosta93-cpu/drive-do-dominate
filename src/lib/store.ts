@@ -3,40 +3,90 @@ import { persist } from "zustand/middleware";
 
 export type Priority = "baixa" | "media" | "alta";
 export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude";
-export type Repetition = "nenhuma" | "diaria" | "semanal" | "dias-uteis";
+export type Repetition =
+  | "nenhuma"
+  | "diaria"
+  | "semanal"
+  | "dias-uteis"
+  | "quinzenal"
+  | "mensal"
+  | "anual"
+  | "personalizada";
+export type TaskStatus =
+  | "nao-iniciada"
+  | "em-andamento"
+  | "concluida"
+  | "adiada"
+  | "cancelada";
 
 export interface Task {
   id: string;
   name: string;
+  description?: string;
   category: Category;
   priority: Priority;
   time: string; // HH:MM
+  endTime?: string;
   estimatedMinutes: number;
   maxMinutes: number;
+  actualMinutes?: number;
   repetition: Repetition;
+  customDates?: string[];
   difficulty: number; // 1-10
   reward: string;
   consequence: string;
+  status?: TaskStatus;
+  color?: string;
+  icon?: string;
+  notes?: string;
+  archived?: boolean;
+  editCount?: number;
   createdAt: number;
-  scheduledDate: string; // YYYY-MM-DD — for non-repeating; rolled over if not done
-  lastCompletedDate?: string; // YYYY-MM-DD — last time it was completed (any repetition)
-  rolloverCount?: number; // how many times it was pushed to the next day
+  scheduledDate: string;
+  lastCompletedDate?: string;
+  rolloverCount?: number;
 }
 
-export const todaysTasks = (tasks: Task[], today: string): Task[] => {
-  const d = new Date(today + "T00:00:00");
-  const dow = d.getDay(); // 0=Sun..6=Sat
-  return tasks.filter((t) => {
-    if (t.repetition === "diaria") return true;
-    if (t.repetition === "dias-uteis") return dow >= 1 && dow <= 5;
-    if (t.repetition === "semanal") {
-      const created = new Date(t.createdAt);
+const parseDate = (s: string) => new Date(s + "T00:00:00");
+
+/** Whether a task appears on a given YYYY-MM-DD. Ignores archived/cancelled. */
+export const taskAppearsOn = (t: Task, date: string): boolean => {
+  if (t.archived) return false;
+  if (t.status === "cancelada") return false;
+  const d = parseDate(date);
+  const dow = d.getDay();
+  const created = new Date(t.createdAt);
+  const createdKey = `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, "0")}-${String(created.getDate()).padStart(2, "0")}`;
+  // Never before creation or scheduled date (whichever is earlier for the first occurrence)
+  const start = t.scheduledDate < createdKey ? t.scheduledDate : createdKey;
+  if (date < start && t.repetition !== "nenhuma") return false;
+
+  switch (t.repetition) {
+    case "nenhuma":
+      return t.scheduledDate === date;
+    case "diaria":
+      return true;
+    case "dias-uteis":
+      return dow >= 1 && dow <= 5;
+    case "semanal":
       return created.getDay() === dow;
+    case "quinzenal": {
+      const diff = Math.floor((d.getTime() - parseDate(start).getTime()) / 86400000);
+      return diff >= 0 && diff % 14 === 0;
     }
-    // nenhuma
-    return t.scheduledDate === today;
-  });
+    case "mensal":
+      return d.getDate() === parseDate(t.scheduledDate).getDate();
+    case "anual": {
+      const s = parseDate(t.scheduledDate);
+      return d.getDate() === s.getDate() && d.getMonth() === s.getMonth();
+    }
+    case "personalizada":
+      return (t.customDates ?? []).includes(date);
+  }
 };
+
+export const todaysTasks = (tasks: Task[], today: string): Task[] =>
+  tasks.filter((t) => taskAppearsOn(t, today));
 
 export interface CompletedSession {
   id: string;
@@ -50,7 +100,7 @@ export interface CompletedSession {
   xp: number;
   completedAt: number;
   hourOfDay: number;
-  reflection?: string; // vault entry
+  reflection?: string;
   feeling?: string;
 }
 
@@ -60,7 +110,7 @@ export interface Achievement {
 }
 
 export interface WeeklyGoal {
-  weekStart: number; // ms
+  weekStart: number;
   goal: string;
   targetSessions: number;
 }
@@ -68,22 +118,29 @@ export interface WeeklyGoal {
 interface State {
   userName: string;
   tasks: Task[];
-  completedToday: string[]; // task ids completed today
+  completedToday: string[];
   sessions: CompletedSession[];
   xp: number;
   streak: number;
-  lastActiveDay: string | null; // YYYY-MM-DD
+  lastActiveDay: string | null;
   longestStreak: number;
   achievements: Achievement[];
   weeklyGoal: WeeklyGoal | null;
-  dailyMissionCompleted: string | null; // YYYY-MM-DD
+  dailyMissionCompleted: string | null;
   onboarded: boolean;
 
   setUserName: (n: string) => void;
   setOnboarded: (b: boolean) => void;
-  addTask: (t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string }) => void;
+  addTask: (t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string }) => Task;
   updateTask: (id: string, patch: Partial<Task>) => void;
   removeTask: (id: string) => void;
+  duplicateTask: (id: string, newDate?: string) => void;
+  duplicateTaskToDates: (id: string, dates: string[]) => void;
+  moveTask: (id: string, newDate: string, newTime?: string) => void;
+  archiveTask: (id: string) => void;
+  restoreTask: (id: string) => void;
+  setTaskStatus: (id: string, status: TaskStatus) => void;
+  reopenTask: (id: string) => void;
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
   addReflection: (sessionId: string, feeling: string, reflection: string) => void;
   markDailyMission: () => void;
@@ -107,7 +164,6 @@ const calcXp = (difficulty: number, estimatedMinutes: number, spentSeconds: numb
 };
 
 const levelFromXp = (xp: number) => {
-  // 100, 300, 600, 1000, 1500... quadratic-ish
   let level = 1;
   let need = 100;
   let acc = 0;
@@ -142,16 +198,100 @@ export const useStore = create<State>()(
       setUserName: (userName) => set({ userName }),
       setOnboarded: (onboarded) => set({ onboarded }),
 
-      addTask: (t) =>
-        set((s) => ({
-          tasks: [...s.tasks, { scheduledDate: todayKey(), ...t, id: genId(), createdAt: Date.now() }],
-        })),
+      addTask: (t) => {
+        const task: Task = {
+          scheduledDate: todayKey(),
+          status: "nao-iniciada",
+          editCount: 0,
+          ...t,
+          id: genId(),
+          createdAt: Date.now(),
+        };
+        set((s) => ({ tasks: [...s.tasks, task] }));
+        return task;
+      },
 
       updateTask: (id, patch) =>
-        set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === id ? { ...t, ...patch, editCount: (t.editCount ?? 0) + 1 } : t,
+          ),
+        })),
 
       removeTask: (id) =>
         set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+
+      duplicateTask: (id, newDate) => {
+        const src = get().tasks.find((t) => t.id === id);
+        if (!src) return;
+        const copy: Task = {
+          ...src,
+          id: genId(),
+          createdAt: Date.now(),
+          scheduledDate: newDate ?? src.scheduledDate,
+          repetition: "nenhuma",
+          customDates: undefined,
+          status: "nao-iniciada",
+          lastCompletedDate: undefined,
+          rolloverCount: 0,
+          editCount: 0,
+          actualMinutes: 0,
+        };
+        set((s) => ({ tasks: [...s.tasks, copy] }));
+      },
+
+      duplicateTaskToDates: (id, dates) => {
+        const src = get().tasks.find((t) => t.id === id);
+        if (!src) return;
+        const copies: Task[] = dates.map((d) => ({
+          ...src,
+          id: genId(),
+          createdAt: Date.now() + Math.random(),
+          scheduledDate: d,
+          repetition: "nenhuma",
+          customDates: undefined,
+          status: "nao-iniciada",
+          lastCompletedDate: undefined,
+          rolloverCount: 0,
+          editCount: 0,
+          actualMinutes: 0,
+        }));
+        set((s) => ({ tasks: [...s.tasks, ...copies] }));
+      },
+
+      moveTask: (id, newDate, newTime) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  scheduledDate: newDate,
+                  time: newTime ?? t.time,
+                  editCount: (t.editCount ?? 0) + 1,
+                }
+              : t,
+          ),
+        })),
+
+      archiveTask: (id) =>
+        set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, archived: true } : t)) })),
+
+      restoreTask: (id) =>
+        set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, archived: false } : t)) })),
+
+      setTaskStatus: (id, status) =>
+        set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, status } : t)) })),
+
+      reopenTask: (id) => {
+        const today = todayKey();
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === id ? { ...t, status: "nao-iniciada", lastCompletedDate: undefined } : t,
+          ),
+          completedToday: s.completedToday.filter((tid) => tid !== id),
+          sessions: s.sessions.filter((sess) => !(sess.taskId === id && new Date(sess.completedAt).toISOString().slice(0, 10) === today)),
+        }));
+      },
 
       completeSession: (partial) => {
         const xp = calcXp(partial.difficulty, partial.estimatedMinutes, partial.spentSeconds);
@@ -172,7 +312,6 @@ export const useStore = create<State>()(
           newStreak = state.lastActiveDay === yKey ? state.streak + 1 : 1;
         }
         const newXp = state.xp + xp;
-        // check achievements
         const newAch = [...state.achievements];
         const unlock = (id: string) => {
           if (!newAch.find((a) => a.id === id)) newAch.push({ id, unlockedAt: Date.now() });
@@ -195,7 +334,16 @@ export const useStore = create<State>()(
           longestStreak: Math.max(state.longestStreak, newStreak),
           lastActiveDay: today,
           achievements: newAch,
-          tasks: state.tasks.map((t) => (t.id === session.taskId ? { ...t, lastCompletedDate: today } : t)),
+          tasks: state.tasks.map((t) =>
+            t.id === session.taskId
+              ? {
+                  ...t,
+                  lastCompletedDate: today,
+                  status: "concluida",
+                  actualMinutes: (t.actualMinutes ?? 0) + Math.round(session.spentSeconds / 60),
+                }
+              : t,
+          ),
         });
         return session;
       },
@@ -214,10 +362,18 @@ export const useStore = create<State>()(
       tickDay: () => {
         const state = get();
         const today = todayKey();
-        // Roll over any non-repeating task scheduled before today that wasn't completed today
         const rolledTasks = state.tasks.map((t) =>
-          t.repetition === "nenhuma" && t.scheduledDate < today && t.lastCompletedDate !== t.scheduledDate
-            ? { ...t, scheduledDate: today, rolloverCount: (t.rolloverCount ?? 0) + 1 }
+          t.repetition === "nenhuma" &&
+          !t.archived &&
+          t.status !== "cancelada" &&
+          t.scheduledDate < today &&
+          t.lastCompletedDate !== t.scheduledDate
+            ? {
+                ...t,
+                scheduledDate: today,
+                rolloverCount: (t.rolloverCount ?? 0) + 1,
+                status: "adiada" as TaskStatus,
+              }
             : t,
         );
         if (state.lastActiveDay && state.lastActiveDay !== today) {
@@ -253,3 +409,22 @@ export const useStore = create<State>()(
     { name: "kairos-store-v1" },
   ),
 );
+
+/** Compute per-day stats: total, done, pending, %. */
+export const dayStats = (tasks: Task[], sessions: CompletedSession[], date: string) => {
+  const list = todaysTasks(tasks, date);
+  const total = list.length;
+  const dayStart = parseDate(date).getTime();
+  const dayEnd = dayStart + 86400000;
+  const doneIds = new Set(
+    sessions
+      .filter((s) => s.completedAt >= dayStart && s.completedAt < dayEnd)
+      .map((s) => s.taskId),
+  );
+  // Also count tasks marked concluida for this date via lastCompletedDate
+  for (const t of list) if (t.lastCompletedDate === date) doneIds.add(t.id);
+  const done = list.filter((t) => doneIds.has(t.id)).length;
+  const pending = Math.max(total - done, 0);
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  return { total, done, pending, pct };
+};

@@ -1,9 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, ListChecks, BarChart3, Trophy, Sparkles } from "lucide-react";
+import { Home, CalendarDays, BarChart3, Trophy, Sparkles } from "lucide-react";
 
 const items = [
   { to: "/", label: "Início", icon: Home },
-  { to: "/tasks", label: "Tarefas", icon: ListChecks },
+  { to: "/calendar", label: "Agenda", icon: CalendarDays },
   { to: "/stats", label: "Stats", icon: BarChart3 },
   { to: "/vault", label: "Cofre", icon: Trophy },
   { to: "/motivation", label: "Motivação", icon: Sparkles },
