@@ -22,6 +22,10 @@ import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
 import { Route as AuthenticatedFocusTaskIdRouteImport } from './routes/_authenticated/focus.$taskId'
 import { Route as AuthenticatedCalendarWeekRouteImport } from './routes/_authenticated/calendar.week'
+import { Route as AuthenticatedCalendarSearchRouteImport } from './routes/_authenticated/calendar.search'
+import { Route as AuthenticatedCalendarHistoryRouteImport } from './routes/_authenticated/calendar.history'
+import { Route as AuthenticatedCalendarArchivedRouteImport } from './routes/_authenticated/calendar.archived'
+import { Route as AuthenticatedCalendarDayDateRouteImport } from './routes/_authenticated/calendar.day.$date'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -91,6 +95,30 @@ const AuthenticatedCalendarWeekRoute =
     path: '/week',
     getParentRoute: () => AuthenticatedCalendarRoute,
   } as any)
+const AuthenticatedCalendarSearchRoute =
+  AuthenticatedCalendarSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedCalendarHistoryRoute =
+  AuthenticatedCalendarHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedCalendarArchivedRoute =
+  AuthenticatedCalendarArchivedRouteImport.update({
+    id: '/archived',
+    path: '/archived',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedCalendarDayDateRoute =
+  AuthenticatedCalendarDayDateRouteImport.update({
+    id: '/day/$date',
+    path: '/day/$date',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -100,11 +128,15 @@ export interface FileRoutesByFullPath {
   '/motivation': typeof AuthenticatedMotivationRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
+  '/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
+  '/calendar/history': typeof AuthenticatedCalendarHistoryRoute
+  '/calendar/search': typeof AuthenticatedCalendarSearchRoute
   '/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
+  '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -113,11 +145,15 @@ export interface FileRoutesByTo {
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
   '/': typeof AuthenticatedIndexRoute
+  '/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
+  '/calendar/history': typeof AuthenticatedCalendarHistoryRoute
+  '/calendar/search': typeof AuthenticatedCalendarSearchRoute
   '/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar': typeof AuthenticatedCalendarIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
+  '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,11 +165,15 @@ export interface FileRoutesById {
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
+  '/_authenticated/calendar/history': typeof AuthenticatedCalendarHistoryRoute
+  '/_authenticated/calendar/search': typeof AuthenticatedCalendarSearchRoute
   '/_authenticated/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/_authenticated/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
   '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
+  '/_authenticated/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,11 +185,15 @@ export interface FileRouteTypes {
     | '/motivation'
     | '/stats'
     | '/vault'
+    | '/calendar/archived'
+    | '/calendar/history'
+    | '/calendar/search'
     | '/calendar/week'
     | '/focus/$taskId'
     | '/tasks/new'
     | '/calendar/'
     | '/tasks/'
+    | '/calendar/day/$date'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -158,11 +202,15 @@ export interface FileRouteTypes {
     | '/stats'
     | '/vault'
     | '/'
+    | '/calendar/archived'
+    | '/calendar/history'
+    | '/calendar/search'
     | '/calendar/week'
     | '/focus/$taskId'
     | '/tasks/new'
     | '/calendar'
     | '/tasks'
+    | '/calendar/day/$date'
   id:
     | '__root__'
     | '/_authenticated'
@@ -173,11 +221,15 @@ export interface FileRouteTypes {
     | '/_authenticated/stats'
     | '/_authenticated/vault'
     | '/_authenticated/'
+    | '/_authenticated/calendar/archived'
+    | '/_authenticated/calendar/history'
+    | '/_authenticated/calendar/search'
     | '/_authenticated/calendar/week'
     | '/_authenticated/focus/$taskId'
     | '/_authenticated/tasks/new'
     | '/_authenticated/calendar/'
     | '/_authenticated/tasks/'
+    | '/_authenticated/calendar/day/$date'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -278,17 +330,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarWeekRouteImport
       parentRoute: typeof AuthenticatedCalendarRoute
     }
+    '/_authenticated/calendar/search': {
+      id: '/_authenticated/calendar/search'
+      path: '/search'
+      fullPath: '/calendar/search'
+      preLoaderRoute: typeof AuthenticatedCalendarSearchRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/calendar/history': {
+      id: '/_authenticated/calendar/history'
+      path: '/history'
+      fullPath: '/calendar/history'
+      preLoaderRoute: typeof AuthenticatedCalendarHistoryRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/calendar/archived': {
+      id: '/_authenticated/calendar/archived'
+      path: '/archived'
+      fullPath: '/calendar/archived'
+      preLoaderRoute: typeof AuthenticatedCalendarArchivedRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/calendar/day/$date': {
+      id: '/_authenticated/calendar/day/$date'
+      path: '/day/$date'
+      fullPath: '/calendar/day/$date'
+      preLoaderRoute: typeof AuthenticatedCalendarDayDateRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
   }
 }
 
 interface AuthenticatedCalendarRouteChildren {
+  AuthenticatedCalendarArchivedRoute: typeof AuthenticatedCalendarArchivedRoute
+  AuthenticatedCalendarHistoryRoute: typeof AuthenticatedCalendarHistoryRoute
+  AuthenticatedCalendarSearchRoute: typeof AuthenticatedCalendarSearchRoute
   AuthenticatedCalendarWeekRoute: typeof AuthenticatedCalendarWeekRoute
   AuthenticatedCalendarIndexRoute: typeof AuthenticatedCalendarIndexRoute
+  AuthenticatedCalendarDayDateRoute: typeof AuthenticatedCalendarDayDateRoute
 }
 
 const AuthenticatedCalendarRouteChildren: AuthenticatedCalendarRouteChildren = {
+  AuthenticatedCalendarArchivedRoute: AuthenticatedCalendarArchivedRoute,
+  AuthenticatedCalendarHistoryRoute: AuthenticatedCalendarHistoryRoute,
+  AuthenticatedCalendarSearchRoute: AuthenticatedCalendarSearchRoute,
   AuthenticatedCalendarWeekRoute: AuthenticatedCalendarWeekRoute,
   AuthenticatedCalendarIndexRoute: AuthenticatedCalendarIndexRoute,
+  AuthenticatedCalendarDayDateRoute: AuthenticatedCalendarDayDateRoute,
 }
 
 const AuthenticatedCalendarRouteWithChildren =
