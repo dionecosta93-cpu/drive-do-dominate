@@ -15,10 +15,13 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
 import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
+import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
+import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authenticated/calendar.index'
 import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
 import { Route as AuthenticatedFocusTaskIdRouteImport } from './routes/_authenticated/focus.$taskId'
+import { Route as AuthenticatedCalendarWeekRouteImport } from './routes/_authenticated/calendar.week'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -49,6 +52,11 @@ const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
   path: '/motivation',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAchievementsRoute =
   AuthenticatedAchievementsRouteImport.update({
     id: '/achievements',
@@ -60,6 +68,12 @@ const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   path: '/tasks/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCalendarIndexRoute =
+  AuthenticatedCalendarIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
 const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
   id: '/tasks/new',
   path: '/tasks/new',
@@ -71,16 +85,25 @@ const AuthenticatedFocusTaskIdRoute =
     path: '/focus/$taskId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCalendarWeekRoute =
+  AuthenticatedCalendarWeekRouteImport.update({
+    id: '/week',
+    path: '/week',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
+  '/calendar': typeof AuthenticatedCalendarRouteWithChildren
   '/motivation': typeof AuthenticatedMotivationRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
+  '/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
+  '/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRoutesByTo {
@@ -90,8 +113,10 @@ export interface FileRoutesByTo {
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
   '/': typeof AuthenticatedIndexRoute
+  '/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
+  '/calendar': typeof AuthenticatedCalendarIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRoutesById {
@@ -99,12 +124,15 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
+  '/_authenticated/calendar': typeof AuthenticatedCalendarRouteWithChildren
   '/_authenticated/motivation': typeof AuthenticatedMotivationRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/_authenticated/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
+  '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
 }
 export interface FileRouteTypes {
@@ -113,11 +141,14 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/achievements'
+    | '/calendar'
     | '/motivation'
     | '/stats'
     | '/vault'
+    | '/calendar/week'
     | '/focus/$taskId'
     | '/tasks/new'
+    | '/calendar/'
     | '/tasks/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -127,20 +158,25 @@ export interface FileRouteTypes {
     | '/stats'
     | '/vault'
     | '/'
+    | '/calendar/week'
     | '/focus/$taskId'
     | '/tasks/new'
+    | '/calendar'
     | '/tasks'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/achievements'
+    | '/_authenticated/calendar'
     | '/_authenticated/motivation'
     | '/_authenticated/stats'
     | '/_authenticated/vault'
     | '/_authenticated/'
+    | '/_authenticated/calendar/week'
     | '/_authenticated/focus/$taskId'
     | '/_authenticated/tasks/new'
+    | '/_authenticated/calendar/'
     | '/_authenticated/tasks/'
   fileRoutesById: FileRoutesById
 }
@@ -193,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMotivationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/calendar': {
+      id: '/_authenticated/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AuthenticatedCalendarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/achievements': {
       id: '/_authenticated/achievements'
       path: '/achievements'
@@ -206,6 +249,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/tasks/'
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/calendar/': {
+      id: '/_authenticated/calendar/'
+      path: '/'
+      fullPath: '/calendar/'
+      preLoaderRoute: typeof AuthenticatedCalendarIndexRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
     }
     '/_authenticated/tasks/new': {
       id: '/_authenticated/tasks/new'
@@ -221,11 +271,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFocusTaskIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/calendar/week': {
+      id: '/_authenticated/calendar/week'
+      path: '/week'
+      fullPath: '/calendar/week'
+      preLoaderRoute: typeof AuthenticatedCalendarWeekRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
   }
 }
 
+interface AuthenticatedCalendarRouteChildren {
+  AuthenticatedCalendarWeekRoute: typeof AuthenticatedCalendarWeekRoute
+  AuthenticatedCalendarIndexRoute: typeof AuthenticatedCalendarIndexRoute
+}
+
+const AuthenticatedCalendarRouteChildren: AuthenticatedCalendarRouteChildren = {
+  AuthenticatedCalendarWeekRoute: AuthenticatedCalendarWeekRoute,
+  AuthenticatedCalendarIndexRoute: AuthenticatedCalendarIndexRoute,
+}
+
+const AuthenticatedCalendarRouteWithChildren =
+  AuthenticatedCalendarRoute._addFileChildren(
+    AuthenticatedCalendarRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
+  AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRouteWithChildren
   AuthenticatedMotivationRoute: typeof AuthenticatedMotivationRoute
   AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
   AuthenticatedVaultRoute: typeof AuthenticatedVaultRoute
@@ -237,6 +310,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
+  AuthenticatedCalendarRoute: AuthenticatedCalendarRouteWithChildren,
   AuthenticatedMotivationRoute: AuthenticatedMotivationRoute,
   AuthenticatedStatsRoute: AuthenticatedStatsRoute,
   AuthenticatedVaultRoute: AuthenticatedVaultRoute,
