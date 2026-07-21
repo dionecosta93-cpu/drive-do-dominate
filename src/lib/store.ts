@@ -41,10 +41,14 @@ export interface Task {
   color?: string;
   icon?: string;
   notes?: string;
+  motivation?: string;
   archived?: boolean;
   editCount?: number;
   createdAt: number;
   scheduledDate: string;
+  startDate?: string;
+  endDate?: string;
+  weekdays?: number[]; // 0=Sun..6=Sat, for dias-especificos
   lastCompletedDate?: string;
   rolloverCount?: number;
 }
