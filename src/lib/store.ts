@@ -8,6 +8,8 @@ export type Repetition =
   | "diaria"
   | "semanal"
   | "dias-uteis"
+  | "fim-de-semana"
+  | "dias-especificos"
   | "quinzenal"
   | "mensal"
   | "anual"
@@ -39,10 +41,14 @@ export interface Task {
   color?: string;
   icon?: string;
   notes?: string;
+  motivation?: string;
   archived?: boolean;
   editCount?: number;
   createdAt: number;
   scheduledDate: string;
+  startDate?: string;
+  endDate?: string;
+  weekdays?: number[]; // 0=Sun..6=Sat, for dias-especificos
   lastCompletedDate?: string;
   rolloverCount?: number;
 }
@@ -53,11 +59,13 @@ const parseDate = (s: string) => new Date(s + "T00:00:00");
 export const taskAppearsOn = (t: Task, date: string): boolean => {
   if (t.archived) return false;
   if (t.status === "cancelada") return false;
+  // Respect optional start/end period (inclusive)
+  if (t.startDate && date < t.startDate) return false;
+  if (t.endDate && date > t.endDate) return false;
   const d = parseDate(date);
   const dow = d.getDay();
   const created = new Date(t.createdAt);
   const createdKey = `${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, "0")}-${String(created.getDate()).padStart(2, "0")}`;
-  // Never before creation or scheduled date (whichever is earlier for the first occurrence)
   const start = t.scheduledDate < createdKey ? t.scheduledDate : createdKey;
   if (date < start && t.repetition !== "nenhuma") return false;
 
@@ -68,6 +76,10 @@ export const taskAppearsOn = (t: Task, date: string): boolean => {
       return true;
     case "dias-uteis":
       return dow >= 1 && dow <= 5;
+    case "fim-de-semana":
+      return dow === 0 || dow === 6;
+    case "dias-especificos":
+      return (t.weekdays ?? []).includes(dow);
     case "semanal":
       return created.getDay() === dow;
     case "quinzenal": {
@@ -82,6 +94,8 @@ export const taskAppearsOn = (t: Task, date: string): boolean => {
     }
     case "personalizada":
       return (t.customDates ?? []).includes(date);
+    default:
+      return false;
   }
 };
 
@@ -339,7 +353,9 @@ export const useStore = create<State>()(
               ? {
                   ...t,
                   lastCompletedDate: today,
-                  status: "concluida",
+                  // For recurring tasks, do not persist "concluida" status —
+                  // each date has its own completion, tracked via sessions/completedToday.
+                  status: t.repetition === "nenhuma" ? "concluida" : t.status,
                   actualMinutes: (t.actualMinutes ?? 0) + Math.round(session.spentSeconds / 60),
                 }
               : t,

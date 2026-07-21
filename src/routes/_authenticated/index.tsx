@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
-import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut } from "lucide-react";
+import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -231,16 +231,27 @@ function Dashboard() {
                       {t.estimatedMinutes} min · Dif. {t.difficulty}/10
                     </p>
                   </div>
-                  {isDone ? (
-                    <span className="text-[10px] font-bold text-discipline uppercase">Feito</span>
-                  ) : (
-                    <button
-                      onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: t.id } })}
-                      className="bg-discipline text-black rounded-lg p-2 active:scale-95 transition-transform"
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      to="/tasks/$id/edit"
+                      params={{ id: t.id }}
+                      className="size-9 grid place-items-center rounded-lg border border-border text-muted-foreground hover:text-discipline hover:border-discipline/40 transition"
+                      aria-label="Editar"
                     >
-                      <Play className="size-4" fill="currentColor" />
-                    </button>
-                  )}
+                      <Pencil className="size-4" />
+                    </Link>
+                    {isDone ? (
+                      <span className="text-[10px] font-bold text-discipline uppercase">Feito</span>
+                    ) : (
+                      <button
+                        onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: t.id } })}
+                        className="bg-discipline text-black rounded-lg p-2 active:scale-95 transition-transform"
+                        aria-label="Iniciar foco"
+                      >
+                        <Play className="size-4" fill="currentColor" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {(t.reward || t.consequence) && (
                   <div className="grid grid-cols-2 gap-2 mt-3">
