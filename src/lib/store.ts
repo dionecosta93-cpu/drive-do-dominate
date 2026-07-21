@@ -8,6 +8,8 @@ export type Repetition =
   | "diaria"
   | "semanal"
   | "dias-uteis"
+  | "fim-de-semana"
+  | "dias-especificos"
   | "quinzenal"
   | "mensal"
   | "anual"
