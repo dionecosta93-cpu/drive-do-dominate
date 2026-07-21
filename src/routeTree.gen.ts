@@ -25,6 +25,7 @@ import { Route as AuthenticatedCalendarWeekRouteImport } from './routes/_authent
 import { Route as AuthenticatedCalendarSearchRouteImport } from './routes/_authenticated/calendar.search'
 import { Route as AuthenticatedCalendarHistoryRouteImport } from './routes/_authenticated/calendar.history'
 import { Route as AuthenticatedCalendarArchivedRouteImport } from './routes/_authenticated/calendar.archived'
+import { Route as AuthenticatedTasksIdEditRouteImport } from './routes/_authenticated/tasks.$id.edit'
 import { Route as AuthenticatedCalendarDayDateRouteImport } from './routes/_authenticated/calendar.day.$date'
 
 const AuthRoute = AuthRouteImport.update({
@@ -113,6 +114,12 @@ const AuthenticatedCalendarArchivedRoute =
     path: '/archived',
     getParentRoute: () => AuthenticatedCalendarRoute,
   } as any)
+const AuthenticatedTasksIdEditRoute =
+  AuthenticatedTasksIdEditRouteImport.update({
+    id: '/tasks/$id/edit',
+    path: '/tasks/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCalendarDayDateRoute =
   AuthenticatedCalendarDayDateRouteImport.update({
     id: '/day/$date',
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
+  '/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof AuthenticatedCalendarIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
+  '/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
+  '/_authenticated/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/calendar/'
     | '/tasks/'
     | '/calendar/day/$date'
+    | '/tasks/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/tasks'
     | '/calendar/day/$date'
+    | '/tasks/$id/edit'
   id:
     | '__root__'
     | '/_authenticated'
@@ -230,6 +242,7 @@ export interface FileRouteTypes {
     | '/_authenticated/calendar/'
     | '/_authenticated/tasks/'
     | '/_authenticated/calendar/day/$date'
+    | '/_authenticated/tasks/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarArchivedRouteImport
       parentRoute: typeof AuthenticatedCalendarRoute
     }
+    '/_authenticated/tasks/$id/edit': {
+      id: '/_authenticated/tasks/$id/edit'
+      path: '/tasks/$id/edit'
+      fullPath: '/tasks/$id/edit'
+      preLoaderRoute: typeof AuthenticatedTasksIdEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/calendar/day/$date': {
       id: '/_authenticated/calendar/day/$date'
       path: '/day/$date'
@@ -394,6 +414,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFocusTaskIdRoute: typeof AuthenticatedFocusTaskIdRoute
   AuthenticatedTasksNewRoute: typeof AuthenticatedTasksNewRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
+  AuthenticatedTasksIdEditRoute: typeof AuthenticatedTasksIdEditRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -406,6 +427,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFocusTaskIdRoute: AuthenticatedFocusTaskIdRoute,
   AuthenticatedTasksNewRoute: AuthenticatedTasksNewRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
+  AuthenticatedTasksIdEditRoute: AuthenticatedTasksIdEditRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
