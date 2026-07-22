@@ -158,6 +158,7 @@ function RootComponent() {
       try {
         const AC = (window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
           || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AC) return;
         const ac = new AC();
         [880, 660, 880].forEach((freq, i) => {
           const oscillator = ac.createOscillator();
