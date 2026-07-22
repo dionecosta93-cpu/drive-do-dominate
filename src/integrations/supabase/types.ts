@@ -38,6 +38,57 @@ export type Database = {
         }
         Relationships: []
       }
+      task_occurrences: {
+        Row: {
+          completed_time: string | null
+          created_at: string
+          id: string
+          occurrence_date: string
+          pauses: number
+          scheduled_time: string | null
+          spent_seconds: number
+          status: string
+          task_local_id: string
+          task_name: string
+          timing_delta_minutes: number | null
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          completed_time?: string | null
+          created_at?: string
+          id?: string
+          occurrence_date: string
+          pauses?: number
+          scheduled_time?: string | null
+          spent_seconds?: number
+          status?: string
+          task_local_id: string
+          task_name: string
+          timing_delta_minutes?: number | null
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          completed_time?: string | null
+          created_at?: string
+          id?: string
+          occurrence_date?: string
+          pauses?: number
+          scheduled_time?: string | null
+          spent_seconds?: number
+          status?: string
+          task_local_id?: string
+          task_name?: string
+          timing_delta_minutes?: number | null
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
       user_data: {
         Row: {
           data: Json
