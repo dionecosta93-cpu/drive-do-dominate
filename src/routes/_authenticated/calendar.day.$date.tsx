@@ -136,11 +136,14 @@ function DayView() {
                         t.priority === "alta" ? "bg-struggle/20 text-struggle" :
                         t.priority === "media" ? "bg-warning/20 text-warning" : "bg-muted text-muted-foreground"
                       }`}>{t.priority}</span>
-                      {(isDone || t.status) && (
-                        <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[t.status]}`}>
-                          {(isDone ? "concluida" : t.status)!.replace("-", " ")}
+                      {(isDone || t.status) && (() => {
+                        const visibleStatus: TaskStatus = isDone ? "concluida" : t.status!;
+                        return (
+                        <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[visibleStatus]}`}>
+                          {visibleStatus.replace("-", " ")}
                         </span>
-                      )}
+                        );
+                      })()}
                       {!!t.rolloverCount && !isDone && (
                         <span className="text-[9px] font-bold uppercase px-1.5 rounded bg-struggle/15 text-struggle">↻ {t.rolloverCount}x</span>
                       )}

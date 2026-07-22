@@ -8,11 +8,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { attachCloudSyncForUser, detachCloudSync } from "@/lib/cloud-sync";
-import { useStore } from "@/lib/store";
+import { dateKey, taskCompletedOn, todaysTasks, useStore } from "@/lib/store";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -130,6 +130,9 @@ function RootComponent() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const hideNav = pathname.startsWith("/focus") || pathname.startsWith("/auth");
+  const tasks = useStore((s) => s.tasks);
+  const sessions = useStore((s) => s.sessions);
+  const firedAlarms = useRef(new Set<string>());
 
   useEffect(() => {
     // Hydrate current session immediately (in case page loaded already signed in).
@@ -149,6 +152,52 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router]);
+
+  useEffect(() => {
+    const ring = () => {
+      try {
+        const AC = (window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
+          || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ac = new AC();
+        [880, 660, 880].forEach((freq, i) => {
+          const oscillator = ac.createOscillator();
+          const gain = ac.createGain();
+          oscillator.frequency.value = freq;
+          oscillator.type = "sine";
+          oscillator.connect(gain);
+          gain.connect(ac.destination);
+          const start = ac.currentTime + i * 0.18;
+          gain.gain.setValueAtTime(0, start);
+          gain.gain.linearRampToValueAtTime(0.16, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
+          oscillator.start(start);
+          oscillator.stop(start + 0.17);
+        });
+      } catch { /* ignore unavailable audio */ }
+    };
+
+    const checkAlarms = () => {
+      const today = dateKey();
+      const now = Date.now();
+      for (const task of todaysTasks(tasks, today)) {
+        if (!task.alarmMinutesBefore || taskCompletedOn(task.id, sessions, today)) continue;
+        const alarmAt = new Date(`${today}T${task.time}:00`).getTime() - task.alarmMinutesBefore * 60_000;
+        const key = `${today}:${task.id}:${task.alarmMinutesBefore}`;
+        if (now < alarmAt || now > alarmAt + 60_000 || firedAlarms.current.has(key)) continue;
+        firedAlarms.current.add(key);
+        ring();
+        const message = `${task.name} começa às ${task.time}`;
+        import("sonner").then(({ toast }) => toast(`Despertador: ${message}`, { duration: 10000 }));
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Disciplina Absoluta", { body: message });
+        }
+      }
+    };
+
+    checkAlarms();
+    const interval = window.setInterval(checkAlarms, 30_000);
+    return () => window.clearInterval(interval);
+  }, [tasks, sessions]);
 
   return (
     <QueryClientProvider client={queryClient}>
