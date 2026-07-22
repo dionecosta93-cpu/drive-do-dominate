@@ -320,26 +320,43 @@ export const useStore = create<State>()(
 
       reopenTask: (id) => {
         const today = todayKey();
+        get().reopenTaskForDate(id, today);
+      },
+
+      reopenTaskForDate: (id, date) =>
         set((s) => ({
           tasks: s.tasks.map((t) =>
-            t.id === id ? { ...t, status: "nao-iniciada", lastCompletedDate: undefined } : t,
+            t.id === id
+              ? {
+                  ...t,
+                  status: t.status === "concluida" ? "nao-iniciada" : t.status,
+                  lastCompletedDate: t.lastCompletedDate === date ? undefined : t.lastCompletedDate,
+                }
+              : t,
           ),
-          completedToday: s.completedToday.filter((tid) => tid !== id),
-          sessions: s.sessions.filter((sess) => !(sess.taskId === id && new Date(sess.completedAt).toISOString().slice(0, 10) === today)),
-        }));
-      },
+          completedToday: date === todayKey() ? s.completedToday.filter((tid) => tid !== id) : s.completedToday,
+          sessions: s.sessions.filter((sess) => !(sess.taskId === id && completionDateForSession(sess) === date)),
+        })),
 
       completeSession: (partial) => {
         const xp = calcXp(partial.difficulty, partial.estimatedMinutes, partial.spentSeconds);
+        const state = get();
+        const today = todayKey();
+        const task = state.tasks.find((t) => t.id === partial.taskId);
+        const completedAt = Date.now();
+        const completedTime = timeKey(new Date(completedAt));
         const session: CompletedSession = {
           ...partial,
           id: genId(),
-          completedAt: Date.now(),
+          completedAt,
           hourOfDay: new Date().getHours(),
           xp,
+          scheduledDate: today,
+          scheduledTime: task?.time,
+          completedTime,
+          timingDeltaMinutes: task ? minutesOfDay(completedTime) - minutesOfDay(task.time) : undefined,
+          status: "concluida",
         };
-        const today = todayKey();
-        const state = get();
         let newStreak = state.streak;
         if (state.lastActiveDay !== today) {
           const yesterday = new Date();
@@ -383,6 +400,54 @@ export const useStore = create<State>()(
               : t,
           ),
         });
+        return session;
+      },
+
+      completeTaskForDate: (id, date) => {
+        const state = get();
+        const task = state.tasks.find((t) => t.id === id);
+        if (!task || taskCompletedOn(id, state.sessions, date)) return null;
+
+        const now = new Date();
+        const completedAt = new Date(
+          `${date}T${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
+        ).getTime();
+        const completedTime = timeKey(now);
+        const isToday = date === todayKey();
+        const xp = isToday ? calcXp(task.difficulty, task.estimatedMinutes, task.estimatedMinutes * 60) : 0;
+        const session: CompletedSession = {
+          id: genId(),
+          taskId: task.id,
+          taskName: task.name,
+          category: task.category,
+          difficulty: task.difficulty,
+          estimatedMinutes: task.estimatedMinutes,
+          spentSeconds: task.estimatedMinutes * 60,
+          pauses: 0,
+          xp,
+          completedAt,
+          hourOfDay: now.getHours(),
+          scheduledDate: date,
+          scheduledTime: task.time,
+          completedTime,
+          timingDeltaMinutes: minutesOfDay(completedTime) - minutesOfDay(task.time),
+          status: "concluida",
+        };
+
+        set((s) => ({
+          sessions: [...s.sessions, session],
+          completedToday: isToday && !s.completedToday.includes(id) ? [...s.completedToday, id] : s.completedToday,
+          xp: s.xp + xp,
+          tasks: s.tasks.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  lastCompletedDate: date,
+                  status: t.repetition === "nenhuma" && t.scheduledDate === date ? "concluida" : t.status,
+                }
+              : t,
+          ),
+        }));
         return session;
       },
 
