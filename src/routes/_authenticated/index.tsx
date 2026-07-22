@@ -61,7 +61,7 @@ function Onboarding() {
 function Dashboard() {
   const navigate = useNavigate();
   const {
-    userName, tasks, sessions, xp, streak, completedToday, tickDay,
+    userName, tasks, sessions, xp, streak, tickDay,
     dailyMissionCompleted, markDailyMission,
   } = useStore();
 

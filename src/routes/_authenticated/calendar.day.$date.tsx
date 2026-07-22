@@ -136,7 +136,7 @@ function DayView() {
                         t.priority === "alta" ? "bg-struggle/20 text-struggle" :
                         t.priority === "media" ? "bg-warning/20 text-warning" : "bg-muted text-muted-foreground"
                       }`}>{t.priority}</span>
-                      {(isDone || t.status) && (() => {
+                      {(isDone || (t.status && t.status !== "concluida")) && (() => {
                         const visibleStatus: TaskStatus = isDone ? "concluida" : t.status!;
                         return (
                         <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[visibleStatus]}`}>

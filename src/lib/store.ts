@@ -392,9 +392,8 @@ export const useStore = create<State>()(
               ? {
                   ...t,
                   lastCompletedDate: today,
-                  // For recurring tasks, do not persist "concluida" status —
-                  // each date has its own completion, tracked via sessions/completedToday.
-                  status: t.repetition === "nenhuma" ? "concluida" : t.status,
+                  // Conclusão é sempre por ocorrência/data, registrada em sessions.
+                  status: t.status === "concluida" ? "nao-iniciada" : t.status,
                   actualMinutes: (t.actualMinutes ?? 0) + Math.round(session.spentSeconds / 60),
                 }
               : t,
@@ -443,7 +442,7 @@ export const useStore = create<State>()(
               ? {
                   ...t,
                   lastCompletedDate: date,
-                  status: t.repetition === "nenhuma" && t.scheduledDate === date ? "concluida" : t.status,
+                  status: t.status === "concluida" ? "nao-iniciada" : t.status,
                 }
               : t,
           ),

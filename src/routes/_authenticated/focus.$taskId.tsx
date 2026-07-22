@@ -14,13 +14,13 @@ type Phase = "breathe" | "quote" | "running" | "paused" | "done";
 function FocusMode() {
   const { taskId } = Route.useParams();
   const navigate = useNavigate();
-  const { tasks, sessions, completeSession, addReflection, completedToday } = useStore();
+  const { tasks, sessions, completeSession, addReflection } = useStore();
   const task = tasks.find((t) => t.id === taskId);
   const todayKey = dateKey();
   const nextTask = useMemo(() => {
     const list = todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time));
     return list.find((t) => t.id !== taskId && !taskCompletedOn(t.id, sessions, todayKey));
-  }, [tasks, taskId, sessions, completedToday, todayKey]);
+  }, [tasks, taskId, sessions, todayKey]);
 
   const [phase, setPhase] = useState<Phase>("breathe");
   const [breatheLeft, setBreatheLeft] = useState(5);
