@@ -465,20 +465,22 @@ export const useStore = create<State>()(
       tickDay: () => {
         const state = get();
         const today = todayKey();
-        const rolledTasks = state.tasks.map((t) =>
-          t.repetition === "nenhuma" &&
-          !t.archived &&
-          t.status !== "cancelada" &&
-          t.scheduledDate < today &&
-          t.lastCompletedDate !== t.scheduledDate
+        const rolledTasks = state.tasks.map((t) => {
+          const completedOnScheduledDate =
+            t.lastCompletedDate === t.scheduledDate || taskCompletedOn(t.id, state.sessions, t.scheduledDate);
+          return t.repetition === "nenhuma" &&
+            !t.archived &&
+            t.status !== "cancelada" &&
+            t.scheduledDate < today &&
+            !completedOnScheduledDate
             ? {
                 ...t,
                 scheduledDate: today,
                 rolloverCount: (t.rolloverCount ?? 0) + 1,
                 status: "adiada" as TaskStatus,
               }
-            : t,
-        );
+            : t;
+        });
         if (state.lastActiveDay && state.lastActiveDay !== today) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
@@ -521,7 +523,7 @@ export const dayStats = (tasks: Task[], sessions: CompletedSession[], date: stri
   const dayEnd = dayStart + 86400000;
   const doneIds = new Set(
     sessions
-      .filter((s) => s.completedAt >= dayStart && s.completedAt < dayEnd)
+      .filter((s) => completionDateForSession(s) === date || (s.completedAt >= dayStart && s.completedAt < dayEnd))
       .map((s) => s.taskId),
   );
   // Also count tasks marked concluida for this date via lastCompletedDate
