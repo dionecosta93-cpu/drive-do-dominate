@@ -31,6 +31,7 @@ const repLabel: Record<Repetition, string> = {
 const weekdayLabels = ["D", "S", "T", "Q", "Q", "S", "S"];
 const colors = ["#22c55e", "#ef4444", "#eab308", "#3b82f6", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
 const icons = ["🎯", "💪", "📚", "💼", "🧘", "🏃", "🍎", "✨", "🔥", "⚡", "🌱", "🧠"];
+const alarmOptions = [5, 10, 15, 30, 60];
 
 const todayStr = () => {
   const d = new Date();
@@ -71,6 +72,7 @@ export function TaskForm({
   const [reward, setReward] = useState(initial?.reward ?? "");
   const [consequence, setConsequence] = useState(initial?.consequence ?? "");
   const [motivation, setMotivation] = useState(initial?.motivation ?? "");
+  const [alarmMinutesBefore, setAlarmMinutesBefore] = useState<number | null>(initial?.alarmMinutesBefore ?? null);
   const [color, setColor] = useState<string | undefined>(initial?.color);
   const [icon, setIcon] = useState<string | undefined>(initial?.icon);
   const [notes, setNotes] = useState(initial?.notes ?? "");
@@ -111,6 +113,7 @@ export function TaskForm({
       reward: reward.trim(),
       consequence: consequence.trim(),
       motivation: motivation.trim() || undefined,
+      alarmMinutesBefore,
       color,
       icon,
       notes: notes.trim() || undefined,
@@ -180,6 +183,30 @@ export function TaskForm({
       <Field label="Máximo (min)">
         <input type="number" min={1} value={max} onChange={(e) => setMax(Number(e.target.value))}
           className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline" />
+      </Field>
+
+      <Field label="Despertador (opcional)">
+        <div className="grid grid-cols-3 gap-1">
+          <button
+            onClick={() => setAlarmMinutesBefore(null)}
+            className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
+              alarmMinutesBefore === null ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
+            }`}
+          >
+            sem
+          </button>
+          {alarmOptions.map((minutes) => (
+            <button
+              key={minutes}
+              onClick={() => setAlarmMinutesBefore(minutes)}
+              className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
+                alarmMinutesBefore === minutes ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
+              }`}
+            >
+              {minutes} min
+            </button>
+          ))}
+        </div>
       </Field>
 
       <Field label="Repetição">
