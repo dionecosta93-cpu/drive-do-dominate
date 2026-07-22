@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useStore, todaysTasks } from "@/lib/store";
+import { dateKey, taskCompletedOn, useStore, todaysTasks } from "@/lib/store";
 import { randomStartQuote } from "@/lib/quotes";
+import { saveTaskOccurrence } from "@/lib/task-occurrences";
 import { Pause, Play, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,13 +15,13 @@ type Phase = "breathe" | "quote" | "running" | "paused" | "done";
 function FocusMode() {
   const { taskId } = Route.useParams();
   const navigate = useNavigate();
-  const { tasks, completeSession, addReflection, completedToday } = useStore();
+  const { tasks, sessions, completeSession, addReflection } = useStore();
   const task = tasks.find((t) => t.id === taskId);
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = dateKey();
   const nextTask = useMemo(() => {
     const list = todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time));
-    return list.find((t) => t.id !== taskId && !completedToday.includes(t.id));
-  }, [tasks, taskId, completedToday, todayKey]);
+    return list.find((t) => t.id !== taskId && !taskCompletedOn(t.id, sessions, todayKey));
+  }, [tasks, taskId, sessions, todayKey]);
 
   const [phase, setPhase] = useState<Phase>("breathe");
   const [breatheLeft, setBreatheLeft] = useState(5);
@@ -100,6 +101,7 @@ function FocusMode() {
       difficulty: task.difficulty, estimatedMinutes: task.estimatedMinutes,
       spentSeconds: spent, pauses,
     });
+    void saveTaskOccurrence(s);
     setSession(s);
     setPhase("done");
     // Victory sound

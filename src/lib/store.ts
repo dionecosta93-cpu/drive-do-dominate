@@ -42,6 +42,7 @@ export interface Task {
   icon?: string;
   notes?: string;
   motivation?: string;
+  alarmMinutesBefore?: number | null;
   archived?: boolean;
   editCount?: number;
   createdAt: number;
@@ -54,6 +55,23 @@ export interface Task {
 }
 
 const parseDate = (s: string) => new Date(s + "T00:00:00");
+
+export const dateKey = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const timeKey = (d = new Date()) =>
+  `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
+const minutesOfDay = (time: string) => {
+  const [h = 0, m = 0] = time.split(":").map(Number);
+  return h * 60 + m;
+};
+
+const completionDateForSession = (s: CompletedSession) =>
+  s.scheduledDate ?? dateKey(new Date(s.completedAt));
+
+export const taskCompletedOn = (taskId: string, sessions: CompletedSession[], date: string) =>
+  sessions.some((s) => s.taskId === taskId && completionDateForSession(s) === date);
 
 /** Whether a task appears on a given YYYY-MM-DD. Ignores archived/cancelled. */
 export const taskAppearsOn = (t: Task, date: string): boolean => {
@@ -114,6 +132,11 @@ export interface CompletedSession {
   xp: number;
   completedAt: number;
   hourOfDay: number;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  completedTime?: string;
+  timingDeltaMinutes?: number;
+  status?: "concluida";
   reflection?: string;
   feeling?: string;
 }
@@ -155,7 +178,9 @@ interface State {
   restoreTask: (id: string) => void;
   setTaskStatus: (id: string, status: TaskStatus) => void;
   reopenTask: (id: string) => void;
+  reopenTaskForDate: (id: string, date: string) => void;
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
+  completeTaskForDate: (id: string, date: string) => CompletedSession | null;
   addReflection: (sessionId: string, feeling: string, reflection: string) => void;
   markDailyMission: () => void;
   setWeeklyGoal: (g: WeeklyGoal) => void;
@@ -163,10 +188,7 @@ interface State {
   reset: () => void;
 }
 
-const todayKey = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
+const todayKey = () => dateKey();
 
 const calcXp = (difficulty: number, estimatedMinutes: number, spentSeconds: number) => {
   const base = difficulty * 20;
@@ -298,26 +320,43 @@ export const useStore = create<State>()(
 
       reopenTask: (id) => {
         const today = todayKey();
+        get().reopenTaskForDate(id, today);
+      },
+
+      reopenTaskForDate: (id, date) =>
         set((s) => ({
           tasks: s.tasks.map((t) =>
-            t.id === id ? { ...t, status: "nao-iniciada", lastCompletedDate: undefined } : t,
+            t.id === id
+              ? {
+                  ...t,
+                  status: t.status === "concluida" ? "nao-iniciada" : t.status,
+                  lastCompletedDate: t.lastCompletedDate === date ? undefined : t.lastCompletedDate,
+                }
+              : t,
           ),
-          completedToday: s.completedToday.filter((tid) => tid !== id),
-          sessions: s.sessions.filter((sess) => !(sess.taskId === id && new Date(sess.completedAt).toISOString().slice(0, 10) === today)),
-        }));
-      },
+          completedToday: date === todayKey() ? s.completedToday.filter((tid) => tid !== id) : s.completedToday,
+          sessions: s.sessions.filter((sess) => !(sess.taskId === id && completionDateForSession(sess) === date)),
+        })),
 
       completeSession: (partial) => {
         const xp = calcXp(partial.difficulty, partial.estimatedMinutes, partial.spentSeconds);
+        const state = get();
+        const today = todayKey();
+        const task = state.tasks.find((t) => t.id === partial.taskId);
+        const completedAt = Date.now();
+        const completedTime = timeKey(new Date(completedAt));
         const session: CompletedSession = {
           ...partial,
           id: genId(),
-          completedAt: Date.now(),
+          completedAt,
           hourOfDay: new Date().getHours(),
           xp,
+          scheduledDate: today,
+          scheduledTime: task?.time,
+          completedTime,
+          timingDeltaMinutes: task ? minutesOfDay(completedTime) - minutesOfDay(task.time) : undefined,
+          status: "concluida",
         };
-        const today = todayKey();
-        const state = get();
         let newStreak = state.streak;
         if (state.lastActiveDay !== today) {
           const yesterday = new Date();
@@ -353,14 +392,61 @@ export const useStore = create<State>()(
               ? {
                   ...t,
                   lastCompletedDate: today,
-                  // For recurring tasks, do not persist "concluida" status —
-                  // each date has its own completion, tracked via sessions/completedToday.
-                  status: t.repetition === "nenhuma" ? "concluida" : t.status,
+                  // Conclusão é sempre por ocorrência/data, registrada em sessions.
+                  status: t.status === "concluida" ? "nao-iniciada" : t.status,
                   actualMinutes: (t.actualMinutes ?? 0) + Math.round(session.spentSeconds / 60),
                 }
               : t,
           ),
         });
+        return session;
+      },
+
+      completeTaskForDate: (id, date) => {
+        const state = get();
+        const task = state.tasks.find((t) => t.id === id);
+        if (!task || taskCompletedOn(id, state.sessions, date)) return null;
+
+        const now = new Date();
+        const completedAt = new Date(
+          `${date}T${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
+        ).getTime();
+        const completedTime = timeKey(now);
+        const isToday = date === todayKey();
+        const xp = isToday ? calcXp(task.difficulty, task.estimatedMinutes, task.estimatedMinutes * 60) : 0;
+        const session: CompletedSession = {
+          id: genId(),
+          taskId: task.id,
+          taskName: task.name,
+          category: task.category,
+          difficulty: task.difficulty,
+          estimatedMinutes: task.estimatedMinutes,
+          spentSeconds: task.estimatedMinutes * 60,
+          pauses: 0,
+          xp,
+          completedAt,
+          hourOfDay: now.getHours(),
+          scheduledDate: date,
+          scheduledTime: task.time,
+          completedTime,
+          timingDeltaMinutes: minutesOfDay(completedTime) - minutesOfDay(task.time),
+          status: "concluida",
+        };
+
+        set((s) => ({
+          sessions: [...s.sessions, session],
+          completedToday: isToday && !s.completedToday.includes(id) ? [...s.completedToday, id] : s.completedToday,
+          xp: s.xp + xp,
+          tasks: s.tasks.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  lastCompletedDate: date,
+                  status: t.status === "concluida" ? "nao-iniciada" : t.status,
+                }
+              : t,
+          ),
+        }));
         return session;
       },
 
@@ -378,20 +464,22 @@ export const useStore = create<State>()(
       tickDay: () => {
         const state = get();
         const today = todayKey();
-        const rolledTasks = state.tasks.map((t) =>
-          t.repetition === "nenhuma" &&
-          !t.archived &&
-          t.status !== "cancelada" &&
-          t.scheduledDate < today &&
-          t.lastCompletedDate !== t.scheduledDate
+        const rolledTasks = state.tasks.map((t) => {
+          const completedOnScheduledDate =
+            t.lastCompletedDate === t.scheduledDate || taskCompletedOn(t.id, state.sessions, t.scheduledDate);
+          return t.repetition === "nenhuma" &&
+            !t.archived &&
+            t.status !== "cancelada" &&
+            t.scheduledDate < today &&
+            !completedOnScheduledDate
             ? {
                 ...t,
                 scheduledDate: today,
                 rolloverCount: (t.rolloverCount ?? 0) + 1,
                 status: "adiada" as TaskStatus,
               }
-            : t,
-        );
+            : t;
+        });
         if (state.lastActiveDay && state.lastActiveDay !== today) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
@@ -434,7 +522,7 @@ export const dayStats = (tasks: Task[], sessions: CompletedSession[], date: stri
   const dayEnd = dayStart + 86400000;
   const doneIds = new Set(
     sessions
-      .filter((s) => s.completedAt >= dayStart && s.completedAt < dayEnd)
+      .filter((s) => completionDateForSession(s) === date || (s.completedAt >= dayStart && s.completedAt < dayEnd))
       .map((s) => s.taskId),
   );
   // Also count tasks marked concluida for this date via lastCompletedDate

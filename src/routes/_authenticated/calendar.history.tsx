@@ -43,6 +43,10 @@ function HistoryView() {
               <div className="font-heading font-bold text-sm">{s.taskName}</div>
               <div className="text-[11px] text-muted-foreground mt-1">
                 planejado {s.estimatedMinutes}min · real {minReal}min · pausas {s.pauses}
+                {s.scheduledDate ? ` · data ${s.scheduledDate}` : ""}
+                {s.scheduledTime ? ` · previsto ${s.scheduledTime}` : ""}
+                {s.completedTime ? ` · concluído ${s.completedTime}` : ""}
+                {typeof s.timingDeltaMinutes === "number" ? ` · ${s.timingDeltaMinutes > 0 ? "atraso" : s.timingDeltaMinutes < 0 ? "adiantado" : "no horário"} ${Math.abs(s.timingDeltaMinutes)}min` : ""}
                 {t?.editCount ? ` · ${t.editCount} edições` : ""}
               </div>
               {s.reflection && (

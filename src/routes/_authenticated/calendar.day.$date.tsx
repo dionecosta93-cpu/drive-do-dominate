@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useStore, todaysTasks, type Task, type TaskStatus } from "@/lib/store";
+import { taskCompletedOn, useStore, todaysTasks, type Task, type TaskStatus } from "@/lib/store";
+import { saveTaskOccurrence } from "@/lib/task-occurrences";
 import { ChevronLeft, ChevronRight, Plus, MoreVertical, Play, Check, RotateCcw, Copy, Move, Archive, Trash2, Edit, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,10 +44,7 @@ function DayView() {
   }, [date]);
 
   const isToday = date === dateKey(new Date());
-  const doneCount = list.filter((t) =>
-    t.lastCompletedDate === date ||
-    sessions.some((s) => s.taskId === t.id && new Date(s.completedAt).toISOString().slice(0, 10) === date),
-  ).length;
+  const doneCount = list.filter((t) => taskCompletedOn(t.id, sessions, date)).length;
 
   const [menuId, setMenuId] = useState<string | null>(null);
   const [moveTaskId, setMoveTaskId] = useState<string | null>(null);
@@ -123,7 +121,7 @@ function DayView() {
       ) : (
         <div className="space-y-2">
           {list.map((t) => {
-            const isDone = t.lastCompletedDate === date || t.status === "concluida";
+            const isDone = taskCompletedOn(t.id, sessions, date);
             return (
               <div
                 key={t.id}
@@ -139,11 +137,14 @@ function DayView() {
                         t.priority === "alta" ? "bg-struggle/20 text-struggle" :
                         t.priority === "media" ? "bg-warning/20 text-warning" : "bg-muted text-muted-foreground"
                       }`}>{t.priority}</span>
-                      {t.status && (
-                        <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[t.status]}`}>
-                          {t.status.replace("-", " ")}
+                      {(isDone || (t.status && t.status !== "concluida")) && (() => {
+                        const visibleStatus: TaskStatus = isDone ? "concluida" : t.status!;
+                        return (
+                        <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[visibleStatus]}`}>
+                          {visibleStatus.replace("-", " ")}
                         </span>
-                      )}
+                        );
+                      })()}
                       {!!t.rolloverCount && !isDone && (
                         <span className="text-[9px] font-bold uppercase px-1.5 rounded bg-struggle/15 text-struggle">↻ {t.rolloverCount}x</span>
                       )}
@@ -151,7 +152,7 @@ function DayView() {
                     <h3 className={`text-base font-heading font-bold leading-tight ${isDone ? "line-through opacity-60" : ""}`}>{t.name}</h3>
                     {t.description && <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>}
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      {t.estimatedMinutes}min prev.{t.actualMinutes ? ` · ${t.actualMinutes}min real` : ""} · Dif. {t.difficulty}/10
+                      {t.estimatedMinutes}min prev.{t.actualMinutes ? ` · ${t.actualMinutes}min real` : ""} · Dif. {t.difficulty}/10{t.alarmMinutesBefore ? ` · alarme ${t.alarmMinutesBefore}min antes` : ""}
                     </p>
                     {t.notes && <p className="text-[11px] italic text-muted-foreground mt-1">"{t.notes}"</p>}
                   </div>
@@ -181,9 +182,9 @@ function DayView() {
                     date={date}
                     isDone={isDone}
                     onClose={closeMenu}
-                    onEdit={() => { closeMenu(); toast("Edite pelo cadastro."); navigate({ to: "/tasks" }); }}
-                    onComplete={() => { store.setTaskStatus(t.id, "concluida"); store.updateTask(t.id, { lastCompletedDate: date }); closeMenu(); toast.success("Concluída."); }}
-                    onReopen={() => { store.reopenTask(t.id); closeMenu(); toast("Reaberta."); }}
+                    onEdit={() => { closeMenu(); navigate({ to: "/tasks/$id/edit", params: { id: t.id } }); }}
+                    onComplete={() => { const session = store.completeTaskForDate(t.id, date); if (session) void saveTaskOccurrence(session); closeMenu(); toast.success("Concluída somente neste dia."); }}
+                    onReopen={() => { store.reopenTaskForDate(t.id, date); closeMenu(); toast("Reaberta somente neste dia."); }}
                     onPostpone={() => { store.setTaskStatus(t.id, "adiada"); closeMenu(); toast("Adiada."); }}
                     onCancel={() => { store.setTaskStatus(t.id, "cancelada"); closeMenu(); toast("Cancelada."); }}
                     onMove={() => { setMoveTaskId(t.id); setMoveDate(date); closeMenu(); }}
