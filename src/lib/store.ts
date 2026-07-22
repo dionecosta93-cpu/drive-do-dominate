@@ -42,6 +42,7 @@ export interface Task {
   icon?: string;
   notes?: string;
   motivation?: string;
+  alarmMinutesBefore?: number | null;
   archived?: boolean;
   editCount?: number;
   createdAt: number;
@@ -54,6 +55,23 @@ export interface Task {
 }
 
 const parseDate = (s: string) => new Date(s + "T00:00:00");
+
+export const dateKey = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const timeKey = (d = new Date()) =>
+  `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
+const minutesOfDay = (time: string) => {
+  const [h = 0, m = 0] = time.split(":").map(Number);
+  return h * 60 + m;
+};
+
+const completionDateForSession = (s: CompletedSession) =>
+  s.scheduledDate ?? dateKey(new Date(s.completedAt));
+
+export const taskCompletedOn = (taskId: string, sessions: CompletedSession[], date: string) =>
+  sessions.some((s) => s.taskId === taskId && completionDateForSession(s) === date);
 
 /** Whether a task appears on a given YYYY-MM-DD. Ignores archived/cancelled. */
 export const taskAppearsOn = (t: Task, date: string): boolean => {
@@ -114,6 +132,11 @@ export interface CompletedSession {
   xp: number;
   completedAt: number;
   hourOfDay: number;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  completedTime?: string;
+  timingDeltaMinutes?: number;
+  status?: "concluida";
   reflection?: string;
   feeling?: string;
 }
@@ -155,7 +178,9 @@ interface State {
   restoreTask: (id: string) => void;
   setTaskStatus: (id: string, status: TaskStatus) => void;
   reopenTask: (id: string) => void;
+  reopenTaskForDate: (id: string, date: string) => void;
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
+  completeTaskForDate: (id: string, date: string) => CompletedSession | null;
   addReflection: (sessionId: string, feeling: string, reflection: string) => void;
   markDailyMission: () => void;
   setWeeklyGoal: (g: WeeklyGoal) => void;
@@ -163,10 +188,7 @@ interface State {
   reset: () => void;
 }
 
-const todayKey = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
+const todayKey = () => dateKey();
 
 const calcXp = (difficulty: number, estimatedMinutes: number, spentSeconds: number) => {
   const base = difficulty * 20;
