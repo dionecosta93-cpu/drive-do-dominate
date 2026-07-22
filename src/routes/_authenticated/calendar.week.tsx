@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useStore, todaysTasks, dayStats } from "@/lib/store";
+import { dayStats, taskCompletedOn, todaysTasks, useStore } from "@/lib/store";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/calendar/week")({
@@ -99,7 +99,7 @@ function WeekView() {
                     >
                       <span className="font-mono font-bold text-discipline text-[10px]">{t.time}</span>
                       <span className="truncate flex-1">{t.name}</span>
-                      {t.status === "concluida" && <span className="text-[9px] font-bold text-discipline">✓</span>}
+                      {taskCompletedOn(t.id, sessions, key) && <span className="text-[9px] font-bold text-discipline">✓</span>}
                     </div>
                   ))}
                 </div>

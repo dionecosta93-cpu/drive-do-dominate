@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore, xpToLevel, todaysTasks } from "@/lib/store";
+import { dateKey, taskCompletedOn, useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
 import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil } from "lucide-react";
@@ -80,19 +80,19 @@ function Dashboard() {
   const dateStr = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "short" });
   const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = dateKey();
   const todayTasks = useMemo(
     () => todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time)),
     [tasks, todayKey],
   );
-  const done = todayTasks.filter((t) => completedToday.includes(t.id)).length;
+  const done = todayTasks.filter((t) => taskCompletedOn(t.id, sessions, todayKey)).length;
   const total = Math.max(todayTasks.length, 1);
   const progress = Math.round((done / total) * 100);
 
   const level = xpToLevel(xp);
   const missionDone = dailyMissionCompleted === todayKey;
 
-  const nextTask = todayTasks.find((t) => !completedToday.includes(t.id));
+  const nextTask = todayTasks.find((t) => !taskCompletedOn(t.id, sessions, todayKey));
 
 
   return (
@@ -205,7 +205,7 @@ function Dashboard() {
 
         <div className="space-y-3">
           {todayTasks.map((t) => {
-            const isDone = completedToday.includes(t.id);
+            const isDone = taskCompletedOn(t.id, sessions, todayKey);
             return (
               <div
                 key={t.id}
@@ -228,7 +228,7 @@ function Dashboard() {
                     </div>
                     <h3 className="text-base font-heading font-bold leading-tight truncate">{t.name}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {t.estimatedMinutes} min · Dif. {t.difficulty}/10
+                      {t.estimatedMinutes} min · Dif. {t.difficulty}/10{t.alarmMinutesBefore ? ` · alarme ${t.alarmMinutesBefore}min antes` : ""}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
