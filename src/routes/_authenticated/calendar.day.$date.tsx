@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { taskCompletedOn, useStore, todaysTasks, type Task, type TaskStatus } from "@/lib/store";
+import { saveTaskOccurrence } from "@/lib/task-occurrences";
 import { ChevronLeft, ChevronRight, Plus, MoreVertical, Play, Check, RotateCcw, Copy, Move, Archive, Trash2, Edit, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -182,7 +183,7 @@ function DayView() {
                     isDone={isDone}
                     onClose={closeMenu}
                     onEdit={() => { closeMenu(); navigate({ to: "/tasks/$id/edit", params: { id: t.id } }); }}
-                    onComplete={() => { store.completeTaskForDate(t.id, date); closeMenu(); toast.success("Concluída somente neste dia."); }}
+                    onComplete={() => { const session = store.completeTaskForDate(t.id, date); if (session) void saveTaskOccurrence(session); closeMenu(); toast.success("Concluída somente neste dia."); }}
                     onReopen={() => { store.reopenTaskForDate(t.id, date); closeMenu(); toast("Reaberta somente neste dia."); }}
                     onPostpone={() => { store.setTaskStatus(t.id, "adiada"); closeMenu(); toast("Adiada."); }}
                     onCancel={() => { store.setTaskStatus(t.id, "cancelada"); closeMenu(); toast("Cancelada."); }}
