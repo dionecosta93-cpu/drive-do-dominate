@@ -372,12 +372,29 @@ function FocusMode() {
       )}
 
       <button
+        onClick={() => {
+          setCoachMuted((m) => {
+            const next = !m;
+            if (next && coachAudioRef.current) {
+              try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+            }
+            return next;
+          });
+        }}
+        className="absolute top-4 left-4 text-muted-foreground/60 p-2"
+        aria-label={coachMuted ? "Ativar voz do coach" : "Silenciar voz do coach"}
+      >
+        {coachMuted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+      </button>
+
+      <button
         onClick={() => navigate({ to: "/" })}
         className="absolute top-4 right-4 text-muted-foreground/60 p-2"
         aria-label="Fechar"
       >
         <X className="size-5" />
       </button>
+
     </FullScreen>
   );
 }
