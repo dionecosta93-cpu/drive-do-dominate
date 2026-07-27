@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dateKey, taskCompletedOn, useStore, todaysTasks } from "@/lib/store";
 import { randomStartQuote } from "@/lib/quotes";
 import { saveTaskOccurrence } from "@/lib/task-occurrences";
-import { Pause, Play, Check, X } from "lucide-react";
+import { pickFocusCoachLine } from "@/lib/focus-coach";
+import { Pause, Play, Check, X, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/focus/$taskId")({
   component: FocusMode,
@@ -35,6 +37,37 @@ function FocusMode() {
   const [feeling, setFeeling] = useState("");
   const [reflection, setReflection] = useState("");
   const [nudged, setNudged] = useState(false);
+  const [coachMuted, setCoachMuted] = useState(false);
+  const [lastCoachLine, setLastCoachLine] = useState<string | null>(null);
+  const lastCoachMinute = useRef(0);
+  const coachLastLine = useRef<string | undefined>(undefined);
+  const coachAudioRef = useRef<HTMLAudioElement | null>(null);
+  const coachMutedRef = useRef(false);
+  useEffect(() => { coachMutedRef.current = coachMuted; }, [coachMuted]);
+
+  const speakCoach = useCallback(async (line: string) => {
+    if (coachMutedRef.current) return;
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: line }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (coachAudioRef.current) {
+        try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+      }
+      const audio = new Audio(url);
+      audio.volume = 0.95;
+      coachAudioRef.current = audio;
+      audio.onended = () => URL.revokeObjectURL(url);
+      if (coachMutedRef.current) return;
+      await audio.play().catch(() => { /* autoplay blocked */ });
+    } catch { /* ignore network */ }
+  }, []);
+
 
   useEffect(() => {
     if (phase !== "breathe") return;
@@ -59,6 +92,35 @@ function FocusMode() {
       toast("Você já começou. Continue mais um pouco.", { duration: 5000 });
     }
   }, [elapsed, phase, nudged]);
+
+  // AI coach voice: every minute of focused work, speak an impactful line.
+  useEffect(() => {
+    if (phase !== "running") return;
+    const minute = Math.floor(elapsed / 60);
+    if (minute <= 0 || minute === lastCoachMinute.current) return;
+    lastCoachMinute.current = minute;
+    const line = pickFocusCoachLine(coachLastLine.current);
+    coachLastLine.current = line;
+    setLastCoachLine(line);
+    void speakCoach(line);
+  }, [elapsed, phase, speakCoach]);
+
+  // Stop coach audio when leaving running phase or unmounting.
+  useEffect(() => {
+    if (phase === "running") return;
+    if (coachAudioRef.current) {
+      try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+      coachAudioRef.current = null;
+    }
+  }, [phase]);
+
+  useEffect(() => () => {
+    if (coachAudioRef.current) {
+      try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+    }
+  }, []);
+
+
 
   if (!task) {
     return (
@@ -250,7 +312,13 @@ function FocusMode() {
         {pauses > 0 && (
           <p className="mt-4 text-[10px] font-mono text-warning uppercase">Pausas: {pauses}</p>
         )}
+        {lastCoachLine && (
+          <p className="mt-6 max-w-xs mx-auto text-sm font-heading italic text-discipline/90 text-pretty px-4">
+            "{lastCoachLine}"
+          </p>
+        )}
       </div>
+
 
       <div className="absolute bottom-8 inset-x-0 px-6 space-y-3">
         <button
@@ -304,12 +372,29 @@ function FocusMode() {
       )}
 
       <button
+        onClick={() => {
+          setCoachMuted((m) => {
+            const next = !m;
+            if (next && coachAudioRef.current) {
+              try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+            }
+            return next;
+          });
+        }}
+        className="absolute top-4 left-4 text-muted-foreground/60 p-2"
+        aria-label={coachMuted ? "Ativar voz do coach" : "Silenciar voz do coach"}
+      >
+        {coachMuted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+      </button>
+
+      <button
         onClick={() => navigate({ to: "/" })}
         className="absolute top-4 right-4 text-muted-foreground/60 p-2"
         aria-label="Fechar"
       >
         <X className="size-5" />
       </button>
+
     </FullScreen>
   );
 }
