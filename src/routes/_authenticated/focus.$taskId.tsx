@@ -37,6 +37,37 @@ function FocusMode() {
   const [feeling, setFeeling] = useState("");
   const [reflection, setReflection] = useState("");
   const [nudged, setNudged] = useState(false);
+  const [coachMuted, setCoachMuted] = useState(false);
+  const [lastCoachLine, setLastCoachLine] = useState<string | null>(null);
+  const lastCoachMinute = useRef(0);
+  const coachLastLine = useRef<string | undefined>(undefined);
+  const coachAudioRef = useRef<HTMLAudioElement | null>(null);
+  const coachMutedRef = useRef(false);
+  useEffect(() => { coachMutedRef.current = coachMuted; }, [coachMuted]);
+
+  const speakCoach = useCallback(async (line: string) => {
+    if (coachMutedRef.current) return;
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: line }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (coachAudioRef.current) {
+        try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+      }
+      const audio = new Audio(url);
+      audio.volume = 0.95;
+      coachAudioRef.current = audio;
+      audio.onended = () => URL.revokeObjectURL(url);
+      if (coachMutedRef.current) return;
+      await audio.play().catch(() => { /* autoplay blocked */ });
+    } catch { /* ignore network */ }
+  }, []);
+
 
   useEffect(() => {
     if (phase !== "breathe") return;
