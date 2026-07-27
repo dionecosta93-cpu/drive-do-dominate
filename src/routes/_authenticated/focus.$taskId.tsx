@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dateKey, taskCompletedOn, useStore, todaysTasks } from "@/lib/store";
 import { randomStartQuote } from "@/lib/quotes";
 import { saveTaskOccurrence } from "@/lib/task-occurrences";
-import { Pause, Play, Check, X } from "lucide-react";
+import { pickFocusCoachLine } from "@/lib/focus-coach";
+import { Pause, Play, Check, X, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/focus/$taskId")({
   component: FocusMode,
