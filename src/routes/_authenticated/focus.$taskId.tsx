@@ -312,7 +312,13 @@ function FocusMode() {
         {pauses > 0 && (
           <p className="mt-4 text-[10px] font-mono text-warning uppercase">Pausas: {pauses}</p>
         )}
+        {lastCoachLine && (
+          <p className="mt-6 max-w-xs mx-auto text-sm font-heading italic text-discipline/90 text-pretty px-4">
+            "{lastCoachLine}"
+          </p>
+        )}
       </div>
+
 
       <div className="absolute bottom-8 inset-x-0 px-6 space-y-3">
         <button
