@@ -93,6 +93,35 @@ function FocusMode() {
     }
   }, [elapsed, phase, nudged]);
 
+  // AI coach voice: every minute of focused work, speak an impactful line.
+  useEffect(() => {
+    if (phase !== "running") return;
+    const minute = Math.floor(elapsed / 60);
+    if (minute <= 0 || minute === lastCoachMinute.current) return;
+    lastCoachMinute.current = minute;
+    const line = pickFocusCoachLine(coachLastLine.current);
+    coachLastLine.current = line;
+    setLastCoachLine(line);
+    void speakCoach(line);
+  }, [elapsed, phase, speakCoach]);
+
+  // Stop coach audio when leaving running phase or unmounting.
+  useEffect(() => {
+    if (phase === "running") return;
+    if (coachAudioRef.current) {
+      try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+      coachAudioRef.current = null;
+    }
+  }, [phase]);
+
+  useEffect(() => () => {
+    if (coachAudioRef.current) {
+      try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+    }
+  }, []);
+
+
+
   if (!task) {
     return (
       <div className="min-h-screen grid place-items-center px-6 text-center">
