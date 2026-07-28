@@ -52,6 +52,8 @@ export interface Task {
   weekdays?: number[]; // 0=Sun..6=Sat, for dias-especificos
   lastCompletedDate?: string;
   rolloverCount?: number;
+  goalId?: string;
+  objectiveId?: string;
 }
 
 const parseDate = (s: string) => new Date(s + "T00:00:00");
