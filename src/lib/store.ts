@@ -154,6 +154,39 @@ export interface WeeklyGoal {
   targetSessions: number;
 }
 
+export type LifeGoalStatus = "em-andamento" | "concluida" | "pausada";
+export type LifeGoalCategory =
+  | "negocios"
+  | "financeiro"
+  | "familia"
+  | "relacionamento"
+  | "saude"
+  | "atleta"
+  | "espiritual"
+  | "estudo"
+  | "carreira"
+  | "outro";
+
+export interface GoalObjective {
+  id: string;
+  name: string;
+  done?: boolean;
+}
+
+export interface LifeGoal {
+  id: string;
+  name: string;
+  description?: string;
+  category: LifeGoalCategory;
+  priority: Priority;
+  targetDate?: string;
+  motivation?: string;
+  status: LifeGoalStatus;
+  manualProgress?: number; // 0-100 override
+  objectives: GoalObjective[];
+  createdAt: number;
+}
+
 interface State {
   userName: string;
   tasks: Task[];
@@ -167,6 +200,15 @@ interface State {
   weeklyGoal: WeeklyGoal | null;
   dailyMissionCompleted: string | null;
   onboarded: boolean;
+  lifeGoals: LifeGoal[];
+
+  addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
+  updateLifeGoal: (id: string, patch: Partial<LifeGoal>) => void;
+  removeLifeGoal: (id: string) => void;
+  addObjective: (goalId: string, name: string) => void;
+  toggleObjective: (goalId: string, objectiveId: string) => void;
+  removeObjective: (goalId: string, objectiveId: string) => void;
+
 
   setUserName: (n: string) => void;
   setOnboarded: (b: boolean) => void;
