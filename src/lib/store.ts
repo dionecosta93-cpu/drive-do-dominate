@@ -605,6 +605,8 @@ export const useStore = create<State>()(
           weeklyGoal: null,
           dailyMissionCompleted: null,
           onboarded: false,
+          lifeGoals: [],
+
         }),
     }),
     { name: "kairos-store-v1" },
