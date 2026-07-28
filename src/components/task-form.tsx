@@ -77,6 +77,10 @@ export function TaskForm({
   const [color, setColor] = useState<string | undefined>(initial?.color);
   const [icon, setIcon] = useState<string | undefined>(initial?.icon);
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [goalId, setGoalId] = useState<string | undefined>(initial?.goalId);
+  const [objectiveId, setObjectiveId] = useState<string | undefined>(initial?.objectiveId);
+  const lifeGoals = useStore((s) => s.lifeGoals);
+  const selectedGoal = lifeGoals.find((g) => g.id === goalId);
 
   const toggleWeekday = (d: number) => {
     setWeekdays((w) => (w.includes(d) ? w.filter((x) => x !== d) : [...w, d].sort()));
