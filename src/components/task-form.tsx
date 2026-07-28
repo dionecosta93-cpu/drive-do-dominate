@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Category, Priority, Repetition, Task } from "@/lib/store";
+import { useStore } from "@/lib/store";
 
-const categories: Category[] = ["treino", "trabalho", "estudo", "vida", "negocios", "saude"];
+const categories: Category[] = ["treino", "trabalho", "estudo", "vida", "negocios", "saude", "familia", "espiritual"];
 const priorities: Priority[] = ["baixa", "media", "alta"];
 const reps: Repetition[] = [
   "nenhuma",
