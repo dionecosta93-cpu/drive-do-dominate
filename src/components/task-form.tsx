@@ -122,6 +122,8 @@ export function TaskForm({
       color,
       icon,
       notes: notes.trim() || undefined,
+      goalId,
+      objectiveId: goalId ? objectiveId : undefined,
     });
   };
 
