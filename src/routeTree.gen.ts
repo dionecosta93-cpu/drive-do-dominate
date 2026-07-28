@@ -23,6 +23,7 @@ import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authenticated/calendar.index'
 import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
+import { Route as AuthenticatedGoalsImpactRouteImport } from './routes/_authenticated/goals.impact'
 import { Route as AuthenticatedGoalsIdRouteImport } from './routes/_authenticated/goals.$id'
 import { Route as AuthenticatedFocusTaskIdRouteImport } from './routes/_authenticated/focus.$taskId'
 import { Route as AuthenticatedCalendarWeekRouteImport } from './routes/_authenticated/calendar.week'
@@ -103,6 +104,12 @@ const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
   path: '/goals/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGoalsImpactRoute =
+  AuthenticatedGoalsImpactRouteImport.update({
+    id: '/goals/impact',
+    path: '/goals/impact',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedGoalsIdRoute = AuthenticatedGoalsIdRouteImport.update({
   id: '/goals/$id',
   path: '/goals/$id',
@@ -166,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/goals/$id': typeof AuthenticatedGoalsIdRoute
+  '/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar/': typeof AuthenticatedCalendarIndexRoute
@@ -188,6 +196,7 @@ export interface FileRoutesByTo {
   '/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/goals/$id': typeof AuthenticatedGoalsIdRoute
+  '/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar': typeof AuthenticatedCalendarIndexRoute
@@ -213,6 +222,7 @@ export interface FileRoutesById {
   '/_authenticated/calendar/week': typeof AuthenticatedCalendarWeekRoute
   '/_authenticated/focus/$taskId': typeof AuthenticatedFocusTaskIdRoute
   '/_authenticated/goals/$id': typeof AuthenticatedGoalsIdRoute
+  '/_authenticated/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
   '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
   '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/calendar/week'
     | '/focus/$taskId'
     | '/goals/$id'
+    | '/goals/impact'
     | '/goals/new'
     | '/tasks/new'
     | '/calendar/'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/calendar/week'
     | '/focus/$taskId'
     | '/goals/$id'
+    | '/goals/impact'
     | '/goals/new'
     | '/tasks/new'
     | '/calendar'
@@ -284,6 +296,7 @@ export interface FileRouteTypes {
     | '/_authenticated/calendar/week'
     | '/_authenticated/focus/$taskId'
     | '/_authenticated/goals/$id'
+    | '/_authenticated/goals/impact'
     | '/_authenticated/goals/new'
     | '/_authenticated/tasks/new'
     | '/_authenticated/calendar/'
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGoalsNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/goals/impact': {
+      id: '/_authenticated/goals/impact'
+      path: '/goals/impact'
+      fullPath: '/goals/impact'
+      preLoaderRoute: typeof AuthenticatedGoalsImpactRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/goals/$id': {
       id: '/_authenticated/goals/$id'
       path: '/goals/$id'
@@ -490,6 +510,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedFocusTaskIdRoute: typeof AuthenticatedFocusTaskIdRoute
   AuthenticatedGoalsIdRoute: typeof AuthenticatedGoalsIdRoute
+  AuthenticatedGoalsImpactRoute: typeof AuthenticatedGoalsImpactRoute
   AuthenticatedGoalsNewRoute: typeof AuthenticatedGoalsNewRoute
   AuthenticatedTasksNewRoute: typeof AuthenticatedTasksNewRoute
   AuthenticatedGoalsIndexRoute: typeof AuthenticatedGoalsIndexRoute
@@ -506,6 +527,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedFocusTaskIdRoute: AuthenticatedFocusTaskIdRoute,
   AuthenticatedGoalsIdRoute: AuthenticatedGoalsIdRoute,
+  AuthenticatedGoalsImpactRoute: AuthenticatedGoalsImpactRoute,
   AuthenticatedGoalsNewRoute: AuthenticatedGoalsNewRoute,
   AuthenticatedTasksNewRoute: AuthenticatedTasksNewRoute,
   AuthenticatedGoalsIndexRoute: AuthenticatedGoalsIndexRoute,
