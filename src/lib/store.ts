@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type Priority = "baixa" | "media" | "alta";
-export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude";
+export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude" | "familia" | "espiritual";
 export type Repetition =
   | "nenhuma"
   | "diaria"
