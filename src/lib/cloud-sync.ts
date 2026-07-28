@@ -15,6 +15,7 @@ const SYNC_KEYS = [
   "weeklyGoal",
   "dailyMissionCompleted",
   "onboarded",
+  "lifeGoals",
 ] as const;
 
 type SyncSnapshot = Partial<Record<(typeof SYNC_KEYS)[number], unknown>>;

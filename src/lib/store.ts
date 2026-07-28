@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type Priority = "baixa" | "media" | "alta";
-export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude";
+export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude" | "familia" | "espiritual";
 export type Repetition =
   | "nenhuma"
   | "diaria"
@@ -52,6 +52,8 @@ export interface Task {
   weekdays?: number[]; // 0=Sun..6=Sat, for dias-especificos
   lastCompletedDate?: string;
   rolloverCount?: number;
+  goalId?: string;
+  objectiveId?: string;
 }
 
 const parseDate = (s: string) => new Date(s + "T00:00:00");
@@ -152,6 +154,39 @@ export interface WeeklyGoal {
   targetSessions: number;
 }
 
+export type LifeGoalStatus = "em-andamento" | "concluida" | "pausada";
+export type LifeGoalCategory =
+  | "negocios"
+  | "financeiro"
+  | "familia"
+  | "relacionamento"
+  | "saude"
+  | "atleta"
+  | "espiritual"
+  | "estudo"
+  | "carreira"
+  | "outro";
+
+export interface GoalObjective {
+  id: string;
+  name: string;
+  done?: boolean;
+}
+
+export interface LifeGoal {
+  id: string;
+  name: string;
+  description?: string;
+  category: LifeGoalCategory;
+  priority: Priority;
+  targetDate?: string;
+  motivation?: string;
+  status: LifeGoalStatus;
+  manualProgress?: number; // 0-100 override
+  objectives: GoalObjective[];
+  createdAt: number;
+}
+
 interface State {
   userName: string;
   tasks: Task[];
@@ -165,6 +200,15 @@ interface State {
   weeklyGoal: WeeklyGoal | null;
   dailyMissionCompleted: string | null;
   onboarded: boolean;
+  lifeGoals: LifeGoal[];
+
+  addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
+  updateLifeGoal: (id: string, patch: Partial<LifeGoal>) => void;
+  removeLifeGoal: (id: string) => void;
+  addObjective: (goalId: string, name: string) => void;
+  toggleObjective: (goalId: string, objectiveId: string) => void;
+  removeObjective: (goalId: string, objectiveId: string) => void;
+
 
   setUserName: (n: string) => void;
   setOnboarded: (b: boolean) => void;
@@ -230,6 +274,59 @@ export const useStore = create<State>()(
       weeklyGoal: null,
       dailyMissionCompleted: null,
       onboarded: false,
+      lifeGoals: [],
+
+      addLifeGoal: (g) => {
+        const goal: LifeGoal = {
+          status: "em-andamento",
+          objectives: [],
+          ...g,
+          id: genId(),
+          createdAt: Date.now(),
+        };
+        set((s) => ({ lifeGoals: [...s.lifeGoals, goal] }));
+        return goal;
+      },
+
+      updateLifeGoal: (id, patch) =>
+        set((s) => ({ lifeGoals: s.lifeGoals.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+
+      removeLifeGoal: (id) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.filter((g) => g.id !== id),
+          tasks: s.tasks.map((t) => (t.goalId === id ? { ...t, goalId: undefined, objectiveId: undefined } : t)),
+        })),
+
+      addObjective: (goalId, name) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.map((g) =>
+            g.id === goalId ? { ...g, objectives: [...g.objectives, { id: genId(), name }] } : g,
+          ),
+        })),
+
+      toggleObjective: (goalId, objectiveId) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.map((g) =>
+            g.id === goalId
+              ? { ...g, objectives: g.objectives.map((o) => (o.id === objectiveId ? { ...o, done: !o.done } : o)) }
+              : g,
+          ),
+        })),
+
+      removeObjective: (goalId, objectiveId) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.map((g) =>
+            g.id === goalId
+              ? {
+                  ...g,
+                  objectives: g.objectives.filter((o) => o.id !== objectiveId),
+                }
+              : g,
+          ),
+          tasks: s.tasks.map((t) => (t.objectiveId === objectiveId ? { ...t, objectiveId: undefined } : t)),
+        })),
+
+
 
       setUserName: (userName) => set({ userName }),
       setOnboarded: (onboarded) => set({ onboarded }),
@@ -508,6 +605,8 @@ export const useStore = create<State>()(
           weeklyGoal: null,
           dailyMissionCompleted: null,
           onboarded: false,
+          lifeGoals: [],
+
         }),
     }),
     { name: "kairos-store-v1" },
@@ -531,4 +630,108 @@ export const dayStats = (tasks: Task[], sessions: CompletedSession[], date: stri
   const pending = Math.max(total - done, 0);
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
   return { total, done, pending, pct };
+};
+
+// ============================================================
+// Metas de Vida — helpers de progresso e impacto
+// ============================================================
+
+export const goalCategoryLabel: Record<LifeGoalCategory, string> = {
+  negocios: "Negócios",
+  financeiro: "Financeiro",
+  familia: "Família",
+  relacionamento: "Relacionamentos",
+  saude: "Saúde",
+  atleta: "Atleta",
+  espiritual: "Espiritual",
+  estudo: "Estudos",
+  carreira: "Carreira",
+  outro: "Outro",
+};
+
+export const goalStatusLabel: Record<LifeGoalStatus, string> = {
+  "em-andamento": "Em andamento",
+  concluida: "Concluída",
+  pausada: "Pausada",
+};
+
+/** Sessões concluídas ligadas a uma meta (via tarefa vinculada). */
+export const goalSessions = (goal: LifeGoal, tasks: Task[], sessions: CompletedSession[]) => {
+  const ids = new Set(tasks.filter((t) => t.goalId === goal.id).map((t) => t.id));
+  return sessions.filter((s) => ids.has(s.taskId));
+};
+
+/**
+ * Progresso de uma meta: combina objetivos concluídos com execução de tarefas.
+ * `manualProgress` sobrepõe o cálculo automático quando definido.
+ */
+export const goalProgress = (goal: LifeGoal, tasks: Task[], sessions: CompletedSession[]) => {
+  const linkedTasks = tasks.filter((t) => t.goalId === goal.id);
+  const completions = goalSessions(goal, tasks, sessions).length;
+  const objectivesTotal = goal.objectives.length;
+  const objectivesDone = goal.objectives.filter((o) => o.done).length;
+
+  if (goal.status === "concluida") {
+    return { pct: 100, completions, linkedTasks: linkedTasks.length, objectivesDone, objectivesTotal };
+  }
+  if (typeof goal.manualProgress === "number") {
+    return {
+      pct: Math.max(0, Math.min(100, Math.round(goal.manualProgress))),
+      completions,
+      linkedTasks: linkedTasks.length,
+      objectivesDone,
+      objectivesTotal,
+    };
+  }
+
+  const objectivePct = objectivesTotal > 0 ? (objectivesDone / objectivesTotal) * 100 : 0;
+  // Execução: 40 conclusões de tarefas ligadas = 100% da parcela de execução.
+  const executionPct = Math.min(100, (completions / 40) * 100);
+  const pct =
+    objectivesTotal > 0
+      ? Math.round(objectivePct * 0.6 + executionPct * 0.4)
+      : Math.round(executionPct);
+
+  return { pct: Math.max(0, Math.min(100, pct)), completions, linkedTasks: linkedTasks.length, objectivesDone, objectivesTotal };
+};
+
+const daysAgoKey = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return dateKey(d);
+};
+
+/** Painel de impacto: métricas por meta + evolução semanal/mensal/anual. */
+export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: CompletedSession[]) => {
+  const week = daysAgoKey(7);
+  const month = daysAgoKey(30);
+  const year = daysAgoKey(365);
+
+  const rows = goals.map((g) => {
+    const gs = goalSessions(g, tasks, sessions);
+    const dateOf = (s: CompletedSession) => s.scheduledDate ?? dateKey(new Date(s.completedAt));
+    const last = gs.reduce((acc, s) => Math.max(acc, s.completedAt), 0);
+    return {
+      goal: g,
+      ...goalProgress(g, tasks, sessions),
+      weekCount: gs.filter((s) => dateOf(s) >= week).length,
+      monthCount: gs.filter((s) => dateOf(s) >= month).length,
+      yearCount: gs.filter((s) => dateOf(s) >= year).length,
+      xp: gs.reduce((a, s) => a + s.xp, 0),
+      minutes: Math.round(gs.reduce((a, s) => a + s.spentSeconds, 0) / 60),
+      lastActivity: last || null,
+    };
+  });
+
+  const active = rows.filter((r) => r.goal.status !== "pausada");
+  const mostAttention = active.slice().sort((a, b) => b.weekCount - a.weekCount)[0] ?? null;
+  const neglected =
+    active
+      .filter((r) => r.goal.status === "em-andamento")
+      .slice()
+      .sort((a, b) => a.weekCount - b.weekCount || (a.lastActivity ?? 0) - (b.lastActivity ?? 0))[0] ?? null;
+
+  const unlinkedToday = tasks.filter((t) => !t.goalId && !t.archived).length;
+
+  return { rows, mostAttention, neglected, unlinkedToday };
 };

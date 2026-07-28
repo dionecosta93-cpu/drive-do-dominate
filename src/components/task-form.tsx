@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Category, Priority, Repetition, Task } from "@/lib/store";
+import { useStore } from "@/lib/store";
 
-const categories: Category[] = ["treino", "trabalho", "estudo", "vida", "negocios", "saude"];
+const categories: Category[] = ["treino", "trabalho", "estudo", "vida", "negocios", "saude", "familia", "espiritual"];
 const priorities: Priority[] = ["baixa", "media", "alta"];
 const reps: Repetition[] = [
   "nenhuma",
@@ -76,6 +77,10 @@ export function TaskForm({
   const [color, setColor] = useState<string | undefined>(initial?.color);
   const [icon, setIcon] = useState<string | undefined>(initial?.icon);
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [goalId, setGoalId] = useState<string | undefined>(initial?.goalId);
+  const [objectiveId, setObjectiveId] = useState<string | undefined>(initial?.objectiveId);
+  const lifeGoals = useStore((s) => s.lifeGoals);
+  const selectedGoal = lifeGoals.find((g) => g.id === goalId);
 
   const toggleWeekday = (d: number) => {
     setWeekdays((w) => (w.includes(d) ? w.filter((x) => x !== d) : [...w, d].sort()));
@@ -117,6 +122,8 @@ export function TaskForm({
       color,
       icon,
       notes: notes.trim() || undefined,
+      goalId,
+      objectiveId: goalId ? objectiveId : undefined,
     });
   };
 
@@ -134,6 +141,56 @@ export function TaskForm({
           placeholder="Detalhes, contexto, meta específica..."
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-discipline resize-none" />
       </Field>
+
+      <Field label="Esta tarefa contribui para qual meta?">
+        <select
+          value={goalId ?? ""}
+          onChange={(e) => {
+            setGoalId(e.target.value || undefined);
+            setObjectiveId(undefined);
+          }}
+          className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline"
+        >
+          <option value="">Nenhuma meta</option>
+          {lifeGoals.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
+        {lifeGoals.length === 0 && (
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Crie metas em "Metas de Vida" para dar propósito às suas tarefas.
+          </p>
+        )}
+        {selectedGoal && selectedGoal.objectives.length > 0 && (
+          <select
+            value={objectiveId ?? ""}
+            onChange={(e) => setObjectiveId(e.target.value || undefined)}
+            className="w-full bg-surface border border-border rounded-xl px-3 py-3 mt-2 focus:outline-none focus:border-discipline"
+          >
+            <option value="">Objetivo (opcional)</option>
+            {selectedGoal.objectives.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {selectedGoal && (
+          <div className="mt-2 bg-discipline/5 border border-discipline/20 rounded-xl p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-1">
+              Por que esta tarefa é importante?
+            </p>
+            <p className="text-xs text-pretty">
+              Ela ajuda você a alcançar a meta "{selectedGoal.name}".
+              {selectedGoal.motivation ? ` ${selectedGoal.motivation}` : ""}
+            </p>
+          </div>
+        )}
+      </Field>
+
+
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Categoria">

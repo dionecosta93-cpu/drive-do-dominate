@@ -62,7 +62,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const {
     userName, tasks, sessions, xp, streak, tickDay,
-    dailyMissionCompleted, markDailyMission,
+    dailyMissionCompleted, markDailyMission, lifeGoals,
   } = useStore();
 
   const [now, setNow] = useState(new Date());
@@ -230,6 +230,12 @@ function Dashboard() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {t.estimatedMinutes} min · Dif. {t.difficulty}/10{t.alarmMinutesBefore ? ` · alarme ${t.alarmMinutesBefore}min antes` : ""}
                     </p>
+                    {(() => {
+                      const g = lifeGoals.find((lg) => lg.id === t.goalId);
+                      return g ? (
+                        <p className="text-[10px] text-discipline mt-1 truncate">🎯 Meta: {g.name}</p>
+                      ) : null;
+                    })()}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Link
@@ -316,6 +322,14 @@ function Dashboard() {
           <p className="text-[10px] text-muted-foreground uppercase font-bold">Tarefas concluídas</p>
         </Link>
       </div>
+
+      <Link to="/goals" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <Target className="size-5 text-discipline" />
+          <span className="text-sm font-bold">Metas de Vida & Propósito</span>
+        </div>
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </Link>
 
       <Link to="/achievements" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
