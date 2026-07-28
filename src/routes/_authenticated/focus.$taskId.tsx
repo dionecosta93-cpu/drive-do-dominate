@@ -17,8 +17,9 @@ type Phase = "breathe" | "quote" | "running" | "paused" | "done";
 function FocusMode() {
   const { taskId } = Route.useParams();
   const navigate = useNavigate();
-  const { tasks, sessions, completeSession, addReflection } = useStore();
+  const { tasks, sessions, completeSession, addReflection, lifeGoals } = useStore();
   const task = tasks.find((t) => t.id === taskId);
+  const linkedGoal = lifeGoals.find((g) => g.id === task?.goalId);
   const todayKey = dateKey();
   const nextTask = useMemo(() => {
     const list = todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time));
