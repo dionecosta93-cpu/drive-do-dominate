@@ -274,6 +274,59 @@ export const useStore = create<State>()(
       weeklyGoal: null,
       dailyMissionCompleted: null,
       onboarded: false,
+      lifeGoals: [],
+
+      addLifeGoal: (g) => {
+        const goal: LifeGoal = {
+          status: "em-andamento",
+          objectives: [],
+          ...g,
+          id: genId(),
+          createdAt: Date.now(),
+        };
+        set((s) => ({ lifeGoals: [...s.lifeGoals, goal] }));
+        return goal;
+      },
+
+      updateLifeGoal: (id, patch) =>
+        set((s) => ({ lifeGoals: s.lifeGoals.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+
+      removeLifeGoal: (id) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.filter((g) => g.id !== id),
+          tasks: s.tasks.map((t) => (t.goalId === id ? { ...t, goalId: undefined, objectiveId: undefined } : t)),
+        })),
+
+      addObjective: (goalId, name) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.map((g) =>
+            g.id === goalId ? { ...g, objectives: [...g.objectives, { id: genId(), name }] } : g,
+          ),
+        })),
+
+      toggleObjective: (goalId, objectiveId) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.map((g) =>
+            g.id === goalId
+              ? { ...g, objectives: g.objectives.map((o) => (o.id === objectiveId ? { ...o, done: !o.done } : o)) }
+              : g,
+          ),
+        })),
+
+      removeObjective: (goalId, objectiveId) =>
+        set((s) => ({
+          lifeGoals: s.lifeGoals.map((g) =>
+            g.id === goalId
+              ? {
+                  ...g,
+                  objectives: g.objectives.filter((o) => o.id !== objectiveId),
+                }
+              : g,
+          ),
+          tasks: s.tasks.map((t) => (t.objectiveId === objectiveId ? { ...t, objectiveId: undefined } : t)),
+        })),
+
+
 
       setUserName: (userName) => set({ userName }),
       setOnboarded: (onboarded) => set({ onboarded }),
