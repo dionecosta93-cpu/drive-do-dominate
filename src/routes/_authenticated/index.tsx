@@ -230,6 +230,12 @@ function Dashboard() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {t.estimatedMinutes} min · Dif. {t.difficulty}/10{t.alarmMinutesBefore ? ` · alarme ${t.alarmMinutesBefore}min antes` : ""}
                     </p>
+                    {(() => {
+                      const g = lifeGoals.find((lg) => lg.id === t.goalId);
+                      return g ? (
+                        <p className="text-[10px] text-discipline mt-1 truncate">🎯 Meta: {g.name}</p>
+                      ) : null;
+                    })()}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Link
