@@ -200,6 +200,16 @@ function FocusMode() {
           </div>
           <h2 className="text-xl font-heading font-bold uppercase mb-2">{task.name}</h2>
           <p className="text-sm text-muted-foreground">{task.estimatedMinutes} minutos previstos</p>
+          {linkedGoal && (
+            <div className="mt-6 mx-auto max-w-xs bg-discipline/5 border border-discipline/20 rounded-2xl p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-1">
+                Por que esta tarefa é importante?
+              </p>
+              <p className="text-xs text-pretty">
+                Ela te aproxima da meta "{linkedGoal.name}".{linkedGoal.motivation ? ` ${linkedGoal.motivation}` : ""}
+              </p>
+            </div>
+          )}
         </div>
       </FullScreen>
     );
