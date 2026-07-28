@@ -631,3 +631,107 @@ export const dayStats = (tasks: Task[], sessions: CompletedSession[], date: stri
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
   return { total, done, pending, pct };
 };
+
+// ============================================================
+// Metas de Vida — helpers de progresso e impacto
+// ============================================================
+
+export const goalCategoryLabel: Record<LifeGoalCategory, string> = {
+  negocios: "Negócios",
+  financeiro: "Financeiro",
+  familia: "Família",
+  relacionamento: "Relacionamentos",
+  saude: "Saúde",
+  atleta: "Atleta",
+  espiritual: "Espiritual",
+  estudo: "Estudos",
+  carreira: "Carreira",
+  outro: "Outro",
+};
+
+export const goalStatusLabel: Record<LifeGoalStatus, string> = {
+  "em-andamento": "Em andamento",
+  concluida: "Concluída",
+  pausada: "Pausada",
+};
+
+/** Sessões concluídas ligadas a uma meta (via tarefa vinculada). */
+export const goalSessions = (goal: LifeGoal, tasks: Task[], sessions: CompletedSession[]) => {
+  const ids = new Set(tasks.filter((t) => t.goalId === goal.id).map((t) => t.id));
+  return sessions.filter((s) => ids.has(s.taskId));
+};
+
+/**
+ * Progresso de uma meta: combina objetivos concluídos com execução de tarefas.
+ * `manualProgress` sobrepõe o cálculo automático quando definido.
+ */
+export const goalProgress = (goal: LifeGoal, tasks: Task[], sessions: CompletedSession[]) => {
+  const linkedTasks = tasks.filter((t) => t.goalId === goal.id);
+  const completions = goalSessions(goal, tasks, sessions).length;
+  const objectivesTotal = goal.objectives.length;
+  const objectivesDone = goal.objectives.filter((o) => o.done).length;
+
+  if (goal.status === "concluida") {
+    return { pct: 100, completions, linkedTasks: linkedTasks.length, objectivesDone, objectivesTotal };
+  }
+  if (typeof goal.manualProgress === "number") {
+    return {
+      pct: Math.max(0, Math.min(100, Math.round(goal.manualProgress))),
+      completions,
+      linkedTasks: linkedTasks.length,
+      objectivesDone,
+      objectivesTotal,
+    };
+  }
+
+  const objectivePct = objectivesTotal > 0 ? (objectivesDone / objectivesTotal) * 100 : 0;
+  // Execução: 40 conclusões de tarefas ligadas = 100% da parcela de execução.
+  const executionPct = Math.min(100, (completions / 40) * 100);
+  const pct =
+    objectivesTotal > 0
+      ? Math.round(objectivePct * 0.6 + executionPct * 0.4)
+      : Math.round(executionPct);
+
+  return { pct: Math.max(0, Math.min(100, pct)), completions, linkedTasks: linkedTasks.length, objectivesDone, objectivesTotal };
+};
+
+const daysAgoKey = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return dateKey(d);
+};
+
+/** Painel de impacto: métricas por meta + evolução semanal/mensal/anual. */
+export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: CompletedSession[]) => {
+  const week = daysAgoKey(7);
+  const month = daysAgoKey(30);
+  const year = daysAgoKey(365);
+
+  const rows = goals.map((g) => {
+    const gs = goalSessions(g, tasks, sessions);
+    const dateOf = (s: CompletedSession) => s.scheduledDate ?? dateKey(new Date(s.completedAt));
+    const last = gs.reduce((acc, s) => Math.max(acc, s.completedAt), 0);
+    return {
+      goal: g,
+      ...goalProgress(g, tasks, sessions),
+      weekCount: gs.filter((s) => dateOf(s) >= week).length,
+      monthCount: gs.filter((s) => dateOf(s) >= month).length,
+      yearCount: gs.filter((s) => dateOf(s) >= year).length,
+      xp: gs.reduce((a, s) => a + s.xp, 0),
+      minutes: Math.round(gs.reduce((a, s) => a + s.spentSeconds, 0) / 60),
+      lastActivity: last || null,
+    };
+  });
+
+  const active = rows.filter((r) => r.goal.status !== "pausada");
+  const mostAttention = active.slice().sort((a, b) => b.weekCount - a.weekCount)[0] ?? null;
+  const neglected =
+    active
+      .filter((r) => r.goal.status === "em-andamento")
+      .slice()
+      .sort((a, b) => a.weekCount - b.weekCount || (a.lastActivity ?? 0) - (b.lastActivity ?? 0))[0] ?? null;
+
+  const unlinkedToday = tasks.filter((t) => !t.goalId && !t.archived).length;
+
+  return { rows, mostAttention, neglected, unlinkedToday };
+};
