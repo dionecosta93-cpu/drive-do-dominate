@@ -142,6 +142,56 @@ export function TaskForm({
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-discipline resize-none" />
       </Field>
 
+      <Field label="Esta tarefa contribui para qual meta?">
+        <select
+          value={goalId ?? ""}
+          onChange={(e) => {
+            setGoalId(e.target.value || undefined);
+            setObjectiveId(undefined);
+          }}
+          className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline"
+        >
+          <option value="">Nenhuma meta</option>
+          {lifeGoals.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
+        {lifeGoals.length === 0 && (
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Crie metas em "Metas de Vida" para dar propósito às suas tarefas.
+          </p>
+        )}
+        {selectedGoal && selectedGoal.objectives.length > 0 && (
+          <select
+            value={objectiveId ?? ""}
+            onChange={(e) => setObjectiveId(e.target.value || undefined)}
+            className="w-full bg-surface border border-border rounded-xl px-3 py-3 mt-2 focus:outline-none focus:border-discipline"
+          >
+            <option value="">Objetivo (opcional)</option>
+            {selectedGoal.objectives.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {selectedGoal && (
+          <div className="mt-2 bg-discipline/5 border border-discipline/20 rounded-xl p-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-1">
+              Por que esta tarefa é importante?
+            </p>
+            <p className="text-xs text-pretty">
+              Ela ajuda você a alcançar a meta "{selectedGoal.name}".
+              {selectedGoal.motivation ? ` ${selectedGoal.motivation}` : ""}
+            </p>
+          </div>
+        )}
+      </Field>
+
+
+
       <div className="grid grid-cols-2 gap-3">
         <Field label="Categoria">
           <select value={category} onChange={(e) => setCategory(e.target.value as Category)}
