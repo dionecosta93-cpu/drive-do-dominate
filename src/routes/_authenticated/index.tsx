@@ -62,7 +62,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const {
     userName, tasks, sessions, xp, streak, tickDay,
-    dailyMissionCompleted, markDailyMission,
+    dailyMissionCompleted, markDailyMission, lifeGoals,
   } = useStore();
 
   const [now, setNow] = useState(new Date());
