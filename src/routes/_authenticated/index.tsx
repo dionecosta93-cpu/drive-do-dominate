@@ -317,6 +317,14 @@ function Dashboard() {
         </Link>
       </div>
 
+      <Link to="/goals" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <Target className="size-5 text-discipline" />
+          <span className="text-sm font-bold">Metas de Vida & Propósito</span>
+        </div>
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </Link>
+
       <Link to="/achievements" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
           <Trophy className="size-5 text-warning" />
