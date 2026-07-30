@@ -4,6 +4,7 @@ import { dateKey, taskCompletedOn, useStore, xpToLevel, todaysTasks } from "@/li
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
 import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen } from "lucide-react";
+import { devotionalOfTheDay } from "@/lib/devotional";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
