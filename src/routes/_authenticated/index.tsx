@@ -153,6 +153,23 @@ function Dashboard() {
         </p>
       </section>
 
+      {/* Devocional do dia */}
+      <Link
+        to="/devotional"
+        className="block mb-6 rounded-2xl border border-info/30 bg-info/5 p-4 animate-rise"
+        style={{ animationDelay: "90ms" }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-info">
+            <BookOpen className="size-4" /> Devocional de hoje
+          </span>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </div>
+        <p className="text-sm font-medium leading-snug text-pretty line-clamp-3">"{todayDevotional.excerpt}"</p>
+        <p className="mt-2 text-[11px] text-muted-foreground">{todayDevotional.book} · {todayDevotional.author}</p>
+      </Link>
+
+
       {/* Primary CTA */}
       <button
         onClick={() => {
