@@ -4,6 +4,7 @@ import { dateKey, taskCompletedOn, useStore, xpToLevel, todaysTasks } from "@/li
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
 import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen } from "lucide-react";
+import { devotionalOfTheDay } from "@/lib/devotional";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -93,6 +94,8 @@ function Dashboard() {
   const missionDone = dailyMissionCompleted === todayKey;
 
   const nextTask = todayTasks.find((t) => !taskCompletedOn(t.id, sessions, todayKey));
+  const todayDevotional = devotionalOfTheDay();
+
 
 
   return (
@@ -152,6 +155,23 @@ function Dashboard() {
           "{quote}"
         </p>
       </section>
+
+      {/* Devocional do dia */}
+      <Link
+        to="/devotional"
+        className="block mb-6 rounded-2xl border border-info/30 bg-info/5 p-4 animate-rise"
+        style={{ animationDelay: "90ms" }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-info">
+            <BookOpen className="size-4" /> Devocional de hoje
+          </span>
+          <ChevronRight className="size-4 text-muted-foreground" />
+        </div>
+        <p className="text-sm font-medium leading-snug text-pretty line-clamp-3">"{todayDevotional.excerpt}"</p>
+        <p className="mt-2 text-[11px] text-muted-foreground">{todayDevotional.book} · {todayDevotional.author}</p>
+      </Link>
+
 
       {/* Primary CTA */}
       <button
@@ -331,13 +351,14 @@ function Dashboard() {
         <ChevronRight className="size-4 text-muted-foreground" />
       </Link>
 
-      <Link to="/devotional" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
+      <Link to="/vault" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
-          <BookOpen className="size-5 text-info" />
-          <span className="text-sm font-bold">Devocional de Produtividade</span>
+          <Trophy className="size-5 text-warning" />
+          <span className="text-sm font-bold">Cofre de Vitórias</span>
         </div>
         <ChevronRight className="size-4 text-muted-foreground" />
       </Link>
+
 
 
       <Link to="/achievements" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
