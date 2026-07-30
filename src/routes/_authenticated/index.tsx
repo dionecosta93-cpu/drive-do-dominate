@@ -93,6 +93,8 @@ function Dashboard() {
   const missionDone = dailyMissionCompleted === todayKey;
 
   const nextTask = todayTasks.find((t) => !taskCompletedOn(t.id, sessions, todayKey));
+  const todayDevotional = devotionalOfTheDay();
+
 
 
   return (
