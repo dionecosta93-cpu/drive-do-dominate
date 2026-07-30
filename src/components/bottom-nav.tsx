@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarDays, BarChart3, Trophy, Sparkles } from "lucide-react";
+import { Home, CalendarDays, BarChart3, BookOpen, Sparkles } from "lucide-react";
 
 const items = [
   { to: "/", label: "Início", icon: Home },
   { to: "/calendar", label: "Agenda", icon: CalendarDays },
   { to: "/stats", label: "Stats", icon: BarChart3 },
-  { to: "/vault", label: "Cofre", icon: Trophy },
+  { to: "/devotional", label: "Devocional", icon: BookOpen },
   { to: "/motivation", label: "Motivação", icon: Sparkles },
 ] as const;
 
