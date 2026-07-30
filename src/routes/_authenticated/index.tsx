@@ -351,13 +351,14 @@ function Dashboard() {
         <ChevronRight className="size-4 text-muted-foreground" />
       </Link>
 
-      <Link to="/devotional" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
+      <Link to="/vault" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
-          <BookOpen className="size-5 text-info" />
-          <span className="text-sm font-bold">Devocional de Produtividade</span>
+          <Trophy className="size-5 text-warning" />
+          <span className="text-sm font-bold">Cofre de Vitórias</span>
         </div>
         <ChevronRight className="size-4 text-muted-foreground" />
       </Link>
+
 
 
       <Link to="/achievements" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
