@@ -16,6 +16,7 @@ import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
 import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
+import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authenticated/devotional'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
@@ -66,6 +67,11 @@ const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
 const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
   id: '/motivation',
   path: '/motivation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDevotionalRoute = AuthenticatedDevotionalRouteImport.update({
+  id: '/devotional',
+  path: '/devotional',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/calendar': typeof AuthenticatedCalendarRouteWithChildren
+  '/devotional': typeof AuthenticatedDevotionalRoute
   '/motivation': typeof AuthenticatedMotivationRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
+  '/devotional': typeof AuthenticatedDevotionalRoute
   '/motivation': typeof AuthenticatedMotivationRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRouteWithChildren
+  '/_authenticated/devotional': typeof AuthenticatedDevotionalRoute
   '/_authenticated/motivation': typeof AuthenticatedMotivationRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/achievements'
     | '/calendar'
+    | '/devotional'
     | '/motivation'
     | '/stats'
     | '/vault'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/achievements'
+    | '/devotional'
     | '/motivation'
     | '/stats'
     | '/vault'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/achievements'
     | '/_authenticated/calendar'
+    | '/_authenticated/devotional'
     | '/_authenticated/motivation'
     | '/_authenticated/stats'
     | '/_authenticated/vault'
@@ -374,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/motivation'
       fullPath: '/motivation'
       preLoaderRoute: typeof AuthenticatedMotivationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/devotional': {
+      id: '/_authenticated/devotional'
+      path: '/devotional'
+      fullPath: '/devotional'
+      preLoaderRoute: typeof AuthenticatedDevotionalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/calendar': {
@@ -524,6 +543,7 @@ const AuthenticatedCalendarRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRouteWithChildren
+  AuthenticatedDevotionalRoute: typeof AuthenticatedDevotionalRoute
   AuthenticatedMotivationRoute: typeof AuthenticatedMotivationRoute
   AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
   AuthenticatedVaultRoute: typeof AuthenticatedVaultRoute
@@ -542,6 +562,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRouteWithChildren,
+  AuthenticatedDevotionalRoute: AuthenticatedDevotionalRoute,
   AuthenticatedMotivationRoute: AuthenticatedMotivationRoute,
   AuthenticatedStatsRoute: AuthenticatedStatsRoute,
   AuthenticatedVaultRoute: AuthenticatedVaultRoute,

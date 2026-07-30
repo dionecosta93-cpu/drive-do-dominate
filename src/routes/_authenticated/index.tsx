@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { dateKey, taskCompletedOn, useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
-import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil } from "lucide-react";
+import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -330,6 +330,15 @@ function Dashboard() {
         </div>
         <ChevronRight className="size-4 text-muted-foreground" />
       </Link>
+
+      <Link to="/devotional" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <BookOpen className="size-5 text-info" />
+          <span className="text-sm font-bold">Devocional de Produtividade</span>
+        </div>
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </Link>
+
 
       <Link to="/achievements" className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
