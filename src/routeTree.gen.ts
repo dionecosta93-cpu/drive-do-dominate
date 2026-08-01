@@ -24,6 +24,7 @@ import { Route as AuthenticatedReadingIndexRouteImport } from './routes/_authent
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authenticated/calendar.index'
 import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
+import { Route as AuthenticatedReadingNewRouteImport } from './routes/_authenticated/reading.new'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
 import { Route as AuthenticatedGoalsImpactRouteImport } from './routes/_authenticated/goals.impact'
 import { Route as AuthenticatedGoalsAssistantRouteImport } from './routes/_authenticated/goals.assistant'
@@ -113,6 +114,11 @@ const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
   path: '/tasks/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReadingNewRoute = AuthenticatedReadingNewRouteImport.update({
+  id: '/reading/new',
+  path: '/reading/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
   id: '/goals/new',
   path: '/goals/new',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/goals/assistant': typeof AuthenticatedGoalsAssistantRoute
   '/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/reading/new': typeof AuthenticatedReadingNewRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/goals/assistant': typeof AuthenticatedGoalsAssistantRoute
   '/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/reading/new': typeof AuthenticatedReadingNewRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar': typeof AuthenticatedCalendarIndexRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/goals/assistant': typeof AuthenticatedGoalsAssistantRoute
   '/_authenticated/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/_authenticated/reading/new': typeof AuthenticatedReadingNewRoute
   '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
   '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/goals/assistant'
     | '/goals/impact'
     | '/goals/new'
+    | '/reading/new'
     | '/tasks/new'
     | '/calendar/'
     | '/goals/'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/goals/assistant'
     | '/goals/impact'
     | '/goals/new'
+    | '/reading/new'
     | '/tasks/new'
     | '/calendar'
     | '/goals'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/_authenticated/goals/assistant'
     | '/_authenticated/goals/impact'
     | '/_authenticated/goals/new'
+    | '/_authenticated/reading/new'
     | '/_authenticated/tasks/new'
     | '/_authenticated/calendar/'
     | '/_authenticated/goals/'
@@ -457,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reading/new': {
+      id: '/_authenticated/reading/new'
+      path: '/reading/new'
+      fullPath: '/reading/new'
+      preLoaderRoute: typeof AuthenticatedReadingNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/goals/new': {
       id: '/_authenticated/goals/new'
       path: '/goals/new'
@@ -573,6 +592,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGoalsAssistantRoute: typeof AuthenticatedGoalsAssistantRoute
   AuthenticatedGoalsImpactRoute: typeof AuthenticatedGoalsImpactRoute
   AuthenticatedGoalsNewRoute: typeof AuthenticatedGoalsNewRoute
+  AuthenticatedReadingNewRoute: typeof AuthenticatedReadingNewRoute
   AuthenticatedTasksNewRoute: typeof AuthenticatedTasksNewRoute
   AuthenticatedGoalsIndexRoute: typeof AuthenticatedGoalsIndexRoute
   AuthenticatedReadingIndexRoute: typeof AuthenticatedReadingIndexRoute
@@ -593,6 +613,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGoalsAssistantRoute: AuthenticatedGoalsAssistantRoute,
   AuthenticatedGoalsImpactRoute: AuthenticatedGoalsImpactRoute,
   AuthenticatedGoalsNewRoute: AuthenticatedGoalsNewRoute,
+  AuthenticatedReadingNewRoute: AuthenticatedReadingNewRoute,
   AuthenticatedTasksNewRoute: AuthenticatedTasksNewRoute,
   AuthenticatedGoalsIndexRoute: AuthenticatedGoalsIndexRoute,
   AuthenticatedReadingIndexRoute: AuthenticatedReadingIndexRoute,
