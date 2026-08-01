@@ -878,3 +878,120 @@ export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: Completed
 
   return { rows, mostAttention, neglected, unlinkedToday };
 };
+
+// ============================================================
+// Leitura — helpers
+// ============================================================
+
+export const bookStatusLabel: Record<BookStatus, string> = {
+  "quero-ler": "Quero Ler",
+  lendo: "Lendo",
+  concluido: "Concluído",
+};
+
+export const bookProgress = (b: Book) =>
+  b.totalPages > 0 ? Math.max(0, Math.min(100, Math.round((b.currentPage / b.totalPages) * 100))) : 0;
+
+export const readingGoalLabel: Record<ReadingGoalKind, string> = {
+  "livros-ano": "livros por ano",
+  "paginas-dia": "páginas por dia",
+  "minutos-dia": "minutos por dia",
+  "horas-semana": "horas por semana",
+};
+
+const startOfWeekKey = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay());
+  return dateKey(d);
+};
+
+export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
+  const today = dateKey();
+  const week = startOfWeekKey();
+  const monthPrefix = today.slice(0, 7);
+
+  const minutes = (list: ReadingSession[]) => list.reduce((a, s) => a + s.minutes, 0);
+  const todayMinutes = minutes(sessions.filter((s) => s.date === today));
+  const weekMinutes = minutes(sessions.filter((s) => s.date >= week));
+  const monthMinutes = minutes(sessions.filter((s) => s.date.startsWith(monthPrefix)));
+  const totalMinutes = minutes(sessions);
+
+  const completed = books.filter((b) => b.status === "concluido");
+  const reading = books.filter((b) => b.status === "lendo");
+  const wishlist = books.filter((b) => b.status === "quero-ler");
+
+  const pagesRead = books.reduce(
+    (a, b) => a + (b.status === "concluido" ? b.totalPages || b.currentPage : b.currentPage),
+    0,
+  );
+
+  // Páginas por dia (baseado nos logs)
+  const pagesByDay = new Map<string, number>();
+  for (const b of books) {
+    let prev = 0;
+    for (const l of [...b.logs].sort((x, y) => x.at - y.at)) {
+      const delta = Math.max(0, l.page - prev);
+      prev = l.page;
+      pagesByDay.set(l.date, (pagesByDay.get(l.date) ?? 0) + delta);
+    }
+  }
+  const dayCount = Math.max(pagesByDay.size, 1);
+  const avgPagesPerDay = Math.round([...pagesByDay.values()].reduce((a, v) => a + v, 0) / dayCount);
+  const todayPages = pagesByDay.get(today) ?? 0;
+
+  const avgSessionMinutes = sessions.length ? Math.round(totalMinutes / sessions.length) : 0;
+
+  // Streak de dias lendo (sessão ou log)
+  const activeDays = new Set<string>([...sessions.map((s) => s.date), ...pagesByDay.keys()]);
+  let streak = 0;
+  const cursor = new Date();
+  if (!activeDays.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  while (activeDays.has(dateKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  const countBy = (vals: string[]) => {
+    const m = new Map<string, number>();
+    for (const v of vals) if (v.trim()) m.set(v, (m.get(v) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  };
+  const topCategories = countBy(books.map((b) => b.category));
+  const topAuthors = countBy(books.map((b) => b.author));
+
+  const booksThisYear = completed.filter((b) => (b.endDate ?? "").startsWith(String(new Date().getFullYear()))).length;
+
+  return {
+    todayMinutes,
+    weekMinutes,
+    monthMinutes,
+    totalMinutes,
+    completed: completed.length,
+    reading: reading.length,
+    wishlist: wishlist.length,
+    pagesRead,
+    avgPagesPerDay,
+    todayPages,
+    avgSessionMinutes,
+    streak,
+    topCategories,
+    topAuthors,
+    booksThisYear,
+  };
+};
+
+export const readingGoalProgress = (
+  g: ReadingGoal,
+  stats: ReturnType<typeof readingStats>,
+) => {
+  const current =
+    g.kind === "livros-ano"
+      ? stats.booksThisYear
+      : g.kind === "paginas-dia"
+        ? stats.todayPages
+        : g.kind === "minutos-dia"
+          ? stats.todayMinutes
+          : Math.round((stats.weekMinutes / 60) * 10) / 10;
+  const pct = g.target > 0 ? Math.min(100, Math.round((current / g.target) * 100)) : 0;
+  return { current, pct };
+};
