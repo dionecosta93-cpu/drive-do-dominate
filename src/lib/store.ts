@@ -345,6 +345,75 @@ export const useStore = create<State>()(
       dailyMissionCompleted: null,
       onboarded: false,
       lifeGoals: [],
+      books: [],
+      readingSessions: [],
+      readingGoals: [],
+
+      addBook: (b) => {
+        const now = Date.now();
+        const book: Book = {
+          author: "",
+          category: "",
+          totalPages: 0,
+          currentPage: 0,
+          status: "quero-ler",
+          tags: [],
+          logs: [],
+          ...b,
+          id: genId(),
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((s) => ({ books: [...s.books, book] }));
+        return book;
+      },
+
+      updateBook: (id, patch) =>
+        set((s) => ({
+          books: s.books.map((b) => (b.id === id ? { ...b, ...patch, updatedAt: Date.now() } : b)),
+        })),
+
+      removeBook: (id) =>
+        set((s) => ({
+          books: s.books.filter((b) => b.id !== id),
+          readingSessions: s.readingSessions.filter((r) => r.bookId !== id),
+        })),
+
+      toggleBookFavorite: (id) =>
+        set((s) => ({
+          books: s.books.map((b) => (b.id === id ? { ...b, favorite: !b.favorite, updatedAt: Date.now() } : b)),
+        })),
+
+      logReadingProgress: (id, page) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== id) return b;
+            const p = Math.max(0, b.totalPages ? Math.min(page, b.totalPages) : page);
+            const done = b.totalPages > 0 && p >= b.totalPages;
+            return {
+              ...b,
+              currentPage: p,
+              status: done ? "concluido" : b.status === "quero-ler" ? "lendo" : b.status,
+              endDate: done ? (b.endDate ?? todayKey()) : b.endDate,
+              startDate: b.startDate ?? todayKey(),
+              logs: [...b.logs, { id: genId(), date: todayKey(), page: p, at: Date.now() }],
+              updatedAt: Date.now(),
+            };
+          }),
+        })),
+
+      addReadingSession: (s0) =>
+        set((s) => ({ readingSessions: [...s.readingSessions, { ...s0, id: genId() }] })),
+
+      removeReadingSession: (id) =>
+        set((s) => ({ readingSessions: s.readingSessions.filter((r) => r.id !== id) })),
+
+      addReadingGoal: (g) =>
+        set((s) => ({ readingGoals: [...s.readingGoals, { ...g, id: genId(), createdAt: Date.now() }] })),
+
+      removeReadingGoal: (id) =>
+        set((s) => ({ readingGoals: s.readingGoals.filter((g) => g.id !== id) })),
+
 
       addLifeGoal: (g) => {
         const goal: LifeGoal = {
