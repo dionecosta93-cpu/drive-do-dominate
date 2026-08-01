@@ -187,6 +187,62 @@ export interface LifeGoal {
   createdAt: number;
 }
 
+// ============================================================
+// Leitura — tipos
+// ============================================================
+export type BookStatus = "quero-ler" | "lendo" | "concluido";
+
+export interface ReadingLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  page: number;
+  at: number;
+}
+
+export interface ReadingSession {
+  id: string;
+  bookId: string;
+  date: string; // YYYY-MM-DD
+  startedAt: number;
+  endedAt: number;
+  minutes: number;
+  pagesRead?: number;
+}
+
+export type ReadingGoalKind = "livros-ano" | "paginas-dia" | "minutos-dia" | "horas-semana";
+
+export interface ReadingGoal {
+  id: string;
+  kind: ReadingGoalKind;
+  target: number;
+  createdAt: number;
+}
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  category: string;
+  cover?: string;
+  totalPages: number;
+  currentPage: number;
+  startDate?: string;
+  endDate?: string;
+  status: BookStatus;
+  rating?: number; // 1-5
+  favorite?: boolean;
+  comments?: string;
+  summary?: string;
+  learnings?: string;
+  ideas?: string;
+  quotes?: string;
+  application?: string;
+  tags: string[];
+  logs: ReadingLog[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 interface State {
   userName: string;
   tasks: Task[];
@@ -201,8 +257,22 @@ interface State {
   dailyMissionCompleted: string | null;
   onboarded: boolean;
   lifeGoals: LifeGoal[];
+  books: Book[];
+  readingSessions: ReadingSession[];
+  readingGoals: ReadingGoal[];
+
+  addBook: (b: Partial<Book> & { title: string }) => Book;
+  updateBook: (id: string, patch: Partial<Book>) => void;
+  removeBook: (id: string) => void;
+  toggleBookFavorite: (id: string) => void;
+  logReadingProgress: (id: string, page: number) => void;
+  addReadingSession: (s: Omit<ReadingSession, "id">) => void;
+  removeReadingSession: (id: string) => void;
+  addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
+  removeReadingGoal: (id: string) => void;
 
   addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
+
   updateLifeGoal: (id: string, patch: Partial<LifeGoal>) => void;
   removeLifeGoal: (id: string) => void;
   addObjective: (goalId: string, name: string) => void;
