@@ -745,6 +745,10 @@ export const useStore = create<State>()(
           dailyMissionCompleted: null,
           onboarded: false,
           lifeGoals: [],
+          books: [],
+          readingSessions: [],
+          readingGoals: [],
+
 
         }),
     }),
