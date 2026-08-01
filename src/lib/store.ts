@@ -187,6 +187,62 @@ export interface LifeGoal {
   createdAt: number;
 }
 
+// ============================================================
+// Leitura — tipos
+// ============================================================
+export type BookStatus = "quero-ler" | "lendo" | "concluido";
+
+export interface ReadingLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  page: number;
+  at: number;
+}
+
+export interface ReadingSession {
+  id: string;
+  bookId: string;
+  date: string; // YYYY-MM-DD
+  startedAt: number;
+  endedAt: number;
+  minutes: number;
+  pagesRead?: number;
+}
+
+export type ReadingGoalKind = "livros-ano" | "paginas-dia" | "minutos-dia" | "horas-semana";
+
+export interface ReadingGoal {
+  id: string;
+  kind: ReadingGoalKind;
+  target: number;
+  createdAt: number;
+}
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  category: string;
+  cover?: string;
+  totalPages: number;
+  currentPage: number;
+  startDate?: string;
+  endDate?: string;
+  status: BookStatus;
+  rating?: number; // 1-5
+  favorite?: boolean;
+  comments?: string;
+  summary?: string;
+  learnings?: string;
+  ideas?: string;
+  quotes?: string;
+  application?: string;
+  tags: string[];
+  logs: ReadingLog[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 interface State {
   userName: string;
   tasks: Task[];
@@ -201,8 +257,22 @@ interface State {
   dailyMissionCompleted: string | null;
   onboarded: boolean;
   lifeGoals: LifeGoal[];
+  books: Book[];
+  readingSessions: ReadingSession[];
+  readingGoals: ReadingGoal[];
+
+  addBook: (b: Partial<Book> & { title: string }) => Book;
+  updateBook: (id: string, patch: Partial<Book>) => void;
+  removeBook: (id: string) => void;
+  toggleBookFavorite: (id: string) => void;
+  logReadingProgress: (id: string, page: number) => void;
+  addReadingSession: (s: Omit<ReadingSession, "id">) => void;
+  removeReadingSession: (id: string) => void;
+  addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
+  removeReadingGoal: (id: string) => void;
 
   addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
+
   updateLifeGoal: (id: string, patch: Partial<LifeGoal>) => void;
   removeLifeGoal: (id: string) => void;
   addObjective: (goalId: string, name: string) => void;
@@ -275,6 +345,75 @@ export const useStore = create<State>()(
       dailyMissionCompleted: null,
       onboarded: false,
       lifeGoals: [],
+      books: [],
+      readingSessions: [],
+      readingGoals: [],
+
+      addBook: (b) => {
+        const now = Date.now();
+        const book: Book = {
+          author: "",
+          category: "",
+          totalPages: 0,
+          currentPage: 0,
+          status: "quero-ler",
+          tags: [],
+          logs: [],
+          ...b,
+          id: genId(),
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((s) => ({ books: [...s.books, book] }));
+        return book;
+      },
+
+      updateBook: (id, patch) =>
+        set((s) => ({
+          books: s.books.map((b) => (b.id === id ? { ...b, ...patch, updatedAt: Date.now() } : b)),
+        })),
+
+      removeBook: (id) =>
+        set((s) => ({
+          books: s.books.filter((b) => b.id !== id),
+          readingSessions: s.readingSessions.filter((r) => r.bookId !== id),
+        })),
+
+      toggleBookFavorite: (id) =>
+        set((s) => ({
+          books: s.books.map((b) => (b.id === id ? { ...b, favorite: !b.favorite, updatedAt: Date.now() } : b)),
+        })),
+
+      logReadingProgress: (id, page) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== id) return b;
+            const p = Math.max(0, b.totalPages ? Math.min(page, b.totalPages) : page);
+            const done = b.totalPages > 0 && p >= b.totalPages;
+            return {
+              ...b,
+              currentPage: p,
+              status: done ? "concluido" : b.status === "quero-ler" ? "lendo" : b.status,
+              endDate: done ? (b.endDate ?? todayKey()) : b.endDate,
+              startDate: b.startDate ?? todayKey(),
+              logs: [...b.logs, { id: genId(), date: todayKey(), page: p, at: Date.now() }],
+              updatedAt: Date.now(),
+            };
+          }),
+        })),
+
+      addReadingSession: (s0) =>
+        set((s) => ({ readingSessions: [...s.readingSessions, { ...s0, id: genId() }] })),
+
+      removeReadingSession: (id) =>
+        set((s) => ({ readingSessions: s.readingSessions.filter((r) => r.id !== id) })),
+
+      addReadingGoal: (g) =>
+        set((s) => ({ readingGoals: [...s.readingGoals, { ...g, id: genId(), createdAt: Date.now() }] })),
+
+      removeReadingGoal: (id) =>
+        set((s) => ({ readingGoals: s.readingGoals.filter((g) => g.id !== id) })),
+
 
       addLifeGoal: (g) => {
         const goal: LifeGoal = {
@@ -606,6 +745,10 @@ export const useStore = create<State>()(
           dailyMissionCompleted: null,
           onboarded: false,
           lifeGoals: [],
+          books: [],
+          readingSessions: [],
+          readingGoals: [],
+
 
         }),
     }),
@@ -734,4 +877,121 @@ export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: Completed
   const unlinkedToday = tasks.filter((t) => !t.goalId && !t.archived).length;
 
   return { rows, mostAttention, neglected, unlinkedToday };
+};
+
+// ============================================================
+// Leitura — helpers
+// ============================================================
+
+export const bookStatusLabel: Record<BookStatus, string> = {
+  "quero-ler": "Quero Ler",
+  lendo: "Lendo",
+  concluido: "Concluído",
+};
+
+export const bookProgress = (b: Book) =>
+  b.totalPages > 0 ? Math.max(0, Math.min(100, Math.round((b.currentPage / b.totalPages) * 100))) : 0;
+
+export const readingGoalLabel: Record<ReadingGoalKind, string> = {
+  "livros-ano": "livros por ano",
+  "paginas-dia": "páginas por dia",
+  "minutos-dia": "minutos por dia",
+  "horas-semana": "horas por semana",
+};
+
+const startOfWeekKey = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay());
+  return dateKey(d);
+};
+
+export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
+  const today = dateKey();
+  const week = startOfWeekKey();
+  const monthPrefix = today.slice(0, 7);
+
+  const minutes = (list: ReadingSession[]) => list.reduce((a, s) => a + s.minutes, 0);
+  const todayMinutes = minutes(sessions.filter((s) => s.date === today));
+  const weekMinutes = minutes(sessions.filter((s) => s.date >= week));
+  const monthMinutes = minutes(sessions.filter((s) => s.date.startsWith(monthPrefix)));
+  const totalMinutes = minutes(sessions);
+
+  const completed = books.filter((b) => b.status === "concluido");
+  const reading = books.filter((b) => b.status === "lendo");
+  const wishlist = books.filter((b) => b.status === "quero-ler");
+
+  const pagesRead = books.reduce(
+    (a, b) => a + (b.status === "concluido" ? b.totalPages || b.currentPage : b.currentPage),
+    0,
+  );
+
+  // Páginas por dia (baseado nos logs)
+  const pagesByDay = new Map<string, number>();
+  for (const b of books) {
+    let prev = 0;
+    for (const l of [...b.logs].sort((x, y) => x.at - y.at)) {
+      const delta = Math.max(0, l.page - prev);
+      prev = l.page;
+      pagesByDay.set(l.date, (pagesByDay.get(l.date) ?? 0) + delta);
+    }
+  }
+  const dayCount = Math.max(pagesByDay.size, 1);
+  const avgPagesPerDay = Math.round([...pagesByDay.values()].reduce((a, v) => a + v, 0) / dayCount);
+  const todayPages = pagesByDay.get(today) ?? 0;
+
+  const avgSessionMinutes = sessions.length ? Math.round(totalMinutes / sessions.length) : 0;
+
+  // Streak de dias lendo (sessão ou log)
+  const activeDays = new Set<string>([...sessions.map((s) => s.date), ...pagesByDay.keys()]);
+  let streak = 0;
+  const cursor = new Date();
+  if (!activeDays.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  while (activeDays.has(dateKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  const countBy = (vals: string[]) => {
+    const m = new Map<string, number>();
+    for (const v of vals) if (v.trim()) m.set(v, (m.get(v) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  };
+  const topCategories = countBy(books.map((b) => b.category));
+  const topAuthors = countBy(books.map((b) => b.author));
+
+  const booksThisYear = completed.filter((b) => (b.endDate ?? "").startsWith(String(new Date().getFullYear()))).length;
+
+  return {
+    todayMinutes,
+    weekMinutes,
+    monthMinutes,
+    totalMinutes,
+    completed: completed.length,
+    reading: reading.length,
+    wishlist: wishlist.length,
+    pagesRead,
+    avgPagesPerDay,
+    todayPages,
+    avgSessionMinutes,
+    streak,
+    topCategories,
+    topAuthors,
+    booksThisYear,
+  };
+};
+
+export const readingGoalProgress = (
+  g: ReadingGoal,
+  stats: ReturnType<typeof readingStats>,
+) => {
+  const current =
+    g.kind === "livros-ano"
+      ? stats.booksThisYear
+      : g.kind === "paginas-dia"
+        ? stats.todayPages
+        : g.kind === "minutos-dia"
+          ? stats.todayMinutes
+          : Math.round((stats.weekMinutes / 60) * 10) / 10;
+  const pct = g.target > 0 ? Math.min(100, Math.round((current / g.target) * 100)) : 0;
+  return { current, pct };
 };

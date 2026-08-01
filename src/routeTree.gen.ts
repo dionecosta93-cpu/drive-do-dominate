@@ -20,9 +20,14 @@ import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
+import { Route as AuthenticatedReadingIndexRouteImport } from './routes/_authenticated/reading.index'
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authenticated/calendar.index'
 import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
+import { Route as AuthenticatedReadingStatsRouteImport } from './routes/_authenticated/reading.stats'
+import { Route as AuthenticatedReadingNewRouteImport } from './routes/_authenticated/reading.new'
+import { Route as AuthenticatedReadingGoalsRouteImport } from './routes/_authenticated/reading.goals'
+import { Route as AuthenticatedReadingIdRouteImport } from './routes/_authenticated/reading.$id'
 import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
 import { Route as AuthenticatedGoalsImpactRouteImport } from './routes/_authenticated/goals.impact'
 import { Route as AuthenticatedGoalsAssistantRouteImport } from './routes/_authenticated/goals.assistant'
@@ -90,6 +95,12 @@ const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   path: '/tasks/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReadingIndexRoute =
+  AuthenticatedReadingIndexRouteImport.update({
+    id: '/reading/',
+    path: '/reading/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedGoalsIndexRoute = AuthenticatedGoalsIndexRouteImport.update({
   id: '/goals/',
   path: '/goals/',
@@ -104,6 +115,28 @@ const AuthenticatedCalendarIndexRoute =
 const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
   id: '/tasks/new',
   path: '/tasks/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReadingStatsRoute =
+  AuthenticatedReadingStatsRouteImport.update({
+    id: '/reading/stats',
+    path: '/reading/stats',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReadingNewRoute = AuthenticatedReadingNewRouteImport.update({
+  id: '/reading/new',
+  path: '/reading/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReadingGoalsRoute =
+  AuthenticatedReadingGoalsRouteImport.update({
+    id: '/reading/goals',
+    path: '/reading/goals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReadingIdRoute = AuthenticatedReadingIdRouteImport.update({
+  id: '/reading/$id',
+  path: '/reading/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
@@ -190,9 +223,14 @@ export interface FileRoutesByFullPath {
   '/goals/assistant': typeof AuthenticatedGoalsAssistantRoute
   '/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/reading/$id': typeof AuthenticatedReadingIdRoute
+  '/reading/goals': typeof AuthenticatedReadingGoalsRoute
+  '/reading/new': typeof AuthenticatedReadingNewRoute
+  '/reading/stats': typeof AuthenticatedReadingStatsRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
+  '/reading/': typeof AuthenticatedReadingIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
   '/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
@@ -215,9 +253,14 @@ export interface FileRoutesByTo {
   '/goals/assistant': typeof AuthenticatedGoalsAssistantRoute
   '/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/reading/$id': typeof AuthenticatedReadingIdRoute
+  '/reading/goals': typeof AuthenticatedReadingGoalsRoute
+  '/reading/new': typeof AuthenticatedReadingNewRoute
+  '/reading/stats': typeof AuthenticatedReadingStatsRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar': typeof AuthenticatedCalendarIndexRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
+  '/reading': typeof AuthenticatedReadingIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
   '/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
@@ -243,9 +286,14 @@ export interface FileRoutesById {
   '/_authenticated/goals/assistant': typeof AuthenticatedGoalsAssistantRoute
   '/_authenticated/goals/impact': typeof AuthenticatedGoalsImpactRoute
   '/_authenticated/goals/new': typeof AuthenticatedGoalsNewRoute
+  '/_authenticated/reading/$id': typeof AuthenticatedReadingIdRoute
+  '/_authenticated/reading/goals': typeof AuthenticatedReadingGoalsRoute
+  '/_authenticated/reading/new': typeof AuthenticatedReadingNewRoute
+  '/_authenticated/reading/stats': typeof AuthenticatedReadingStatsRoute
   '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
   '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
+  '/_authenticated/reading/': typeof AuthenticatedReadingIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
   '/_authenticated/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
@@ -271,9 +319,14 @@ export interface FileRouteTypes {
     | '/goals/assistant'
     | '/goals/impact'
     | '/goals/new'
+    | '/reading/$id'
+    | '/reading/goals'
+    | '/reading/new'
+    | '/reading/stats'
     | '/tasks/new'
     | '/calendar/'
     | '/goals/'
+    | '/reading/'
     | '/tasks/'
     | '/calendar/day/$date'
     | '/tasks/$id/edit'
@@ -296,9 +349,14 @@ export interface FileRouteTypes {
     | '/goals/assistant'
     | '/goals/impact'
     | '/goals/new'
+    | '/reading/$id'
+    | '/reading/goals'
+    | '/reading/new'
+    | '/reading/stats'
     | '/tasks/new'
     | '/calendar'
     | '/goals'
+    | '/reading'
     | '/tasks'
     | '/calendar/day/$date'
     | '/tasks/$id/edit'
@@ -323,9 +381,14 @@ export interface FileRouteTypes {
     | '/_authenticated/goals/assistant'
     | '/_authenticated/goals/impact'
     | '/_authenticated/goals/new'
+    | '/_authenticated/reading/$id'
+    | '/_authenticated/reading/goals'
+    | '/_authenticated/reading/new'
+    | '/_authenticated/reading/stats'
     | '/_authenticated/tasks/new'
     | '/_authenticated/calendar/'
     | '/_authenticated/goals/'
+    | '/_authenticated/reading/'
     | '/_authenticated/tasks/'
     | '/_authenticated/calendar/day/$date'
     | '/_authenticated/tasks/$id/edit'
@@ -416,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reading/': {
+      id: '/_authenticated/reading/'
+      path: '/reading'
+      fullPath: '/reading/'
+      preLoaderRoute: typeof AuthenticatedReadingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/goals/': {
       id: '/_authenticated/goals/'
       path: '/goals'
@@ -435,6 +505,34 @@ declare module '@tanstack/react-router' {
       path: '/tasks/new'
       fullPath: '/tasks/new'
       preLoaderRoute: typeof AuthenticatedTasksNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/stats': {
+      id: '/_authenticated/reading/stats'
+      path: '/reading/stats'
+      fullPath: '/reading/stats'
+      preLoaderRoute: typeof AuthenticatedReadingStatsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/new': {
+      id: '/_authenticated/reading/new'
+      path: '/reading/new'
+      fullPath: '/reading/new'
+      preLoaderRoute: typeof AuthenticatedReadingNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/goals': {
+      id: '/_authenticated/reading/goals'
+      path: '/reading/goals'
+      fullPath: '/reading/goals'
+      preLoaderRoute: typeof AuthenticatedReadingGoalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/$id': {
+      id: '/_authenticated/reading/$id'
+      path: '/reading/$id'
+      fullPath: '/reading/$id'
+      preLoaderRoute: typeof AuthenticatedReadingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/goals/new': {
@@ -553,8 +651,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGoalsAssistantRoute: typeof AuthenticatedGoalsAssistantRoute
   AuthenticatedGoalsImpactRoute: typeof AuthenticatedGoalsImpactRoute
   AuthenticatedGoalsNewRoute: typeof AuthenticatedGoalsNewRoute
+  AuthenticatedReadingIdRoute: typeof AuthenticatedReadingIdRoute
+  AuthenticatedReadingGoalsRoute: typeof AuthenticatedReadingGoalsRoute
+  AuthenticatedReadingNewRoute: typeof AuthenticatedReadingNewRoute
+  AuthenticatedReadingStatsRoute: typeof AuthenticatedReadingStatsRoute
   AuthenticatedTasksNewRoute: typeof AuthenticatedTasksNewRoute
   AuthenticatedGoalsIndexRoute: typeof AuthenticatedGoalsIndexRoute
+  AuthenticatedReadingIndexRoute: typeof AuthenticatedReadingIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedTasksIdEditRoute: typeof AuthenticatedTasksIdEditRoute
 }
@@ -572,8 +675,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGoalsAssistantRoute: AuthenticatedGoalsAssistantRoute,
   AuthenticatedGoalsImpactRoute: AuthenticatedGoalsImpactRoute,
   AuthenticatedGoalsNewRoute: AuthenticatedGoalsNewRoute,
+  AuthenticatedReadingIdRoute: AuthenticatedReadingIdRoute,
+  AuthenticatedReadingGoalsRoute: AuthenticatedReadingGoalsRoute,
+  AuthenticatedReadingNewRoute: AuthenticatedReadingNewRoute,
+  AuthenticatedReadingStatsRoute: AuthenticatedReadingStatsRoute,
   AuthenticatedTasksNewRoute: AuthenticatedTasksNewRoute,
   AuthenticatedGoalsIndexRoute: AuthenticatedGoalsIndexRoute,
+  AuthenticatedReadingIndexRoute: AuthenticatedReadingIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedTasksIdEditRoute: AuthenticatedTasksIdEditRoute,
 }
