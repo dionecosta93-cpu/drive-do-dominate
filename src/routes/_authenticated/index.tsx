@@ -156,7 +156,35 @@ function Dashboard() {
         </p>
       </section>
 
+      {/* Disciplina */}
+      <div className="mb-6 animate-rise" style={{ animationDelay: "70ms" }}>
+        <DisciplineBar />
+      </div>
+
+      {/* Motivação inteligente */}
+      {nudges.length > 0 && (
+        <div className="mb-6 space-y-2 animate-rise" style={{ animationDelay: "80ms" }}>
+          {nudges.map((n) => (
+            <p key={n} className="text-xs bg-warning/10 border border-warning/25 text-warning rounded-xl px-4 py-3 leading-snug">
+              {n}
+            </p>
+          ))}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 mb-6 animate-rise" style={{ animationDelay: "85ms" }}>
+        <Link to="/missions" className="bg-surface border border-border rounded-2xl p-4">
+          <p className="text-sm font-bold mb-0.5">Missões</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold">Diárias e desafios</p>
+        </Link>
+        <Link to="/reports" className="bg-surface border border-border rounded-2xl p-4">
+          <p className="text-sm font-bold mb-0.5">Relatórios IA</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold">Padrões e sugestões</p>
+        </Link>
+      </div>
+
       {/* Devocional do dia */}
+
       <Link
         to="/devotional"
         className="block mb-6 rounded-2xl border border-info/30 bg-info/5 p-4 animate-rise"
