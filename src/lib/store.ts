@@ -1,5 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { evaluateAchievements, type AchievementStats } from "@/lib/achievements";
+import {
+  clampDiscipline,
+  disciplinePenalty,
+  disciplinePoints,
+  EMPTY_DAY_PENALTY,
+} from "@/lib/discipline";
 
 export type Priority = "baixa" | "media" | "alta";
 export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude" | "familia" | "espiritual";
@@ -243,6 +250,28 @@ export interface Book {
   updatedAt: number;
 }
 
+export interface DisciplineEntry {
+  id: string;
+  date: string;
+  delta: number;
+  reason: string;
+  at: number;
+}
+
+export type ChallengeKind = "diario" | "semanal" | "mensal" | "anual" | "pessoal";
+
+export interface Challenge {
+  id: string;
+  name: string;
+  kind: ChallengeKind;
+  target?: number;
+  deadline?: string;
+  done?: boolean;
+  createdAt: number;
+}
+
+
+
 interface State {
   userName: string;
   tasks: Task[];
@@ -260,6 +289,26 @@ interface State {
   books: Book[];
   readingSessions: ReadingSession[];
   readingGoals: ReadingGoal[];
+
+  // Disciplina / gamificação
+  discipline: number;
+  disciplineLog: DisciplineEntry[];
+  dailyMinimum: number;
+  lastPenaltyDate: string | null;
+  claimedMissions: string[];
+  challenges: Challenge[];
+  recentUnlocks: string[];
+
+  addDiscipline: (delta: number, reason: string) => void;
+  setDailyMinimum: (n: number) => void;
+  claimMission: (id: string) => void;
+  addChallenge: (c: Omit<Challenge, "id" | "createdAt" | "done">) => void;
+  toggleChallenge: (id: string) => void;
+  removeChallenge: (id: string) => void;
+  clearRecentUnlocks: () => void;
+  syncAchievements: () => string[];
+
+
 
   addBook: (b: Partial<Book> & { title: string }) => Book;
   updateBook: (id: string, patch: Partial<Book>) => void;
@@ -348,6 +397,80 @@ export const useStore = create<State>()(
       books: [],
       readingSessions: [],
       readingGoals: [],
+
+      discipline: 0,
+      disciplineLog: [],
+      dailyMinimum: 1,
+      lastPenaltyDate: null,
+      claimedMissions: [],
+      challenges: [],
+      recentUnlocks: [],
+
+      addDiscipline: (delta, reason) =>
+        set((s) => ({
+          discipline: clampDiscipline(s.discipline + delta),
+          disciplineLog: [
+            ...s.disciplineLog.slice(-400),
+            { id: genId(), date: todayKey(), delta, reason, at: Date.now() },
+          ],
+        })),
+
+      setDailyMinimum: (n) => set({ dailyMinimum: Math.max(1, Math.round(n)) }),
+
+      claimMission: (id) =>
+        set((s) => (s.claimedMissions.includes(id) ? s : { claimedMissions: [...s.claimedMissions, id] })),
+
+      addChallenge: (c) =>
+        set((s) => ({ challenges: [...s.challenges, { ...c, id: genId(), createdAt: Date.now() }] })),
+
+      toggleChallenge: (id) =>
+        set((s) => ({ challenges: s.challenges.map((c) => (c.id === id ? { ...c, done: !c.done } : c)) })),
+
+      removeChallenge: (id) => set((s) => ({ challenges: s.challenges.filter((c) => c.id !== id) })),
+
+      clearRecentUnlocks: () => set({ recentUnlocks: [] }),
+
+      syncAchievements: () => {
+        const s = get();
+        const hoursByCategory: Record<string, number> = {};
+        let totalHours = 0;
+        for (const sess of s.sessions) {
+          const h = sess.spentSeconds / 3600;
+          totalHours += h;
+          hoursByCategory[sess.category] = (hoursByCategory[sess.category] ?? 0) + h;
+        }
+        const readingHours = s.readingSessions.reduce((a, r) => a + r.minutes, 0) / 60;
+        const dates = new Set(s.sessions.map((x) => x.scheduledDate ?? dateKey(new Date(x.completedAt))));
+        let perfectDays = 0;
+        for (const d of dates) {
+          const st = dayStats(s.tasks, s.sessions, d);
+          if (st.total > 0 && st.pct === 100) perfectDays += 1;
+        }
+        const stats: AchievementStats = {
+          sessions: s.sessions.length,
+          streak: s.streak,
+          longestStreak: s.longestStreak,
+          discipline: s.discipline,
+          xp: s.xp,
+          level: levelFromXp(s.xp).level,
+          totalHours,
+          hoursByCategory,
+          readingHours,
+          noPauseSession: s.sessions.some((x) => x.pauses === 0),
+          earlyFinish: s.sessions.some((x) => x.spentSeconds < x.estimatedMinutes * 60),
+          perfectDays,
+        };
+        const newIds = evaluateAchievements(stats, s.achievements.map((a) => a.id));
+        if (newIds.length) {
+          set({
+            achievements: [...s.achievements, ...newIds.map((id) => ({ id, unlockedAt: Date.now() }))],
+            recentUnlocks: [...s.recentUnlocks, ...newIds],
+          });
+        }
+        return newIds;
+      },
+
+
 
       addBook: (b) => {
         const now = Date.now();
@@ -635,6 +758,8 @@ export const useStore = create<State>()(
               : t,
           ),
         });
+        get().addDiscipline(disciplinePoints(session.difficulty), `Concluiu "${session.taskName}"`);
+        get().syncAchievements();
         return session;
       },
 
@@ -683,6 +808,8 @@ export const useStore = create<State>()(
               : t,
           ),
         }));
+        get().addDiscipline(disciplinePoints(task.difficulty), `Concluiu "${task.name}"`);
+        get().syncAchievements();
         return session;
       },
 
@@ -728,6 +855,36 @@ export const useStore = create<State>()(
         } else {
           set({ tasks: rolledTasks });
         }
+
+        // ---- Penalidades de disciplina por dias passados sem cumprir ----
+        const after = get();
+        const start = after.lastPenaltyDate ?? dateKey(new Date(Date.now() - 86400000));
+        const cursor = parseDate(start);
+        if (after.lastPenaltyDate) cursor.setDate(cursor.getDate() + 1);
+        let penalty = 0;
+        const reasons: string[] = [];
+        let guard = 0;
+        while (dateKey(cursor) < today && guard < 60) {
+          guard += 1;
+          const d = dateKey(cursor);
+          const dayTasks = todaysTasks(after.tasks, d);
+          const doneCount = dayTasks.filter((t) => taskCompletedOn(t.id, after.sessions, d)).length;
+          for (const t of dayTasks) {
+            if (!taskCompletedOn(t.id, after.sessions, d) && t.priority === "alta") {
+              penalty += disciplinePenalty(t.difficulty);
+            }
+          }
+          if (dayTasks.length > 0 && doneCount === 0) {
+            penalty += EMPTY_DAY_PENALTY;
+            reasons.push(`Dia sem nenhuma conclusão (${d})`);
+          }
+          cursor.setDate(cursor.getDate() + 1);
+        }
+        if (penalty > 0) {
+          get().addDiscipline(-penalty, reasons[0] ?? "Tarefas obrigatórias não concluídas");
+        }
+        if (after.lastPenaltyDate !== today) set({ lastPenaltyDate: today });
+        get().syncAchievements();
       },
 
       reset: () =>
@@ -748,8 +905,13 @@ export const useStore = create<State>()(
           books: [],
           readingSessions: [],
           readingGoals: [],
-
-
+          discipline: 0,
+          disciplineLog: [],
+          dailyMinimum: 1,
+          lastPenaltyDate: null,
+          claimedMissions: [],
+          challenges: [],
+          recentUnlocks: [],
         }),
     }),
     { name: "kairos-store-v1" },

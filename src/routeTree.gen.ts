@@ -13,9 +13,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiAiTaskRouteImport } from './routes/api/ai-task'
 import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
+import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
 import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authenticated/devotional'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
@@ -59,6 +62,11 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
   path: '/api/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiTaskRoute = ApiAiTaskRouteImport.update({
+  id: '/api/ai-task',
+  path: '/api/ai-task',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
   id: '/vault',
   path: '/vault',
@@ -69,9 +77,19 @@ const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
   id: '/motivation',
   path: '/motivation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDevotionalRoute = AuthenticatedDevotionalRouteImport.update({
@@ -210,9 +228,12 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/calendar': typeof AuthenticatedCalendarRouteWithChildren
   '/devotional': typeof AuthenticatedDevotionalRoute
+  '/missions': typeof AuthenticatedMissionsRoute
   '/motivation': typeof AuthenticatedMotivationRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
+  '/api/ai-task': typeof ApiAiTaskRoute
   '/api/tts': typeof ApiTtsRoute
   '/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
   '/calendar/history': typeof AuthenticatedCalendarHistoryRoute
@@ -239,9 +260,12 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/devotional': typeof AuthenticatedDevotionalRoute
+  '/missions': typeof AuthenticatedMissionsRoute
   '/motivation': typeof AuthenticatedMotivationRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
+  '/api/ai-task': typeof ApiAiTaskRoute
   '/api/tts': typeof ApiTtsRoute
   '/': typeof AuthenticatedIndexRoute
   '/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
@@ -272,9 +296,12 @@ export interface FileRoutesById {
   '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRouteWithChildren
   '/_authenticated/devotional': typeof AuthenticatedDevotionalRoute
+  '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/motivation': typeof AuthenticatedMotivationRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
+  '/api/ai-task': typeof ApiAiTaskRoute
   '/api/tts': typeof ApiTtsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
@@ -306,9 +333,12 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/calendar'
     | '/devotional'
+    | '/missions'
     | '/motivation'
+    | '/reports'
     | '/stats'
     | '/vault'
+    | '/api/ai-task'
     | '/api/tts'
     | '/calendar/archived'
     | '/calendar/history'
@@ -335,9 +365,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/achievements'
     | '/devotional'
+    | '/missions'
     | '/motivation'
+    | '/reports'
     | '/stats'
     | '/vault'
+    | '/api/ai-task'
     | '/api/tts'
     | '/'
     | '/calendar/archived'
@@ -367,9 +400,12 @@ export interface FileRouteTypes {
     | '/_authenticated/achievements'
     | '/_authenticated/calendar'
     | '/_authenticated/devotional'
+    | '/_authenticated/missions'
     | '/_authenticated/motivation'
+    | '/_authenticated/reports'
     | '/_authenticated/stats'
     | '/_authenticated/vault'
+    | '/api/ai-task'
     | '/api/tts'
     | '/_authenticated/'
     | '/_authenticated/calendar/archived'
@@ -397,6 +433,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiAiTaskRoute: typeof ApiAiTaskRoute
   ApiTtsRoute: typeof ApiTtsRoute
 }
 
@@ -430,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai-task': {
+      id: '/api/ai-task'
+      path: '/api/ai-task'
+      fullPath: '/api/ai-task'
+      preLoaderRoute: typeof ApiAiTaskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/vault': {
       id: '/_authenticated/vault'
       path: '/vault'
@@ -444,11 +488,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStatsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/motivation': {
       id: '/_authenticated/motivation'
       path: '/motivation'
       fullPath: '/motivation'
       preLoaderRoute: typeof AuthenticatedMotivationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/missions': {
+      id: '/_authenticated/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AuthenticatedMissionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/devotional': {
@@ -642,7 +700,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRouteWithChildren
   AuthenticatedDevotionalRoute: typeof AuthenticatedDevotionalRoute
+  AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedMotivationRoute: typeof AuthenticatedMotivationRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
   AuthenticatedVaultRoute: typeof AuthenticatedVaultRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -666,7 +726,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRouteWithChildren,
   AuthenticatedDevotionalRoute: AuthenticatedDevotionalRoute,
+  AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedMotivationRoute: AuthenticatedMotivationRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedStatsRoute: AuthenticatedStatsRoute,
   AuthenticatedVaultRoute: AuthenticatedVaultRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -692,6 +754,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiAiTaskRoute: ApiAiTaskRoute,
   ApiTtsRoute: ApiTtsRoute,
 }
 export const routeTree = rootRouteImport
