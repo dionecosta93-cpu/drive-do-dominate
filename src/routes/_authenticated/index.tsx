@@ -7,6 +7,8 @@ import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Penc
 import { devotionalOfTheDay } from "@/lib/devotional";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { DisciplineBar } from "@/components/discipline-bar";
+import { buildNudges } from "@/lib/analytics";
 
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -95,6 +97,7 @@ function Dashboard() {
 
   const nextTask = todayTasks.find((t) => !taskCompletedOn(t.id, sessions, todayKey));
   const todayDevotional = devotionalOfTheDay();
+  const nudges = useMemo(() => buildNudges(tasks, sessions, streak), [tasks, sessions, streak]);
 
 
 
