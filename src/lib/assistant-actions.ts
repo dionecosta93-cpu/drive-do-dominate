@@ -99,7 +99,7 @@ export function applyAssistantAction(action: AssistantAction): string {
       s.addLifeGoal({
         name,
         description: str(p, "description"),
-        category: "pessoal" as never,
+        category: "outro",
         priority: "media",
         targetDate: str(p, "deadline"),
       });
