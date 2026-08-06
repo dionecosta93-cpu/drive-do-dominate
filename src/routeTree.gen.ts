@@ -15,7 +15,6 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
-import { Route as ApiAiTaskRouteImport } from './routes/api/ai-task'
 import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
@@ -73,11 +72,6 @@ const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
 const ApiAssistantRoute = ApiAssistantRouteImport.update({
   id: '/api/assistant',
   path: '/api/assistant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiTaskRoute = ApiAiTaskRouteImport.update({
-  id: '/api/ai-task',
-  path: '/api/ai-task',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
@@ -252,7 +246,6 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
-  '/api/ai-task': typeof ApiAiTaskRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
@@ -287,7 +280,6 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
-  '/api/ai-task': typeof ApiAiTaskRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
@@ -326,7 +318,6 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
-  '/api/ai-task': typeof ApiAiTaskRoute
   '/api/assistant': typeof ApiAssistantRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/tts': typeof ApiTtsRoute
@@ -366,7 +357,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/stats'
     | '/vault'
-    | '/api/ai-task'
     | '/api/assistant'
     | '/api/transcribe'
     | '/api/tts'
@@ -401,7 +391,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/stats'
     | '/vault'
-    | '/api/ai-task'
     | '/api/assistant'
     | '/api/transcribe'
     | '/api/tts'
@@ -439,7 +428,6 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/stats'
     | '/_authenticated/vault'
-    | '/api/ai-task'
     | '/api/assistant'
     | '/api/transcribe'
     | '/api/tts'
@@ -469,7 +457,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ApiAiTaskRoute: typeof ApiAiTaskRoute
   ApiAssistantRoute: typeof ApiAssistantRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiTtsRoute: typeof ApiTtsRoute
@@ -517,13 +504,6 @@ declare module '@tanstack/react-router' {
       path: '/api/assistant'
       fullPath: '/api/assistant'
       preLoaderRoute: typeof ApiAssistantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai-task': {
-      id: '/api/ai-task'
-      path: '/api/ai-task'
-      fullPath: '/api/ai-task'
-      preLoaderRoute: typeof ApiAiTaskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/vault': {
@@ -815,7 +795,6 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ApiAiTaskRoute: ApiAiTaskRoute,
   ApiAssistantRoute: ApiAssistantRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   ApiTtsRoute: ApiTtsRoute,
