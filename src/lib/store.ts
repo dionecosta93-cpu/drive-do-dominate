@@ -269,6 +269,25 @@ export interface Challenge {
   done?: boolean;
   createdAt: number;
 }
+export type TransactionKind = "receita" | "despesa";
+
+export interface Transaction {
+  id: string;
+  kind: TransactionKind;
+  amount: number;
+  category: string;
+  description?: string;
+  date: string; // YYYY-MM-DD
+  createdAt: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  at: number;
+}
+
 
 
 
