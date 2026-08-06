@@ -947,7 +947,10 @@ export const useStore = create<State>()(
 
       reset: () =>
         set({
+          transactions: [],
+          assistantMessages: [],
           userName: "",
+
           tasks: [],
           completedToday: [],
           sessions: [],
