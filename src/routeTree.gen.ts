@@ -21,6 +21,7 @@ import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
 import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
+import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authenticated/devotional'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
@@ -102,6 +103,11 @@ const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
 const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDevotionalRoute = AuthenticatedDevotionalRouteImport.update({
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/calendar': typeof AuthenticatedCalendarRouteWithChildren
   '/devotional': typeof AuthenticatedDevotionalRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/motivation': typeof AuthenticatedMotivationRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/devotional': typeof AuthenticatedDevotionalRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/motivation': typeof AuthenticatedMotivationRoute
   '/reports': typeof AuthenticatedReportsRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRouteWithChildren
   '/_authenticated/devotional': typeof AuthenticatedDevotionalRoute
+  '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/motivation': typeof AuthenticatedMotivationRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/calendar'
     | '/devotional'
+    | '/finance'
     | '/missions'
     | '/motivation'
     | '/reports'
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/achievements'
     | '/devotional'
+    | '/finance'
     | '/missions'
     | '/motivation'
     | '/reports'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/_authenticated/achievements'
     | '/_authenticated/calendar'
     | '/_authenticated/devotional'
+    | '/_authenticated/finance'
     | '/_authenticated/missions'
     | '/_authenticated/motivation'
     | '/_authenticated/reports'
@@ -547,6 +559,13 @@ declare module '@tanstack/react-router' {
       path: '/missions'
       fullPath: '/missions'
       preLoaderRoute: typeof AuthenticatedMissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/finance': {
+      id: '/_authenticated/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/devotional': {
@@ -740,6 +759,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRouteWithChildren
   AuthenticatedDevotionalRoute: typeof AuthenticatedDevotionalRoute
+  AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedMotivationRoute: typeof AuthenticatedMotivationRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
@@ -766,6 +786,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRouteWithChildren,
   AuthenticatedDevotionalRoute: AuthenticatedDevotionalRoute,
+  AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedMotivationRoute: AuthenticatedMotivationRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
