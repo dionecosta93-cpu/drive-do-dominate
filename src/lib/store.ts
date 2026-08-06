@@ -435,6 +435,35 @@ export const useStore = create<State>()(
       challenges: [],
       recentUnlocks: [],
 
+      transactions: [],
+      assistantMessages: [],
+
+      addTransaction: (t) => {
+        const tx: Transaction = {
+          id: genId(),
+          kind: t.kind,
+          amount: Math.abs(Number(t.amount) || 0),
+          category: t.category || "outros",
+          description: t.description,
+          date: t.date || todayKey(),
+          createdAt: Date.now(),
+        };
+        set((s) => ({ transactions: [tx, ...s.transactions] }));
+        return tx;
+      },
+      updateTransaction: (id, patch) =>
+        set((s) => ({ transactions: s.transactions.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+      removeTransaction: (id) => set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) })),
+
+      addChatMessage: (m) => {
+        const msg: ChatMessage = { id: genId(), role: m.role, content: m.content, at: Date.now() };
+        set((s) => ({ assistantMessages: [...s.assistantMessages.slice(-120), msg] }));
+        return msg;
+      },
+      clearChat: () => set({ assistantMessages: [] }),
+
+
+
       addDiscipline: (delta, reason) =>
         set((s) => ({
           discipline: clampDiscipline(s.discipline + delta),
