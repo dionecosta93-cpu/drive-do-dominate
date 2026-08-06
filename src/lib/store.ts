@@ -269,6 +269,25 @@ export interface Challenge {
   done?: boolean;
   createdAt: number;
 }
+export type TransactionKind = "receita" | "despesa";
+
+export interface Transaction {
+  id: string;
+  kind: TransactionKind;
+  amount: number;
+  category: string;
+  description?: string;
+  date: string; // YYYY-MM-DD
+  createdAt: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  at: number;
+}
+
 
 
 
@@ -298,6 +317,16 @@ interface State {
   claimedMissions: string[];
   challenges: Challenge[];
   recentUnlocks: string[];
+
+  // Finanças + Assistente IA
+  transactions: Transaction[];
+  assistantMessages: ChatMessage[];
+  addTransaction: (t: Omit<Transaction, "id" | "createdAt"> & { date?: string }) => Transaction;
+  updateTransaction: (id: string, patch: Partial<Transaction>) => void;
+  removeTransaction: (id: string) => void;
+  addChatMessage: (m: Omit<ChatMessage, "id" | "at">) => ChatMessage;
+  clearChat: () => void;
+
 
   addDiscipline: (delta: number, reason: string) => void;
   setDailyMinimum: (n: number) => void;
@@ -405,6 +434,35 @@ export const useStore = create<State>()(
       claimedMissions: [],
       challenges: [],
       recentUnlocks: [],
+
+      transactions: [],
+      assistantMessages: [],
+
+      addTransaction: (t) => {
+        const tx: Transaction = {
+          id: genId(),
+          kind: t.kind,
+          amount: Math.abs(Number(t.amount) || 0),
+          category: t.category || "outros",
+          description: t.description,
+          date: t.date || todayKey(),
+          createdAt: Date.now(),
+        };
+        set((s) => ({ transactions: [tx, ...s.transactions] }));
+        return tx;
+      },
+      updateTransaction: (id, patch) =>
+        set((s) => ({ transactions: s.transactions.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+      removeTransaction: (id) => set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) })),
+
+      addChatMessage: (m) => {
+        const msg: ChatMessage = { id: genId(), role: m.role, content: m.content, at: Date.now() };
+        set((s) => ({ assistantMessages: [...s.assistantMessages.slice(-120), msg] }));
+        return msg;
+      },
+      clearChat: () => set({ assistantMessages: [] }),
+
+
 
       addDiscipline: (delta, reason) =>
         set((s) => ({
@@ -889,7 +947,10 @@ export const useStore = create<State>()(
 
       reset: () =>
         set({
+          transactions: [],
+          assistantMessages: [],
           userName: "",
+
           tasks: [],
           completedToday: [],
           sessions: [],

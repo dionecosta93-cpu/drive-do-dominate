@@ -2,7 +2,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { Category, Priority, Repetition, Task } from "@/lib/store";
 import { useStore } from "@/lib/store";
-import { VoiceTask, type ParsedTask } from "@/components/voice-task";
 
 const categories: Category[] = ["treino", "trabalho", "estudo", "vida", "negocios", "saude", "familia", "espiritual"];
 const priorities: Priority[] = ["baixa", "media", "alta"];
@@ -130,37 +129,8 @@ export function TaskForm({
 
   const dateDisabled = repetition !== "nenhuma";
 
-  const applyVoice = (parsed: ParsedTask) => {
-    const t = (parsed.task ?? {}) as Record<string, unknown>;
-    const str = (k: string) => (typeof t[k] === "string" ? (t[k] as string) : undefined);
-    const num = (k: string) => (typeof t[k] === "number" ? (t[k] as number) : undefined);
-
-    if (str("name")) setName(str("name")!);
-    if (str("description")) setDescription(str("description")!);
-    if (str("category") && categories.includes(str("category") as Category)) setCategory(str("category") as Category);
-    if (str("priority") && priorities.includes(str("priority") as Priority)) setPriority(str("priority") as Priority);
-    if (str("time")) setTime(str("time")!);
-    if (str("endTime")) setEndTime(str("endTime")!);
-    if (num("estimatedMinutes")) setEstimated(num("estimatedMinutes")!);
-    if (num("maxMinutes")) setMax(num("maxMinutes")!);
-    if (num("difficulty")) setDifficulty(Math.min(10, Math.max(1, num("difficulty")!)));
-    if (str("repetition") && reps.includes(str("repetition") as Repetition)) setRepetition(str("repetition") as Repetition);
-    if (Array.isArray(t["weekdays"])) setWeekdays((t["weekdays"] as number[]).filter((d) => d >= 0 && d <= 6));
-    if (str("scheduledDate")) setScheduledDate(str("scheduledDate")!);
-    if (str("startDate")) setStartDate(str("startDate")!);
-    if (str("endDate")) setEndDate(str("endDate")!);
-    if (num("alarmMinutesBefore")) setAlarmMinutesBefore(num("alarmMinutesBefore")!);
-    if (str("notes")) setNotes(str("notes")!);
-    if (str("motivation")) setMotivation(str("motivation")!);
-    if (str("color")) setColor(str("color")!);
-    if (parsed.changes?.time) setTime(parsed.changes.time);
-    if (parsed.changes?.date) setScheduledDate(parsed.changes.date);
-  };
-
   return (
     <div className="space-y-5">
-      <VoiceTask onApply={applyVoice} />
-
       <Field label="Nome">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Treino de força"
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-discipline" />

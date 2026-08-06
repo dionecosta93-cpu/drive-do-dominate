@@ -25,6 +25,8 @@ const SYNC_KEYS = [
   "lastPenaltyDate",
   "claimedMissions",
   "challenges",
+  "transactions",
+  "assistantMessages",
 
 ] as const;
 
