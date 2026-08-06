@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
 import { Route as ApiAiTaskRouteImport } from './routes/api/ai-task'
 import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
@@ -60,6 +61,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const ApiTtsRoute = ApiTtsRouteImport.update({
   id: '/api/tts',
   path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiTaskRoute = ApiAiTaskRouteImport.update({
@@ -234,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
   '/api/ai-task': typeof ApiAiTaskRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/tts': typeof ApiTtsRoute
   '/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
   '/calendar/history': typeof AuthenticatedCalendarHistoryRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
   '/api/ai-task': typeof ApiAiTaskRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/tts': typeof ApiTtsRoute
   '/': typeof AuthenticatedIndexRoute
   '/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
@@ -302,6 +310,7 @@ export interface FileRoutesById {
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
   '/api/ai-task': typeof ApiAiTaskRoute
+  '/api/assistant': typeof ApiAssistantRoute
   '/api/tts': typeof ApiTtsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/calendar/archived': typeof AuthenticatedCalendarArchivedRoute
@@ -339,6 +348,7 @@ export interface FileRouteTypes {
     | '/stats'
     | '/vault'
     | '/api/ai-task'
+    | '/api/assistant'
     | '/api/tts'
     | '/calendar/archived'
     | '/calendar/history'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/stats'
     | '/vault'
     | '/api/ai-task'
+    | '/api/assistant'
     | '/api/tts'
     | '/'
     | '/calendar/archived'
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/_authenticated/stats'
     | '/_authenticated/vault'
     | '/api/ai-task'
+    | '/api/assistant'
     | '/api/tts'
     | '/_authenticated/'
     | '/_authenticated/calendar/archived'
@@ -434,6 +446,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiAiTaskRoute: typeof ApiAiTaskRoute
+  ApiAssistantRoute: typeof ApiAssistantRoute
   ApiTtsRoute: typeof ApiTtsRoute
 }
 
@@ -465,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/api/tts'
       fullPath: '/api/tts'
       preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai-task': {
@@ -755,18 +775,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiAiTaskRoute: ApiAiTaskRoute,
+  ApiAssistantRoute: ApiAssistantRoute,
   ApiTtsRoute: ApiTtsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
