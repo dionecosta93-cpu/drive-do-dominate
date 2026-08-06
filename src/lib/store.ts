@@ -299,6 +299,16 @@ interface State {
   challenges: Challenge[];
   recentUnlocks: string[];
 
+  // Finanças + Assistente IA
+  transactions: Transaction[];
+  assistantMessages: ChatMessage[];
+  addTransaction: (t: Omit<Transaction, "id" | "createdAt"> & { date?: string }) => Transaction;
+  updateTransaction: (id: string, patch: Partial<Transaction>) => void;
+  removeTransaction: (id: string) => void;
+  addChatMessage: (m: Omit<ChatMessage, "id" | "at">) => ChatMessage;
+  clearChat: () => void;
+
+
   addDiscipline: (delta: number, reason: string) => void;
   setDailyMinimum: (n: number) => void;
   claimMission: (id: string) => void;
