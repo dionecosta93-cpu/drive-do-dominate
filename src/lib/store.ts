@@ -197,12 +197,13 @@ export interface LifeGoal {
 // ============================================================
 // Leitura — tipos
 // ============================================================
-export type BookStatus = "quero-ler" | "lendo" | "concluido";
+export type BookStatus = "quero-ler" | "lendo" | "pausado" | "concluido";
 
 export interface ReadingLog {
   id: string;
   date: string; // YYYY-MM-DD
   page: number;
+  chapter?: number;
   at: number;
 }
 
@@ -216,7 +217,23 @@ export interface ReadingSession {
   pagesRead?: number;
 }
 
-export type ReadingGoalKind = "livros-ano" | "paginas-dia" | "minutos-dia" | "horas-semana";
+/** Diário de leitura — anotações/aprendizados por livro. */
+export interface ReadingNote {
+  id: string;
+  bookId: string;
+  date: string; // YYYY-MM-DD
+  text: string;
+  at: number;
+}
+
+export type ReadingGoalKind =
+  | "livros-ano"
+  | "paginas-dia"
+  | "minutos-dia"
+  | "horas-semana"
+  | "paginas-semana"
+  | "paginas-mes"
+  | "paginas-ano";
 
 export interface ReadingGoal {
   id: string;
@@ -228,14 +245,29 @@ export interface ReadingGoal {
 export interface Book {
   id: string;
   title: string;
+  subtitle?: string;
   author: string;
   category: string;
+  genre?: string;
+  publisher?: string;
+  publishedYear?: number;
+  language?: string;
+  isbn?: string;
+  synopsis?: string;
+  averageRating?: number; // nota média da obra (0-5)
+  estimatedMinutes?: number; // tempo médio estimado de leitura
   cover?: string;
   totalPages: number;
   currentPage: number;
+  totalChapters?: number;
+  currentChapter?: number;
+  dailyPageGoal?: number;
+  dailyMinutesGoal?: number;
+  targetDate?: string; // meta de conclusão
   startDate?: string;
   endDate?: string;
   status: BookStatus;
+  archived?: boolean;
   rating?: number; // 1-5
   favorite?: boolean;
   comments?: string;
