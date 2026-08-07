@@ -197,12 +197,13 @@ export interface LifeGoal {
 // ============================================================
 // Leitura — tipos
 // ============================================================
-export type BookStatus = "quero-ler" | "lendo" | "concluido";
+export type BookStatus = "quero-ler" | "lendo" | "pausado" | "concluido";
 
 export interface ReadingLog {
   id: string;
   date: string; // YYYY-MM-DD
   page: number;
+  chapter?: number;
   at: number;
 }
 
@@ -216,7 +217,23 @@ export interface ReadingSession {
   pagesRead?: number;
 }
 
-export type ReadingGoalKind = "livros-ano" | "paginas-dia" | "minutos-dia" | "horas-semana";
+/** Diário de leitura — anotações/aprendizados por livro. */
+export interface ReadingNote {
+  id: string;
+  bookId: string;
+  date: string; // YYYY-MM-DD
+  text: string;
+  at: number;
+}
+
+export type ReadingGoalKind =
+  | "livros-ano"
+  | "paginas-dia"
+  | "minutos-dia"
+  | "horas-semana"
+  | "paginas-semana"
+  | "paginas-mes"
+  | "paginas-ano";
 
 export interface ReadingGoal {
   id: string;
@@ -228,14 +245,29 @@ export interface ReadingGoal {
 export interface Book {
   id: string;
   title: string;
+  subtitle?: string;
   author: string;
   category: string;
+  genre?: string;
+  publisher?: string;
+  publishedYear?: number;
+  language?: string;
+  isbn?: string;
+  synopsis?: string;
+  averageRating?: number; // nota média da obra (0-5)
+  estimatedMinutes?: number; // tempo médio estimado de leitura
   cover?: string;
   totalPages: number;
   currentPage: number;
+  totalChapters?: number;
+  currentChapter?: number;
+  dailyPageGoal?: number;
+  dailyMinutesGoal?: number;
+  targetDate?: string; // meta de conclusão
   startDate?: string;
   endDate?: string;
   status: BookStatus;
+  archived?: boolean;
   rating?: number; // 1-5
   favorite?: boolean;
   comments?: string;
@@ -308,6 +340,7 @@ interface State {
   books: Book[];
   readingSessions: ReadingSession[];
   readingGoals: ReadingGoal[];
+  readingNotes: ReadingNote[];
 
   // Disciplina / gamificação
   discipline: number;
@@ -348,6 +381,17 @@ interface State {
   removeReadingSession: (id: string) => void;
   addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
   removeReadingGoal: (id: string) => void;
+  updateReadingGoal: (id: string, patch: Partial<ReadingGoal>) => void;
+  addReadingNote: (n: Omit<ReadingNote, "id" | "at"> & { date?: string }) => ReadingNote;
+  updateReadingNote: (id: string, text: string) => void;
+  removeReadingNote: (id: string) => void;
+  setBookStatus: (id: string, status: BookStatus) => void;
+  archiveBook: (id: string, restore?: boolean) => void;
+  restartBook: (id: string) => void;
+  updateReadingProgress: (
+    id: string,
+    v: { page?: number; chapter?: number; pagesReadToday?: number; minutes?: number; date?: string },
+  ) => void;
 
   addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
 
@@ -426,6 +470,7 @@ export const useStore = create<State>()(
       books: [],
       readingSessions: [],
       readingGoals: [],
+      readingNotes: [],
 
       discipline: 0,
       disciplineLog: [],
@@ -558,6 +603,7 @@ export const useStore = create<State>()(
         set((s) => ({
           books: s.books.filter((b) => b.id !== id),
           readingSessions: s.readingSessions.filter((r) => r.bookId !== id),
+          readingNotes: s.readingNotes.filter((n) => n.bookId !== id),
         })),
 
       toggleBookFavorite: (id) =>
@@ -574,13 +620,110 @@ export const useStore = create<State>()(
             return {
               ...b,
               currentPage: p,
-              status: done ? "concluido" : b.status === "quero-ler" ? "lendo" : b.status,
+              status: done ? "concluido" : b.status === "concluido" ? b.status : "lendo",
               endDate: done ? (b.endDate ?? todayKey()) : b.endDate,
               startDate: b.startDate ?? todayKey(),
               logs: [...b.logs, { id: genId(), date: todayKey(), page: p, at: Date.now() }],
               updatedAt: Date.now(),
             };
           }),
+        })),
+
+      /** Atualização rápida: página, capítulo, páginas lidas no dia e tempo de leitura. */
+      updateReadingProgress: (id, v) =>
+        set((s) => {
+          const date = v.date ?? todayKey();
+          const book = s.books.find((b) => b.id === id);
+          if (!book) return {};
+          const fromPages =
+            v.page !== undefined
+              ? v.page
+              : v.pagesReadToday !== undefined
+                ? book.currentPage + v.pagesReadToday
+                : book.currentPage;
+          const page = Math.max(0, book.totalPages ? Math.min(fromPages, book.totalPages) : fromPages);
+          const done = book.totalPages > 0 && page >= book.totalPages;
+          const changed = page !== book.currentPage || v.chapter !== undefined;
+          const updated: Book = {
+            ...book,
+            currentPage: page,
+            currentChapter: v.chapter ?? book.currentChapter,
+            startDate: book.startDate ?? date,
+            status: done ? "concluido" : book.status === "concluido" ? book.status : "lendo",
+            endDate: done ? (book.endDate ?? date) : book.endDate,
+            logs: changed
+              ? [...book.logs, { id: genId(), date, page, chapter: v.chapter, at: Date.now() }]
+              : book.logs,
+            updatedAt: Date.now(),
+          };
+          const minutes = v.minutes ?? 0;
+          const end = Date.now();
+          return {
+            books: s.books.map((b) => (b.id === id ? updated : b)),
+            readingSessions:
+              minutes > 0
+                ? [
+                    ...s.readingSessions,
+                    {
+                      id: genId(),
+                      bookId: id,
+                      date,
+                      startedAt: end - minutes * 60000,
+                      endedAt: end,
+                      minutes,
+                      pagesRead: Math.max(0, page - book.currentPage) || v.pagesReadToday,
+                    },
+                  ]
+                : s.readingSessions,
+          };
+        }),
+
+      setBookStatus: (id, status) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== id) return b;
+            if (status === "concluido") {
+              return {
+                ...b,
+                status,
+                currentPage: b.totalPages || b.currentPage,
+                endDate: b.endDate ?? todayKey(),
+                startDate: b.startDate ?? todayKey(),
+                updatedAt: Date.now(),
+              };
+            }
+            return {
+              ...b,
+              status,
+              endDate: undefined,
+              startDate: status === "lendo" ? (b.startDate ?? todayKey()) : b.startDate,
+              updatedAt: Date.now(),
+            };
+          }),
+        })),
+
+      archiveBook: (id, restore) =>
+        set((s) => ({
+          books: s.books.map((b) => (b.id === id ? { ...b, archived: !restore, updatedAt: Date.now() } : b)),
+        })),
+
+      restartBook: (id) =>
+        set((s) => ({
+          books: s.books.map((b) =>
+            b.id === id
+              ? {
+                  ...b,
+                  currentPage: 0,
+                  currentChapter: undefined,
+                  status: "lendo",
+                  startDate: todayKey(),
+                  endDate: undefined,
+                  logs: [],
+                  updatedAt: Date.now(),
+                }
+              : b,
+          ),
+          readingSessions: s.readingSessions.filter((r) => r.bookId !== id),
         })),
 
       addReadingSession: (s0) =>
@@ -594,6 +737,27 @@ export const useStore = create<State>()(
 
       removeReadingGoal: (id) =>
         set((s) => ({ readingGoals: s.readingGoals.filter((g) => g.id !== id) })),
+
+      updateReadingGoal: (id, patch) =>
+        set((s) => ({ readingGoals: s.readingGoals.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+
+      addReadingNote: (n) => {
+        const note: ReadingNote = {
+          id: genId(),
+          bookId: n.bookId,
+          text: n.text,
+          date: n.date ?? todayKey(),
+          at: Date.now(),
+        };
+        set((s) => ({ readingNotes: [...s.readingNotes, note] }));
+        return note;
+      },
+
+      updateReadingNote: (id, text) =>
+        set((s) => ({ readingNotes: s.readingNotes.map((n) => (n.id === id ? { ...n, text } : n)) })),
+
+      removeReadingNote: (id) =>
+        set((s) => ({ readingNotes: s.readingNotes.filter((n) => n.id !== id) })),
 
 
       addLifeGoal: (g) => {
@@ -966,6 +1130,7 @@ export const useStore = create<State>()(
           books: [],
           readingSessions: [],
           readingGoals: [],
+          readingNotes: [],
           discipline: 0,
           disciplineLog: [],
           dailyMinimum: 1,
@@ -1107,8 +1272,9 @@ export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: Completed
 // ============================================================
 
 export const bookStatusLabel: Record<BookStatus, string> = {
-  "quero-ler": "Quero Ler",
-  lendo: "Lendo",
+  "quero-ler": "Não iniciado",
+  lendo: "Em leitura",
+  pausado: "Pausado",
   concluido: "Concluído",
 };
 
@@ -1120,6 +1286,9 @@ export const readingGoalLabel: Record<ReadingGoalKind, string> = {
   "paginas-dia": "páginas por dia",
   "minutos-dia": "minutos por dia",
   "horas-semana": "horas por semana",
+  "paginas-semana": "páginas por semana",
+  "paginas-mes": "páginas por mês",
+  "paginas-ano": "páginas por ano",
 };
 
 const startOfWeekKey = () => {
@@ -1184,6 +1353,50 @@ export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
 
   const booksThisYear = completed.filter((b) => (b.endDate ?? "").startsWith(String(new Date().getFullYear()))).length;
 
+  // Agregações por mês / ano (páginas e minutos)
+  const yearPrefix = today.slice(0, 4);
+  const pagesThisWeek = [...pagesByDay.entries()].filter(([d]) => d >= week).reduce((a, [, v]) => a + v, 0);
+  const pagesThisMonth = [...pagesByDay.entries()]
+    .filter(([d]) => d.startsWith(monthPrefix))
+    .reduce((a, [, v]) => a + v, 0);
+  const pagesThisYear = [...pagesByDay.entries()]
+    .filter(([d]) => d.startsWith(yearPrefix))
+    .reduce((a, [, v]) => a + v, 0);
+
+  const pagesByMonth = new Map<string, number>();
+  for (const [d, v] of pagesByDay) pagesByMonth.set(d.slice(0, 7), (pagesByMonth.get(d.slice(0, 7)) ?? 0) + v);
+  const minutesByMonth = new Map<string, number>();
+  for (const s of sessions)
+    minutesByMonth.set(s.date.slice(0, 7), (minutesByMonth.get(s.date.slice(0, 7)) ?? 0) + s.minutes);
+  const monthly = [...new Set([...pagesByMonth.keys(), ...minutesByMonth.keys()])]
+    .sort()
+    .map((m) => ({ mes: m, paginas: pagesByMonth.get(m) ?? 0, minutos: minutesByMonth.get(m) ?? 0 }));
+
+  const pagesByYear = new Map<string, number>();
+  for (const [d, v] of pagesByDay) pagesByYear.set(d.slice(0, 4), (pagesByYear.get(d.slice(0, 4)) ?? 0) + v);
+  const yearly = [...pagesByYear.entries()].sort().map(([ano, paginas]) => ({ ano, paginas }));
+
+  const totalPagesLogged = [...pagesByDay.values()].reduce((a, v) => a + v, 0);
+  // Velocidade média de leitura em páginas por minuto/hora
+  const pagesPerMinute = totalMinutes > 0 ? totalPagesLogged / totalMinutes : 0;
+  const pagesPerHour = Math.round(pagesPerMinute * 60);
+  const avgMinutesPerDay = Math.round(totalMinutes / Math.max(new Set(sessions.map((s) => s.date)).size, 1));
+
+  // Maior sequência de dias lendo (histórica)
+  const activeSorted = [...activeDays].sort();
+  let longestStreak = 0;
+  let run = 0;
+  let prevDay: string | null = null;
+  for (const d of activeSorted) {
+    if (prevDay) {
+      const prevDate = new Date(`${prevDay}T12:00:00`);
+      prevDate.setDate(prevDate.getDate() + 1);
+      run = dateKey(prevDate) === d ? run + 1 : 1;
+    } else run = 1;
+    longestStreak = Math.max(longestStreak, run);
+    prevDay = d;
+  }
+
   return {
     todayMinutes,
     weekMinutes,
@@ -1192,21 +1405,101 @@ export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
     completed: completed.length,
     reading: reading.length,
     wishlist: wishlist.length,
+    paused: books.filter((b) => b.status === "pausado").length,
     pagesRead,
     avgPagesPerDay,
     todayPages,
+    pagesThisWeek,
+    pagesThisMonth,
+    pagesThisYear,
+    monthly,
+    yearly,
+    pagesByDay,
+    activeDays,
     avgSessionMinutes,
+    avgMinutesPerDay,
+    pagesPerHour,
+    pagesPerMinute,
     streak,
+    longestReadingStreak: longestStreak,
     topCategories,
     topAuthors,
     booksThisYear,
   };
 };
 
-export const readingGoalProgress = (
-  g: ReadingGoal,
-  stats: ReturnType<typeof readingStats>,
-) => {
+/** Estatísticas detalhadas de um livro específico. */
+export const bookStats = (b: Book, sessions: ReadingSession[], notes: ReadingNote[] = []) => {
+  const mine = sessions.filter((s) => s.bookId === b.id);
+  const totalMinutes = mine.reduce((a, s) => a + s.minutes, 0);
+  const days = new Set<string>([...mine.map((s) => s.date), ...b.logs.map((l) => l.date)]);
+  const dayList = [...days].sort();
+  const pct = bookProgress(b);
+  const remainingPages = Math.max(0, (b.totalPages || 0) - b.currentPage);
+  const remainingChapters =
+    b.totalChapters && b.totalChapters > 0 ? Math.max(0, b.totalChapters - (b.currentChapter ?? 0)) : null;
+  const avgPagesPerDay = dayList.length ? Math.round(b.currentPage / dayList.length) : 0;
+  const avgMinutesPerDay = dayList.length ? Math.round(totalMinutes / dayList.length) : 0;
+  const pagesPerMinute = totalMinutes > 0 ? b.currentPage / totalMinutes : 0;
+
+  let estimatedFinish: string | null = null;
+  if (remainingPages > 0 && avgPagesPerDay > 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + Math.ceil(remainingPages / avgPagesPerDay));
+    estimatedFinish = dateKey(d);
+  }
+
+  const daysToFinish =
+    b.startDate && b.endDate
+      ? Math.max(
+          1,
+          Math.round(
+            (new Date(`${b.endDate}T12:00:00`).getTime() - new Date(`${b.startDate}T12:00:00`).getTime()) / 86400000,
+          ),
+        )
+      : null;
+
+  // Maior sequência de dias lendo neste livro
+  let longest = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const d of dayList) {
+    if (prev) {
+      const p = new Date(`${prev}T12:00:00`);
+      p.setDate(p.getDate() + 1);
+      run = dateKey(p) === d ? run + 1 : 1;
+    } else run = 1;
+    longest = Math.max(longest, run);
+    prev = d;
+  }
+
+  // Páginas por dia necessárias para bater a meta de conclusão
+  let pagesPerDayNeeded: number | null = null;
+  if (b.targetDate && remainingPages > 0) {
+    const diff = Math.ceil((new Date(`${b.targetDate}T12:00:00`).getTime() - Date.now()) / 86400000);
+    pagesPerDayNeeded = diff > 0 ? Math.ceil(remainingPages / diff) : remainingPages;
+  }
+
+  return {
+    pct,
+    totalMinutes,
+    sessions: mine.length,
+    notes: notes.filter((n) => n.bookId === b.id).length,
+    readingDays: dayList.length,
+    activeDays: days,
+    remainingPages,
+    remainingChapters,
+    avgPagesPerDay,
+    avgMinutesPerDay,
+    pagesPerHour: Math.round(pagesPerMinute * 60),
+    estimatedFinish,
+    daysToFinish,
+    longestStreak: longest,
+    pagesPerDayNeeded,
+  };
+};
+
+export const readingGoalProgress = (g: ReadingGoal, stats: ReturnType<typeof readingStats>) => {
   const current =
     g.kind === "livros-ano"
       ? stats.booksThisYear
@@ -1214,7 +1507,13 @@ export const readingGoalProgress = (
         ? stats.todayPages
         : g.kind === "minutos-dia"
           ? stats.todayMinutes
-          : Math.round((stats.weekMinutes / 60) * 10) / 10;
+          : g.kind === "paginas-semana"
+            ? stats.pagesThisWeek
+            : g.kind === "paginas-mes"
+              ? stats.pagesThisMonth
+              : g.kind === "paginas-ano"
+                ? stats.pagesThisYear
+                : Math.round((stats.weekMinutes / 60) * 10) / 10;
   const pct = g.target > 0 ? Math.min(100, Math.round((current / g.target) * 100)) : 0;
   return { current, pct };
 };
