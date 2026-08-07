@@ -19,6 +19,7 @@ const SYNC_KEYS = [
   "books",
   "readingSessions",
   "readingGoals",
+  "readingNotes",
   "discipline",
   "disciplineLog",
   "dailyMinimum",
