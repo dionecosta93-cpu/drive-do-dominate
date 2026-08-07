@@ -470,6 +470,7 @@ export const useStore = create<State>()(
       books: [],
       readingSessions: [],
       readingGoals: [],
+      readingNotes: [],
 
       discipline: 0,
       disciplineLog: [],
