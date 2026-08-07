@@ -340,6 +340,7 @@ interface State {
   books: Book[];
   readingSessions: ReadingSession[];
   readingGoals: ReadingGoal[];
+  readingNotes: ReadingNote[];
 
   // Disciplina / gamificação
   discipline: number;
