@@ -378,7 +378,7 @@ export function buildAssistantContext(): string {
     streak: s.streak,
     maior_streak: s.longestStreak,
     minimo_diario: s.dailyMinimum,
-    conquistas: s.achievements.filter((a) => a.unlocked).map((a) => a.title ?? a.id),
+    conquistas: s.achievements.map((a) => a.id),
     tarefas: s.tasks.map((t) => ({
       id: t.id,
       nome: t.name,
