@@ -1271,8 +1271,9 @@ export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: Completed
 // ============================================================
 
 export const bookStatusLabel: Record<BookStatus, string> = {
-  "quero-ler": "Quero Ler",
-  lendo: "Lendo",
+  "quero-ler": "Não iniciado",
+  lendo: "Em leitura",
+  pausado: "Pausado",
   concluido: "Concluído",
 };
 
@@ -1284,6 +1285,9 @@ export const readingGoalLabel: Record<ReadingGoalKind, string> = {
   "paginas-dia": "páginas por dia",
   "minutos-dia": "minutos por dia",
   "horas-semana": "horas por semana",
+  "paginas-semana": "páginas por semana",
+  "paginas-mes": "páginas por mês",
+  "paginas-ano": "páginas por ano",
 };
 
 const startOfWeekKey = () => {
