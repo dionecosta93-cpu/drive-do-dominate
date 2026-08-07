@@ -1352,6 +1352,50 @@ export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
 
   const booksThisYear = completed.filter((b) => (b.endDate ?? "").startsWith(String(new Date().getFullYear()))).length;
 
+  // Agregações por mês / ano (páginas e minutos)
+  const yearPrefix = today.slice(0, 4);
+  const pagesThisWeek = [...pagesByDay.entries()].filter(([d]) => d >= week).reduce((a, [, v]) => a + v, 0);
+  const pagesThisMonth = [...pagesByDay.entries()]
+    .filter(([d]) => d.startsWith(monthPrefix))
+    .reduce((a, [, v]) => a + v, 0);
+  const pagesThisYear = [...pagesByDay.entries()]
+    .filter(([d]) => d.startsWith(yearPrefix))
+    .reduce((a, [, v]) => a + v, 0);
+
+  const pagesByMonth = new Map<string, number>();
+  for (const [d, v] of pagesByDay) pagesByMonth.set(d.slice(0, 7), (pagesByMonth.get(d.slice(0, 7)) ?? 0) + v);
+  const minutesByMonth = new Map<string, number>();
+  for (const s of sessions)
+    minutesByMonth.set(s.date.slice(0, 7), (minutesByMonth.get(s.date.slice(0, 7)) ?? 0) + s.minutes);
+  const monthly = [...new Set([...pagesByMonth.keys(), ...minutesByMonth.keys()])]
+    .sort()
+    .map((m) => ({ mes: m, paginas: pagesByMonth.get(m) ?? 0, minutos: minutesByMonth.get(m) ?? 0 }));
+
+  const pagesByYear = new Map<string, number>();
+  for (const [d, v] of pagesByDay) pagesByYear.set(d.slice(0, 4), (pagesByYear.get(d.slice(0, 4)) ?? 0) + v);
+  const yearly = [...pagesByYear.entries()].sort().map(([ano, paginas]) => ({ ano, paginas }));
+
+  const totalPagesLogged = [...pagesByDay.values()].reduce((a, v) => a + v, 0);
+  // Velocidade média de leitura em páginas por minuto/hora
+  const pagesPerMinute = totalMinutes > 0 ? totalPagesLogged / totalMinutes : 0;
+  const pagesPerHour = Math.round(pagesPerMinute * 60);
+  const avgMinutesPerDay = Math.round(totalMinutes / Math.max(new Set(sessions.map((s) => s.date)).size, 1));
+
+  // Maior sequência de dias lendo (histórica)
+  const activeSorted = [...activeDays].sort();
+  let longestStreak = 0;
+  let run = 0;
+  let prevDay: string | null = null;
+  for (const d of activeSorted) {
+    if (prevDay) {
+      const prevDate = new Date(`${prevDay}T12:00:00`);
+      prevDate.setDate(prevDate.getDate() + 1);
+      run = dateKey(prevDate) === d ? run + 1 : 1;
+    } else run = 1;
+    longestStreak = Math.max(longestStreak, run);
+    prevDay = d;
+  }
+
   return {
     todayMinutes,
     weekMinutes,
@@ -1360,21 +1404,101 @@ export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
     completed: completed.length,
     reading: reading.length,
     wishlist: wishlist.length,
+    paused: books.filter((b) => b.status === "pausado").length,
     pagesRead,
     avgPagesPerDay,
     todayPages,
+    pagesThisWeek,
+    pagesThisMonth,
+    pagesThisYear,
+    monthly,
+    yearly,
+    pagesByDay,
+    activeDays,
     avgSessionMinutes,
+    avgMinutesPerDay,
+    pagesPerHour,
+    pagesPerMinute,
     streak,
+    longestReadingStreak: longestStreak,
     topCategories,
     topAuthors,
     booksThisYear,
   };
 };
 
-export const readingGoalProgress = (
-  g: ReadingGoal,
-  stats: ReturnType<typeof readingStats>,
-) => {
+/** Estatísticas detalhadas de um livro específico. */
+export const bookStats = (b: Book, sessions: ReadingSession[], notes: ReadingNote[] = []) => {
+  const mine = sessions.filter((s) => s.bookId === b.id);
+  const totalMinutes = mine.reduce((a, s) => a + s.minutes, 0);
+  const days = new Set<string>([...mine.map((s) => s.date), ...b.logs.map((l) => l.date)]);
+  const dayList = [...days].sort();
+  const pct = bookProgress(b);
+  const remainingPages = Math.max(0, (b.totalPages || 0) - b.currentPage);
+  const remainingChapters =
+    b.totalChapters && b.totalChapters > 0 ? Math.max(0, b.totalChapters - (b.currentChapter ?? 0)) : null;
+  const avgPagesPerDay = dayList.length ? Math.round(b.currentPage / dayList.length) : 0;
+  const avgMinutesPerDay = dayList.length ? Math.round(totalMinutes / dayList.length) : 0;
+  const pagesPerMinute = totalMinutes > 0 ? b.currentPage / totalMinutes : 0;
+
+  let estimatedFinish: string | null = null;
+  if (remainingPages > 0 && avgPagesPerDay > 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + Math.ceil(remainingPages / avgPagesPerDay));
+    estimatedFinish = dateKey(d);
+  }
+
+  const daysToFinish =
+    b.startDate && b.endDate
+      ? Math.max(
+          1,
+          Math.round(
+            (new Date(`${b.endDate}T12:00:00`).getTime() - new Date(`${b.startDate}T12:00:00`).getTime()) / 86400000,
+          ),
+        )
+      : null;
+
+  // Maior sequência de dias lendo neste livro
+  let longest = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const d of dayList) {
+    if (prev) {
+      const p = new Date(`${prev}T12:00:00`);
+      p.setDate(p.getDate() + 1);
+      run = dateKey(p) === d ? run + 1 : 1;
+    } else run = 1;
+    longest = Math.max(longest, run);
+    prev = d;
+  }
+
+  // Páginas por dia necessárias para bater a meta de conclusão
+  let pagesPerDayNeeded: number | null = null;
+  if (b.targetDate && remainingPages > 0) {
+    const diff = Math.ceil((new Date(`${b.targetDate}T12:00:00`).getTime() - Date.now()) / 86400000);
+    pagesPerDayNeeded = diff > 0 ? Math.ceil(remainingPages / diff) : remainingPages;
+  }
+
+  return {
+    pct,
+    totalMinutes,
+    sessions: mine.length,
+    notes: notes.filter((n) => n.bookId === b.id).length,
+    readingDays: dayList.length,
+    activeDays: days,
+    remainingPages,
+    remainingChapters,
+    avgPagesPerDay,
+    avgMinutesPerDay,
+    pagesPerHour: Math.round(pagesPerMinute * 60),
+    estimatedFinish,
+    daysToFinish,
+    longestStreak: longest,
+    pagesPerDayNeeded,
+  };
+};
+
+export const readingGoalProgress = (g: ReadingGoal, stats: ReturnType<typeof readingStats>) => {
   const current =
     g.kind === "livros-ano"
       ? stats.booksThisYear
@@ -1382,7 +1506,13 @@ export const readingGoalProgress = (
         ? stats.todayPages
         : g.kind === "minutos-dia"
           ? stats.todayMinutes
-          : Math.round((stats.weekMinutes / 60) * 10) / 10;
+          : g.kind === "paginas-semana"
+            ? stats.pagesThisWeek
+            : g.kind === "paginas-mes"
+              ? stats.pagesThisMonth
+              : g.kind === "paginas-ano"
+                ? stats.pagesThisYear
+                : Math.round((stats.weekMinutes / 60) * 10) / 10;
   const pct = g.target > 0 ? Math.min(100, Math.round((current / g.target) * 100)) : 0;
   return { current, pct };
 };
