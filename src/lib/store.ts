@@ -603,6 +603,7 @@ export const useStore = create<State>()(
         set((s) => ({
           books: s.books.filter((b) => b.id !== id),
           readingSessions: s.readingSessions.filter((r) => r.bookId !== id),
+          readingNotes: s.readingNotes.filter((n) => n.bookId !== id),
         })),
 
       toggleBookFavorite: (id) =>
@@ -619,13 +620,110 @@ export const useStore = create<State>()(
             return {
               ...b,
               currentPage: p,
-              status: done ? "concluido" : b.status === "quero-ler" ? "lendo" : b.status,
+              status: done ? "concluido" : b.status === "concluido" ? b.status : "lendo",
               endDate: done ? (b.endDate ?? todayKey()) : b.endDate,
               startDate: b.startDate ?? todayKey(),
               logs: [...b.logs, { id: genId(), date: todayKey(), page: p, at: Date.now() }],
               updatedAt: Date.now(),
             };
           }),
+        })),
+
+      /** Atualização rápida: página, capítulo, páginas lidas no dia e tempo de leitura. */
+      updateReadingProgress: (id, v) =>
+        set((s) => {
+          const date = v.date ?? todayKey();
+          const book = s.books.find((b) => b.id === id);
+          if (!book) return {};
+          const fromPages =
+            v.page !== undefined
+              ? v.page
+              : v.pagesReadToday !== undefined
+                ? book.currentPage + v.pagesReadToday
+                : book.currentPage;
+          const page = Math.max(0, book.totalPages ? Math.min(fromPages, book.totalPages) : fromPages);
+          const done = book.totalPages > 0 && page >= book.totalPages;
+          const changed = page !== book.currentPage || v.chapter !== undefined;
+          const updated: Book = {
+            ...book,
+            currentPage: page,
+            currentChapter: v.chapter ?? book.currentChapter,
+            startDate: book.startDate ?? date,
+            status: done ? "concluido" : book.status === "concluido" ? book.status : "lendo",
+            endDate: done ? (book.endDate ?? date) : book.endDate,
+            logs: changed
+              ? [...book.logs, { id: genId(), date, page, chapter: v.chapter, at: Date.now() }]
+              : book.logs,
+            updatedAt: Date.now(),
+          };
+          const minutes = v.minutes ?? 0;
+          const end = Date.now();
+          return {
+            books: s.books.map((b) => (b.id === id ? updated : b)),
+            readingSessions:
+              minutes > 0
+                ? [
+                    ...s.readingSessions,
+                    {
+                      id: genId(),
+                      bookId: id,
+                      date,
+                      startedAt: end - minutes * 60000,
+                      endedAt: end,
+                      minutes,
+                      pagesRead: Math.max(0, page - book.currentPage) || v.pagesReadToday,
+                    },
+                  ]
+                : s.readingSessions,
+          };
+        }),
+
+      setBookStatus: (id, status) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== id) return b;
+            if (status === "concluido") {
+              return {
+                ...b,
+                status,
+                currentPage: b.totalPages || b.currentPage,
+                endDate: b.endDate ?? todayKey(),
+                startDate: b.startDate ?? todayKey(),
+                updatedAt: Date.now(),
+              };
+            }
+            return {
+              ...b,
+              status,
+              endDate: undefined,
+              startDate: status === "lendo" ? (b.startDate ?? todayKey()) : b.startDate,
+              updatedAt: Date.now(),
+            };
+          }),
+        })),
+
+      archiveBook: (id, restore) =>
+        set((s) => ({
+          books: s.books.map((b) => (b.id === id ? { ...b, archived: !restore, updatedAt: Date.now() } : b)),
+        })),
+
+      restartBook: (id) =>
+        set((s) => ({
+          books: s.books.map((b) =>
+            b.id === id
+              ? {
+                  ...b,
+                  currentPage: 0,
+                  currentChapter: undefined,
+                  status: "lendo",
+                  startDate: todayKey(),
+                  endDate: undefined,
+                  logs: [],
+                  updatedAt: Date.now(),
+                }
+              : b,
+          ),
+          readingSessions: s.readingSessions.filter((r) => r.bookId !== id),
         })),
 
       addReadingSession: (s0) =>
@@ -639,6 +737,27 @@ export const useStore = create<State>()(
 
       removeReadingGoal: (id) =>
         set((s) => ({ readingGoals: s.readingGoals.filter((g) => g.id !== id) })),
+
+      updateReadingGoal: (id, patch) =>
+        set((s) => ({ readingGoals: s.readingGoals.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+
+      addReadingNote: (n) => {
+        const note: ReadingNote = {
+          id: genId(),
+          bookId: n.bookId,
+          text: n.text,
+          date: n.date ?? todayKey(),
+          at: Date.now(),
+        };
+        set((s) => ({ readingNotes: [...s.readingNotes, note] }));
+        return note;
+      },
+
+      updateReadingNote: (id, text) =>
+        set((s) => ({ readingNotes: s.readingNotes.map((n) => (n.id === id ? { ...n, text } : n)) })),
+
+      removeReadingNote: (id) =>
+        set((s) => ({ readingNotes: s.readingNotes.filter((n) => n.id !== id) })),
 
 
       addLifeGoal: (g) => {
