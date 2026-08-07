@@ -381,6 +381,17 @@ interface State {
   removeReadingSession: (id: string) => void;
   addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
   removeReadingGoal: (id: string) => void;
+  updateReadingGoal: (id: string, patch: Partial<ReadingGoal>) => void;
+  addReadingNote: (n: Omit<ReadingNote, "id" | "at"> & { date?: string }) => ReadingNote;
+  updateReadingNote: (id: string, text: string) => void;
+  removeReadingNote: (id: string) => void;
+  setBookStatus: (id: string, status: BookStatus) => void;
+  archiveBook: (id: string, restore?: boolean) => void;
+  restartBook: (id: string) => void;
+  updateReadingProgress: (
+    id: string,
+    v: { page?: number; chapter?: number; pagesReadToday?: number; minutes?: number; date?: string },
+  ) => void;
 
   addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
 
