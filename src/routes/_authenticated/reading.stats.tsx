@@ -49,14 +49,23 @@ function ReadingStats() {
         <Stat label="Em andamento" value={st.reading} />
         <Stat label="Quero ler" value={st.wishlist} />
         <Stat label="Páginas lidas" value={st.pagesRead} />
+        <Stat label="Páginas hoje" value={st.todayPages} />
+        <Stat label="Páginas na semana" value={st.pagesThisWeek} />
+        <Stat label="Páginas no mês" value={st.pagesThisMonth} />
+        <Stat label="Páginas no ano" value={st.pagesThisYear} />
         <Stat label="Média pág./dia" value={st.avgPagesPerDay} />
+        <Stat label="Média min./dia" value={st.avgMinutesPerDay} />
+        <Stat label="Páginas por hora" value={st.pagesPerHour} />
         <Stat label="Média por sessão" value={`${st.avgSessionMinutes} min`} />
+        <Stat label="Livros neste ano" value={st.booksThisYear} />
+        <Stat label="Maior sequência" value={`${st.longestReadingStreak} d`} />
       </div>
 
       <div className="bg-surface border border-border rounded-2xl p-4 mb-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Sequência lendo</p>
         <p className="font-heading font-black text-3xl text-discipline tabular-nums">{st.streak} dias</p>
       </div>
+
 
       <section className="mb-4">
         <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Categorias mais lidas</h2>
