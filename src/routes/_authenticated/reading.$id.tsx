@@ -299,7 +299,7 @@ function BookDetail() {
           <button
             onClick={() => {
               if (!noteText.trim()) return;
-              addNote({ bookId: book.id, text: noteText.trim() });
+              addNote({ bookId: book.id, text: noteText.trim(), date: dateKey() });
               setNoteText("");
               toast.success("Anotação salva.");
             }}
