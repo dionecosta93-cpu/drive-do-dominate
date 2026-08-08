@@ -77,15 +77,20 @@ function ReadingLibrary() {
   const list = useMemo(() => {
     const term = q.trim().toLowerCase();
     return books
-      .filter((b) => (tab === "favoritos" ? b.favorite : b.status === tab))
+      .filter((b) =>
+        tab === "arquivados"
+          ? b.archived
+          : !b.archived && (tab === "favoritos" ? b.favorite : b.status === tab),
+      )
       .filter((b) =>
         !term
           ? true
-          : [b.title, b.author, b.category, bookStatusLabel[b.status], String(b.rating ?? ""), ...b.tags]
+          : [b.title, b.subtitle ?? "", b.author, b.category, b.genre ?? "", b.publisher ?? "", b.isbn ?? "", bookStatusLabel[b.status], String(b.rating ?? ""), ...b.tags]
               .join(" ")
               .toLowerCase()
               .includes(term),
       )
+
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }, [books, tab, q]);
 
