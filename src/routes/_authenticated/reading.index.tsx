@@ -17,13 +17,16 @@ export const Route = createFileRoute("/_authenticated/reading/")({
   }),
 });
 
-type Tab = BookStatus | "favoritos";
+type Tab = BookStatus | "favoritos" | "arquivados";
 const tabs: { key: Tab; label: string }[] = [
   { key: "quero-ler", label: "📚 Quero Ler" },
   { key: "lendo", label: "📖 Lendo" },
+  { key: "pausado", label: "⏸ Pausados" },
   { key: "concluido", label: "✅ Concluídos" },
   { key: "favoritos", label: "⭐ Favoritos" },
+  { key: "arquivados", label: "📦 Arquivados" },
 ];
+
 
 export function BookCard({ b }: { b: Book }) {
   const pct = bookProgress(b);
