@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/reading/goals")({
   }),
 });
 
-const kinds: ReadingGoalKind[] = ["livros-ano", "paginas-dia", "minutos-dia", "horas-semana"];
+const kinds: ReadingGoalKind[] = ["livros-ano", "paginas-dia", "minutos-dia", "horas-semana", "paginas-semana", "paginas-mes", "paginas-ano"];
 
 function ReadingGoals() {
   const goals = useStore((s) => s.readingGoals);
