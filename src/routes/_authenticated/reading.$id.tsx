@@ -38,6 +38,10 @@ function BookDetail() {
   const addNote = useStore((s) => s.addReadingNote);
   const updateNote = useStore((s) => s.updateReadingNote);
   const removeNote = useStore((s) => s.removeReadingNote);
+  const updateLog = useStore((s) => s.updateReadingLog);
+  const removeLog = useStore((s) => s.removeReadingLog);
+  const updateSession = useStore((s) => s.updateReadingSession);
+  const removeSession = useStore((s) => s.removeReadingSession);
 
   const [editing, setEditing] = useState(false);
   const [page, setPage] = useState("");
@@ -156,6 +160,13 @@ function BookDetail() {
           </div>
         </div>
       </div>
+
+      <button
+        onClick={() => setEditing(true)}
+        className="w-full mb-5 py-3 rounded-xl bg-surface border border-discipline/40 text-discipline text-xs font-bold uppercase flex items-center justify-center gap-2"
+      >
+        <Pencil className="size-4" /> Editar livro
+      </button>
 
       {book.synopsis && (
         <section className="mb-5">
@@ -356,26 +367,109 @@ function BookDetail() {
         ))}
       </section>
 
-      {/* Histórico */}
+      {/* Histórico editável */}
       <section className="mb-6">
-        <p className={sectionTitle}>Histórico</p>
+        <p className={sectionTitle}>Histórico (editável)</p>
+        <p className="text-[10px] text-muted-foreground mb-2">
+          Corrigiu a página errada? Edite abaixo — as estatísticas são recalculadas automaticamente.
+        </p>
         {book.logs.length === 0 && sessions.length === 0 && (
           <p className="text-xs text-muted-foreground">Nenhum registro ainda.</p>
         )}
         <div className="space-y-2">
           {[...book.logs].reverse().map((l) => (
-            <div key={l.id} className="bg-surface border border-border rounded-xl p-3 flex justify-between text-xs">
-              <span>
-                Página {l.page}
-                {l.chapter ? ` · cap. ${l.chapter}` : ""}
-              </span>
-              <span className="text-muted-foreground font-mono">{l.date}</span>
+            <div key={l.id} className="bg-surface border border-border rounded-xl p-3">
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <input
+                  type="date"
+                  defaultValue={l.date}
+                  onBlur={(e) => e.target.value && updateLog(book.id, l.id, { date: e.target.value })}
+                  className="bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
+                />
+                <input
+                  inputMode="numeric"
+                  defaultValue={l.page}
+                  onBlur={(e) => {
+                    const v = Number(e.target.value);
+                    if (v > 0) {
+                      updateLog(book.id, l.id, { page: v });
+                      toast.success("Registro corrigido.");
+                    }
+                  }}
+                  placeholder="Página"
+                  className="bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
+                />
+                <div className="flex items-center gap-2">
+                  <input
+                    inputMode="numeric"
+                    defaultValue={l.chapter ?? ""}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (v > 0) updateLog(book.id, l.id, { chapter: v });
+                    }}
+                    placeholder="Cap."
+                    className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
+                  />
+                  <button
+                    onClick={() => {
+                      removeLog(book.id, l.id);
+                      toast.success("Registro removido.");
+                    }}
+                    className="text-muted-foreground hover:text-struggle shrink-0"
+                    aria-label="Excluir registro"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
-          {[...sessions].reverse().map((s) => (
-            <div key={s.id} className="bg-surface border border-border rounded-xl p-3 flex justify-between text-xs">
-              <span>{s.minutes} min de leitura</span>
-              <span className="text-muted-foreground font-mono">{s.date}</span>
+
+          {[...sessions].reverse().map((sv) => (
+            <div key={sv.id} className="bg-surface border border-border rounded-xl p-3">
+              <div className="grid grid-cols-3 gap-2 items-center">
+                <input
+                  type="date"
+                  defaultValue={sv.date}
+                  onBlur={(e) => e.target.value && updateSession(sv.id, { date: e.target.value })}
+                  className="bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
+                />
+                <input
+                  inputMode="numeric"
+                  defaultValue={sv.minutes}
+                  onBlur={(e) => {
+                    const v = Number(e.target.value);
+                    if (v > 0) {
+                      updateSession(sv.id, { minutes: v });
+                      toast.success("Sessão corrigida.");
+                    }
+                  }}
+                  placeholder="Minutos"
+                  className="bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
+                />
+                <div className="flex items-center gap-2">
+                  <input
+                    inputMode="numeric"
+                    defaultValue={sv.pagesRead ?? ""}
+                    onBlur={(e) => {
+                      const v = Number(e.target.value);
+                      if (v >= 0) updateSession(sv.id, { pagesRead: v });
+                    }}
+                    placeholder="Págs."
+                    className="w-full bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
+                  />
+                  <button
+                    onClick={() => {
+                      removeSession(sv.id);
+                      toast.success("Sessão removida.");
+                    }}
+                    className="text-muted-foreground hover:text-struggle shrink-0"
+                    aria-label="Excluir sessão"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
