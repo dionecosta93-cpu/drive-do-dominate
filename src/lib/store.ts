@@ -381,6 +381,9 @@ interface State {
   logReadingProgress: (id: string, page: number) => void;
   addReadingSession: (s: Omit<ReadingSession, "id">) => void;
   removeReadingSession: (id: string) => void;
+  updateReadingSession: (id: string, patch: Partial<ReadingSession>) => void;
+  updateReadingLog: (bookId: string, logId: string, patch: { page?: number; chapter?: number; date?: string }) => void;
+  removeReadingLog: (bookId: string, logId: string) => void;
   addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
   removeReadingGoal: (id: string) => void;
   updateReadingGoal: (id: string, patch: Partial<ReadingGoal>) => void;
