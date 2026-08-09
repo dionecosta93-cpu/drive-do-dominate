@@ -350,6 +350,9 @@ interface State {
   dailyMinimum: number;
   lastPenaltyDate: string | null;
   claimedMissions: string[];
+  /** Chaves "taskId|YYYY-MM-DD" de alertas de tarefa não concluída dispensados. */
+  dismissedMissed: string[];
+  dismissMissed: (taskId: string, date: string) => void;
   challenges: Challenge[];
   recentUnlocks: string[];
 
@@ -482,6 +485,9 @@ export const useStore = create<State>()(
       dailyMinimum: 1,
       lastPenaltyDate: null,
       claimedMissions: [],
+      dismissedMissed: [],
+      dismissMissed: (taskId, date) =>
+        set((st) => ({ dismissedMissed: [...new Set([...st.dismissedMissed, `${taskId}|${date}`])].slice(-300) })),
       challenges: [],
       recentUnlocks: [],
 
@@ -1182,6 +1188,7 @@ export const useStore = create<State>()(
           dailyMinimum: 1,
           lastPenaltyDate: null,
           claimedMissions: [],
+          dismissedMissed: [],
           challenges: [],
           recentUnlocks: [],
         }),
