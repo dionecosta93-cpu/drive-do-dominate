@@ -309,6 +309,8 @@ export interface Transaction {
   amount: number;
   category: string;
   description?: string;
+  paymentMethod?: string;
+  notes?: string;
   date: string; // YYYY-MM-DD
   createdAt: number;
 }
