@@ -309,6 +309,8 @@ export interface Transaction {
   amount: number;
   category: string;
   description?: string;
+  paymentMethod?: string;
+  notes?: string;
   date: string; // YYYY-MM-DD
   createdAt: number;
 }
@@ -348,6 +350,9 @@ interface State {
   dailyMinimum: number;
   lastPenaltyDate: string | null;
   claimedMissions: string[];
+  /** Chaves "taskId|YYYY-MM-DD" de alertas de tarefa não concluída dispensados. */
+  dismissedMissed: string[];
+  dismissMissed: (taskId: string, date: string) => void;
   challenges: Challenge[];
   recentUnlocks: string[];
 
@@ -379,6 +384,9 @@ interface State {
   logReadingProgress: (id: string, page: number) => void;
   addReadingSession: (s: Omit<ReadingSession, "id">) => void;
   removeReadingSession: (id: string) => void;
+  updateReadingSession: (id: string, patch: Partial<ReadingSession>) => void;
+  updateReadingLog: (bookId: string, logId: string, patch: { page?: number; chapter?: number; date?: string }) => void;
+  removeReadingLog: (bookId: string, logId: string) => void;
   addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
   removeReadingGoal: (id: string) => void;
   updateReadingGoal: (id: string, patch: Partial<ReadingGoal>) => void;
@@ -477,6 +485,9 @@ export const useStore = create<State>()(
       dailyMinimum: 1,
       lastPenaltyDate: null,
       claimedMissions: [],
+      dismissedMissed: [],
+      dismissMissed: (taskId, date) =>
+        set((st) => ({ dismissedMissed: [...new Set([...st.dismissedMissed, `${taskId}|${date}`])].slice(-300) })),
       challenges: [],
       recentUnlocks: [],
 
@@ -731,6 +742,47 @@ export const useStore = create<State>()(
 
       removeReadingSession: (id) =>
         set((s) => ({ readingSessions: s.readingSessions.filter((r) => r.id !== id) })),
+
+      updateReadingSession: (id, patch) =>
+        set((s) => ({
+          readingSessions: s.readingSessions.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+        })),
+
+      /** Corrige um registro do histórico e recalcula a página atual do livro. */
+      updateReadingLog: (bookId, logId, patch) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== bookId) return b;
+            const logs = b.logs.map((l) =>
+              l.id === logId
+                ? {
+                    ...l,
+                    page: patch.page ?? l.page,
+                    chapter: patch.chapter ?? l.chapter,
+                    date: patch.date ?? l.date,
+                  }
+                : l,
+            );
+            const last = [...logs].sort((a, c) => (a.date === c.date ? a.at - c.at : a.date < c.date ? -1 : 1)).at(-1);
+            return {
+              ...b,
+              logs,
+              currentPage: last ? last.page : b.currentPage,
+              currentChapter: last?.chapter ?? b.currentChapter,
+              updatedAt: Date.now(),
+            };
+          }),
+        })),
+
+      removeReadingLog: (bookId, logId) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== bookId) return b;
+            const logs = b.logs.filter((l) => l.id !== logId);
+            const last = [...logs].sort((a, c) => (a.date === c.date ? a.at - c.at : a.date < c.date ? -1 : 1)).at(-1);
+            return { ...b, logs, currentPage: last ? last.page : 0, updatedAt: Date.now() };
+          }),
+        })),
 
       addReadingGoal: (g) =>
         set((s) => ({ readingGoals: [...s.readingGoals, { ...g, id: genId(), createdAt: Date.now() }] })),
@@ -1136,6 +1188,7 @@ export const useStore = create<State>()(
           dailyMinimum: 1,
           lastPenaltyDate: null,
           claimedMissions: [],
+          dismissedMissed: [],
           challenges: [],
           recentUnlocks: [],
         }),

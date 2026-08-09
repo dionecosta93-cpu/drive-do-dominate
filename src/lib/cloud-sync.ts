@@ -28,6 +28,7 @@ const SYNC_KEYS = [
   "challenges",
   "transactions",
   "assistantMessages",
+  "dismissedMissed",
 
 ] as const;
 

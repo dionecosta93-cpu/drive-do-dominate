@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DisciplineBar } from "@/components/discipline-bar";
 import { buildNudges } from "@/lib/analytics";
+import { DailySummaryCard, MissedTasksAlerts } from "@/components/missed-alerts";
 
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -163,6 +164,8 @@ function Dashboard() {
       <div className="mb-6 animate-rise" style={{ animationDelay: "70ms" }}>
         <DisciplineBar />
       </div>
+
+      <MissedTasksAlerts />
 
       {/* Motivação inteligente */}
       {nudges.length > 0 && (
@@ -344,6 +347,8 @@ function Dashboard() {
           </div>
         </div>
       )}
+
+      <DailySummaryCard />
 
       {/* Daily Mission */}
       <div className="bg-surface border border-border rounded-2xl p-4 mb-6 animate-rise" style={{ animationDelay: "300ms" }}>
