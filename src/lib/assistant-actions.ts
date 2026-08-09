@@ -303,6 +303,26 @@ export function applyAssistantAction(action: AssistantAction): string {
       return `Sessão de ${minutes} min registrada em ${book.title}.`;
     }
 
+    case "anotacao_leitura": {
+      const book = findBook(p);
+      const text = str(p, "text");
+      if (!book || !text) return "Anotação inválida.";
+      s.addReadingNote({ bookId: book.id, text, date: str(p, "date") ?? dateKey() });
+      return `Anotação salva em ${book.title}.`;
+    }
+    case "arquivar_livro": {
+      const book = findBook(p);
+      if (!book) return "Livro não encontrado.";
+      s.archiveBook(book.id, book.archived);
+      return `${book.title}: ${book.archived ? "restaurado" : "arquivado"}.`;
+    }
+    case "reiniciar_livro": {
+      const book = findBook(p);
+      if (!book) return "Livro não encontrado.";
+      s.restartBook(book.id);
+      return `Leitura de ${book.title} reiniciada.`;
+    }
+
     // ---------- Hábitos / desafios ----------
     case "criar_habito": {
       const name = str(p, "name");

@@ -27,6 +27,9 @@ const ACTION_TYPES = [
   "concluir_habito",
   "excluir_habito",
   "definir_minimo_diario",
+  "anotacao_leitura",
+  "arquivar_livro",
+  "reiniciar_livro",
 ] as const;
 
 const SCHEMA = {
