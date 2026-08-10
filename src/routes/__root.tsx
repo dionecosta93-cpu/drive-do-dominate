@@ -193,11 +193,10 @@ function RootComponent() {
         ring();
         const message = `${task.name} começa às ${task.time}`;
         import("sonner").then(({ toast }) => toast(`Despertador: ${message}`, { duration: 10000 }));
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("Disciplina Absoluta", { body: message });
-        }
+        void notify("Forja", message);
       }
     };
+
 
     checkAlarms();
     const interval = window.setInterval(checkAlarms, 30_000);
