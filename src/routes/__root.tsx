@@ -18,6 +18,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "@/components/bottom-nav";
 import { AssistantFab } from "@/components/assistant-fab";
+import { OfflineBanner } from "@/components/offline-banner";
+import { initNativeShell, notify } from "@/lib/native";
 
 
 function NotFoundComponent() {
@@ -97,7 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -190,20 +193,24 @@ function RootComponent() {
         ring();
         const message = `${task.name} começa às ${task.time}`;
         import("sonner").then(({ toast }) => toast(`Despertador: ${message}`, { duration: 10000 }));
-        if ("Notification" in window && Notification.permission === "granted") {
-          new Notification("Disciplina Absoluta", { body: message });
-        }
+        void notify("Forja", message);
       }
     };
+
 
     checkAlarms();
     const interval = window.setInterval(checkAlarms, 30_000);
     return () => window.clearInterval(interval);
   }, [tasks, sessions]);
 
+  useEffect(() => {
+    void initNativeShell();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-foreground">
+        <OfflineBanner />
         <div className="mx-auto max-w-[440px] min-h-screen flex flex-col">
           <main className="flex-1 pb-24">
             <Outlet />

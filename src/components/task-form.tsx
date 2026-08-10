@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { Category, Priority, Repetition, Task } from "@/lib/store";
 import { useStore } from "@/lib/store";
+import { ensureNotificationPermission } from "@/lib/native";
 
 const categories: Category[] = ["treino", "trabalho", "estudo", "vida", "negocios", "saude", "familia", "espiritual"];
 const priorities: Priority[] = ["baixa", "media", "alta"];
@@ -258,7 +259,7 @@ export function TaskForm({
               key={minutes}
               onClick={() => {
                 setAlarmMinutesBefore(minutes);
-                if ("Notification" in window && Notification.permission === "default") void Notification.requestPermission();
+                void ensureNotificationPermission();
               }}
               className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
                 alarmMinutesBefore === minutes ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
