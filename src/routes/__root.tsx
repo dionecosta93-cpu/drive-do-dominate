@@ -203,9 +203,14 @@ function RootComponent() {
     return () => window.clearInterval(interval);
   }, [tasks, sessions]);
 
+  useEffect(() => {
+    void initNativeShell();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-foreground">
+        <OfflineBanner />
         <div className="mx-auto max-w-[440px] min-h-screen flex flex-col">
           <main className="flex-1 pb-24">
             <Outlet />
