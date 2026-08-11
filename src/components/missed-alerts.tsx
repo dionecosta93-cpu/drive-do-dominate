@@ -75,15 +75,37 @@ export function MissedTasksAlerts() {
 
           {rescheduling === m.key && (
             <div className="mt-3 flex flex-wrap gap-2">
+              {[
+                { label: "10 min", min: 10 },
+                { label: "30 min", min: 30 },
+                { label: "1 hora", min: 60 },
+              ].map((opt) => (
+                <button
+                  key={opt.min}
+                  onClick={() => {
+                    const d = new Date(Date.now() + opt.min * 60_000);
+                    moveTask(
+                      m.task.id,
+                      dateKey(d),
+                      `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`,
+                    );
+                    setRescheduling(null);
+                    toast.success(`Reagendada para daqui a ${opt.label}.`);
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-border text-[10px] font-bold uppercase"
+                >
+                  +{opt.label}
+                </button>
+              ))}
               <button
                 onClick={() => {
-                  moveTask(m.task.id, dateKey());
+                  moveTask(m.task.id, dateKey(), "20:00");
                   setRescheduling(null);
-                  toast.success("Reagendada para hoje.");
+                  toast.success("Reagendada para hoje à noite (20:00).");
                 }}
                 className="px-3 py-1.5 rounded-lg border border-border text-[10px] font-bold uppercase"
               >
-                Hoje
+                Hoje à noite
               </button>
               <button
                 onClick={() => {
