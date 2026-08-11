@@ -119,6 +119,18 @@ export function applyAssistantAction(action: AssistantAction): string {
       s.updateTask(id, patch);
       return "Tarefa atualizada.";
     }
+    case "lembrete_tarefa": {
+      const id = str(p, "id");
+      const name = str(p, "name");
+      const task = s.tasks.find((t) => t.id === id) ?? s.tasks.find((t) => t.name.toLowerCase() === (name ?? "").toLowerCase());
+      if (!task) return "Tarefa não encontrada.";
+      const raw = p["minutesBefore"];
+      const minutes = typeof raw === "number" ? raw : null;
+      s.updateTask(task.id, { alarmMinutesBefore: minutes });
+      return minutes === null
+        ? `Lembrete desativado para ${task.name}.`
+        : `Lembrete de ${task.name} ajustado para ${minutes === 0 ? "o horário exato" : `${minutes} min antes`}.`;
+    }
     case "excluir_tarefa": {
       const id = str(p, "id");
       if (!id) return "Tarefa não encontrada.";

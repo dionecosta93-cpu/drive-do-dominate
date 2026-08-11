@@ -33,7 +33,8 @@ const repLabel: Record<Repetition, string> = {
 const weekdayLabels = ["D", "S", "T", "Q", "Q", "S", "S"];
 const colors = ["#22c55e", "#ef4444", "#eab308", "#3b82f6", "#a855f7", "#ec4899", "#14b8a6", "#f97316"];
 const icons = ["🎯", "💪", "📚", "💼", "🧘", "🏃", "🍎", "✨", "🔥", "⚡", "🌱", "🧠"];
-const alarmOptions = [5, 10, 15, 30, 60];
+const alarmOptions = [0, 5, 10, 15, 30, 60, 1440];
+const alarmLabel = (m: number) => (m === 0 ? "no horário" : m === 1440 ? "1 dia" : m === 60 ? "1 hora" : `${m} min`);
 
 const todayStr = () => {
   const d = new Date();
@@ -244,7 +245,7 @@ export function TaskForm({
           className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline" />
       </Field>
 
-      <Field label="Despertador (opcional)">
+      <Field label="Lembrete (notificação)">
         <div className="grid grid-cols-3 gap-1">
           <button
             onClick={() => setAlarmMinutesBefore(null)}
@@ -265,7 +266,7 @@ export function TaskForm({
                 alarmMinutesBefore === minutes ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
               }`}
             >
-              {minutes} min
+              {alarmLabel(minutes)}
             </button>
           ))}
         </div>

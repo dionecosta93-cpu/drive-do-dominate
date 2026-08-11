@@ -19,7 +19,10 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "@/components/bottom-nav";
 import { AssistantFab } from "@/components/assistant-fab";
 import { OfflineBanner } from "@/components/offline-banner";
-import { initNativeShell, notify } from "@/lib/native";
+import { initNativeShell, isNativeApp, notify } from "@/lib/native";
+import { syncTaskNotifications, listenNotificationActions } from "@/lib/notifications";
+import { NotificationPermissionCard } from "@/components/notification-permission";
+import { setupServiceWorker } from "@/lib/pwa";
 
 
 function NotFoundComponent() {
@@ -100,7 +103,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -205,12 +209,60 @@ function RootComponent() {
 
   useEffect(() => {
     void initNativeShell();
+    setupServiceWorker();
   }, []);
+
+  // Agendamento NATIVO (Android): recalcula tudo a cada mudança de tarefa/conclusão.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    const t = window.setTimeout(() => void syncTaskNotifications(tasks, sessions), 800);
+    return () => window.clearTimeout(t);
+  }, [tasks, sessions]);
+
+  // Reagenda ao abrir/voltar do segundo plano (cobre reinicialização do aparelho).
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    let remove: (() => void) | undefined;
+    void import("@capacitor/app").then(({ App }) =>
+      App.addListener("appStateChange", ({ isActive }) => {
+        if (isActive) void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
+      }).then((h) => {
+        remove = () => void h.remove();
+      }),
+    );
+    return () => remove?.();
+  }, []);
+
+  // Toque na notificação: abre a tarefa ou executa a ação escolhida.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    let cleanup: (() => void) | undefined;
+    void listenNotificationActions(({ taskId, date, actionId }) => {
+      if (!taskId) return;
+      const st = useStore.getState();
+      const day = date ?? dateKey();
+      if (actionId === "concluir") {
+        st.completeTaskForDate(taskId, day);
+        void import("sonner").then(({ toast }) => toast.success("Tarefa concluída. 🔥"));
+        return;
+      }
+      if (actionId === "dispensar") {
+        st.dismissMissed(taskId, day);
+        return;
+      }
+      // "reagendar" e toque simples abrem os detalhes da tarefa.
+      void router.navigate({ to: "/tasks/$id/edit", params: { id: taskId } });
+    }).then((c) => {
+      cleanup = c;
+    });
+    return () => cleanup?.();
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-foreground">
         <OfflineBanner />
+        <NotificationPermissionCard />
         <div className="mx-auto max-w-[440px] min-h-screen flex flex-col">
           <main className="flex-1 pb-24">
             <Outlet />
