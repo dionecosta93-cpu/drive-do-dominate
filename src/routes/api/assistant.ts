@@ -9,6 +9,7 @@ const ACTION_TYPES = [
   "concluir_tarefa",
   "reabrir_tarefa",
   "arquivar_tarefa",
+  "lembrete_tarefa",
   "registrar_transacao",
   "atualizar_transacao",
   "excluir_transacao",
@@ -68,8 +69,9 @@ Se for só conversa/consulta/relatório, "actions" deve ser [].
 
 Cada ação tem "type", "label" (texto curto em português) e "payload" (STRING com JSON válido). Formatos:
 
-criar_tarefa: {"name","description"?,"category":"treino|trabalho|estudo|vida|negocios|saude|familia|espiritual","priority":"baixa|media|alta","time":"HH:MM","endTime"?,"estimatedMinutes","maxMinutes","difficulty":1-10,"repetition":"nenhuma|diaria|semanal|dias-uteis|fim-de-semana|dias-especificos|quinzenal|mensal|anual","weekdays"?:[0-6],"scheduledDate":"YYYY-MM-DD","startDate"?,"endDate"?,"alarmMinutesBefore"?:5|10|15|30|60,"motivation"?,"notes"?}
+criar_tarefa: {"name","description"?,"category":"treino|trabalho|estudo|vida|negocios|saude|familia|espiritual","priority":"baixa|media|alta","time":"HH:MM","endTime"?,"estimatedMinutes","maxMinutes","difficulty":1-10,"repetition":"nenhuma|diaria|semanal|dias-uteis|fim-de-semana|dias-especificos|quinzenal|mensal|anual","weekdays"?:[0-6],"scheduledDate":"YYYY-MM-DD","startDate"?,"endDate"?,"alarmMinutesBefore"?:0|5|10|15|30|60|1440,"motivation"?,"notes"?}
 atualizar_tarefa: {"id","patch":{...campos da tarefa}}
+lembrete_tarefa: {"id"|"name","minutesBefore": 0|5|10|15|30|60|1440|null}  // null = desativar lembrete; reagenda a notificação nativa
 excluir_tarefa: {"id"} | duplicar_tarefa: {"id","date"?|"dates":[...]} | mover_tarefa: {"id","date","time"?}
 concluir_tarefa: {"id","date"} | reabrir_tarefa: {"id","date"?} | arquivar_tarefa: {"id","restore"?:true}
 registrar_transacao: {"kind":"receita|despesa","amount":number,"category":"alimentacao|transporte|moradia|saude|educacao|lazer|investimento|salario|outros","description"?,"paymentMethod"?,"notes"?,"date":"YYYY-MM-DD"}
