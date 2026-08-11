@@ -22,6 +22,7 @@ import { OfflineBanner } from "@/components/offline-banner";
 import { initNativeShell, isNativeApp, notify } from "@/lib/native";
 import { syncTaskNotifications, listenNotificationActions } from "@/lib/notifications";
 import { NotificationPermissionCard } from "@/components/notification-permission";
+import { setupServiceWorker } from "@/lib/pwa";
 
 
 function NotFoundComponent() {
@@ -102,7 +103,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -207,6 +209,7 @@ function RootComponent() {
 
   useEffect(() => {
     void initNativeShell();
+    setupServiceWorker();
   }, []);
 
   // Agendamento NATIVO (Android): recalcula tudo a cada mudança de tarefa/conclusão.
