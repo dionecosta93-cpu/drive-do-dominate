@@ -21,6 +21,7 @@ export default defineConfig({
         registerType: "autoUpdate",
         devOptions: { enabled: false },
         filename: "sw.js",
+        outDir: "dist/client",
         manifest: false, // manifest estático em public/manifest.webmanifest
         workbox: {
           globDirectory: "dist/client",
