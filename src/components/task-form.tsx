@@ -245,7 +245,7 @@ export function TaskForm({
           className="w-full bg-surface border border-border rounded-xl px-3 py-3 focus:outline-none focus:border-discipline" />
       </Field>
 
-      <Field label="Despertador (opcional)">
+      <Field label="Lembrete (notificação)">
         <div className="grid grid-cols-3 gap-1">
           <button
             onClick={() => setAlarmMinutesBefore(null)}
@@ -266,7 +266,7 @@ export function TaskForm({
                 alarmMinutesBefore === minutes ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
               }`}
             >
-              {minutes} min
+              {alarmLabel(minutes)}
             </button>
           ))}
         </div>
