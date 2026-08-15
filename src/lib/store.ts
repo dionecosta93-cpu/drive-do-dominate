@@ -1389,6 +1389,8 @@ export const useStore = create<State>()(
           dismissedMissed: [],
           challenges: [],
           recentUnlocks: [],
+          shoppingLists: [],
+          activeShoppingListId: null,
         }),
     }),
     { name: "kairos-store-v1" },
