@@ -7,9 +7,12 @@ import {
   type LifeGoalStatus,
   type Priority,
   type Repetition,
+  type ShoppingItem,
+  type ShoppingList,
   type Task,
   type TransactionKind,
 } from "@/lib/store";
+import { guessCategory, listTotals } from "@/lib/shopping";
 
 export interface AssistantAction {
   type: string;
