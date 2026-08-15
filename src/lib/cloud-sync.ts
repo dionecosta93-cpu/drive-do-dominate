@@ -30,6 +30,8 @@ const SYNC_KEYS = [
   "transactions",
   "assistantMessages",
   "dismissedMissed",
+  "shoppingLists",
+  "activeShoppingListId",
 
 ] as const;
 

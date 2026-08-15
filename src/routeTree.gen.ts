@@ -26,10 +26,12 @@ import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
+import { Route as AuthenticatedShoppingIndexRouteImport } from './routes/_authenticated/shopping.index'
 import { Route as AuthenticatedReadingIndexRouteImport } from './routes/_authenticated/reading.index'
 import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
 import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authenticated/calendar.index'
 import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
+import { Route as AuthenticatedShoppingIdRouteImport } from './routes/_authenticated/shopping.$id'
 import { Route as AuthenticatedReadingStatsRouteImport } from './routes/_authenticated/reading.stats'
 import { Route as AuthenticatedReadingNewRouteImport } from './routes/_authenticated/reading.new'
 import { Route as AuthenticatedReadingGoalsRouteImport } from './routes/_authenticated/reading.goals'
@@ -131,6 +133,12 @@ const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   path: '/tasks/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedShoppingIndexRoute =
+  AuthenticatedShoppingIndexRouteImport.update({
+    id: '/shopping/',
+    path: '/shopping/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedReadingIndexRoute =
   AuthenticatedReadingIndexRouteImport.update({
     id: '/reading/',
@@ -151,6 +159,11 @@ const AuthenticatedCalendarIndexRoute =
 const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
   id: '/tasks/new',
   path: '/tasks/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedShoppingIdRoute = AuthenticatedShoppingIdRouteImport.update({
+  id: '/shopping/$id',
+  path: '/shopping/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedReadingStatsRoute =
@@ -269,10 +282,12 @@ export interface FileRoutesByFullPath {
   '/reading/goals': typeof AuthenticatedReadingGoalsRoute
   '/reading/new': typeof AuthenticatedReadingNewRoute
   '/reading/stats': typeof AuthenticatedReadingStatsRoute
+  '/shopping/$id': typeof AuthenticatedShoppingIdRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/goals/': typeof AuthenticatedGoalsIndexRoute
   '/reading/': typeof AuthenticatedReadingIndexRoute
+  '/shopping/': typeof AuthenticatedShoppingIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
   '/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
@@ -305,10 +320,12 @@ export interface FileRoutesByTo {
   '/reading/goals': typeof AuthenticatedReadingGoalsRoute
   '/reading/new': typeof AuthenticatedReadingNewRoute
   '/reading/stats': typeof AuthenticatedReadingStatsRoute
+  '/shopping/$id': typeof AuthenticatedShoppingIdRoute
   '/tasks/new': typeof AuthenticatedTasksNewRoute
   '/calendar': typeof AuthenticatedCalendarIndexRoute
   '/goals': typeof AuthenticatedGoalsIndexRoute
   '/reading': typeof AuthenticatedReadingIndexRoute
+  '/shopping': typeof AuthenticatedShoppingIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
   '/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
@@ -344,10 +361,12 @@ export interface FileRoutesById {
   '/_authenticated/reading/goals': typeof AuthenticatedReadingGoalsRoute
   '/_authenticated/reading/new': typeof AuthenticatedReadingNewRoute
   '/_authenticated/reading/stats': typeof AuthenticatedReadingStatsRoute
+  '/_authenticated/shopping/$id': typeof AuthenticatedShoppingIdRoute
   '/_authenticated/tasks/new': typeof AuthenticatedTasksNewRoute
   '/_authenticated/calendar/': typeof AuthenticatedCalendarIndexRoute
   '/_authenticated/goals/': typeof AuthenticatedGoalsIndexRoute
   '/_authenticated/reading/': typeof AuthenticatedReadingIndexRoute
+  '/_authenticated/shopping/': typeof AuthenticatedShoppingIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/calendar/day/$date': typeof AuthenticatedCalendarDayDateRoute
   '/_authenticated/tasks/$id/edit': typeof AuthenticatedTasksIdEditRoute
@@ -383,10 +402,12 @@ export interface FileRouteTypes {
     | '/reading/goals'
     | '/reading/new'
     | '/reading/stats'
+    | '/shopping/$id'
     | '/tasks/new'
     | '/calendar/'
     | '/goals/'
     | '/reading/'
+    | '/shopping/'
     | '/tasks/'
     | '/calendar/day/$date'
     | '/tasks/$id/edit'
@@ -419,10 +440,12 @@ export interface FileRouteTypes {
     | '/reading/goals'
     | '/reading/new'
     | '/reading/stats'
+    | '/shopping/$id'
     | '/tasks/new'
     | '/calendar'
     | '/goals'
     | '/reading'
+    | '/shopping'
     | '/tasks'
     | '/calendar/day/$date'
     | '/tasks/$id/edit'
@@ -457,10 +480,12 @@ export interface FileRouteTypes {
     | '/_authenticated/reading/goals'
     | '/_authenticated/reading/new'
     | '/_authenticated/reading/stats'
+    | '/_authenticated/shopping/$id'
     | '/_authenticated/tasks/new'
     | '/_authenticated/calendar/'
     | '/_authenticated/goals/'
     | '/_authenticated/reading/'
+    | '/_authenticated/shopping/'
     | '/_authenticated/tasks/'
     | '/_authenticated/calendar/day/$date'
     | '/_authenticated/tasks/$id/edit'
@@ -596,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/shopping/': {
+      id: '/_authenticated/shopping/'
+      path: '/shopping'
+      fullPath: '/shopping/'
+      preLoaderRoute: typeof AuthenticatedShoppingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reading/': {
       id: '/_authenticated/reading/'
       path: '/reading'
@@ -622,6 +654,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks/new'
       fullPath: '/tasks/new'
       preLoaderRoute: typeof AuthenticatedTasksNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/shopping/$id': {
+      id: '/_authenticated/shopping/$id'
+      path: '/shopping/$id'
+      fullPath: '/shopping/$id'
+      preLoaderRoute: typeof AuthenticatedShoppingIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reading/stats': {
@@ -775,9 +814,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReadingGoalsRoute: typeof AuthenticatedReadingGoalsRoute
   AuthenticatedReadingNewRoute: typeof AuthenticatedReadingNewRoute
   AuthenticatedReadingStatsRoute: typeof AuthenticatedReadingStatsRoute
+  AuthenticatedShoppingIdRoute: typeof AuthenticatedShoppingIdRoute
   AuthenticatedTasksNewRoute: typeof AuthenticatedTasksNewRoute
   AuthenticatedGoalsIndexRoute: typeof AuthenticatedGoalsIndexRoute
   AuthenticatedReadingIndexRoute: typeof AuthenticatedReadingIndexRoute
+  AuthenticatedShoppingIndexRoute: typeof AuthenticatedShoppingIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedTasksIdEditRoute: typeof AuthenticatedTasksIdEditRoute
 }
@@ -802,9 +843,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReadingGoalsRoute: AuthenticatedReadingGoalsRoute,
   AuthenticatedReadingNewRoute: AuthenticatedReadingNewRoute,
   AuthenticatedReadingStatsRoute: AuthenticatedReadingStatsRoute,
+  AuthenticatedShoppingIdRoute: AuthenticatedShoppingIdRoute,
   AuthenticatedTasksNewRoute: AuthenticatedTasksNewRoute,
   AuthenticatedGoalsIndexRoute: AuthenticatedGoalsIndexRoute,
   AuthenticatedReadingIndexRoute: AuthenticatedReadingIndexRoute,
+  AuthenticatedShoppingIndexRoute: AuthenticatedShoppingIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedTasksIdEditRoute: AuthenticatedTasksIdEditRoute,
 }

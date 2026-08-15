@@ -7,7 +7,7 @@
  *   cancelando o que ficou obsoleto — nunca sobra notificação antiga.
  * - Horários usam Date local do aparelho (sem UTC direto).
  */
-import { dateKey, taskAppearsOn, taskCompletedOn, type CompletedSession, type Task } from "@/lib/store";
+import { dateKey, taskAppearsOn, taskCompletedOn, useStore, type CompletedSession, type Task } from "@/lib/store";
 import { isNativeApp } from "@/lib/native";
 
 export const CHANNELS = {
@@ -109,11 +109,22 @@ export function planNotifications(
               ? `Daqui a ${Math.round(task.alarmMinutesBefore / 60)}h começa.`
               : `Daqui a ${task.alarmMinutesBefore} minutos começa.`;
 
+      // Extra de compras: se a tarefa tem lista vinculada, mostra o que falta comprar.
+      let shoppingSuffix = "";
+      if (task.shoppingListId) {
+        const list = useStore.getState().shoppingLists.find((l) => l.id === task.shoppingListId);
+        if (list) {
+          const pending = list.items.filter((i) => !i.purchased);
+          const estimated = pending.reduce((sum, i) => sum + (i.estimatedPrice ?? 0) * (i.quantity || 1), 0);
+          shoppingSuffix = `\n🛒 ${pending.length} item(ns) pendentes${estimated > 0 ? ` · est. R$ ${estimated.toFixed(2).replace(".", ",")}` : ""}`;
+        }
+      }
+
       if (remindAt.getTime() > now.getTime()) {
         out.push({
           id: notificationId(task.id, date, "lembrete"),
-          title: "🔥 FORJA",
-          body: `${task.name} às ${task.time}\n"${antecedencia} ${task.motivation?.trim() || pick(MOTIVATIONAL, task.id + date)}"`,
+          title: task.shoppingListId ? "🛒 FORJA — Compras" : "🔥 FORJA",
+          body: `${task.name} às ${task.time}${shoppingSuffix}\n"${antecedencia} ${task.motivation?.trim() || pick(MOTIVATIONAL, task.id + date)}"`,
           at: remindAt,
           channelId: CHANNELS.tarefas,
           taskId: task.id,

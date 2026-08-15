@@ -61,6 +61,8 @@ export interface Task {
   rolloverCount?: number;
   goalId?: string;
   objectiveId?: string;
+  /** Lista de compras vinculada (tarefa "fazer compras"). */
+  shoppingListId?: string;
 }
 
 const parseDate = (s: string) => new Date(s + "T00:00:00");
@@ -322,8 +324,35 @@ export interface ChatMessage {
   at: number;
 }
 
+// ---------- Lista de compras ----------
+export interface ShoppingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  estimatedPrice?: number;
+  paidPrice?: number;
+  category: string;
+  notes?: string;
+  purchased: boolean;
+  purchasedAt?: string; // YYYY-MM-DD
+  /** Lançamento financeiro gerado (evita duplicidade). */
+  transactionId?: string;
+  createdAt: number;
+}
 
-
+export interface ShoppingList {
+  id: string;
+  name: string;
+  date: string; // YYYY-MM-DD
+  items: ShoppingItem[];
+  /** Categoria financeira padrão usada ao registrar gastos. */
+  financeCategory: string;
+  notes?: string;
+  done?: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
 
 interface State {
   userName: string;
@@ -364,6 +393,23 @@ interface State {
   removeTransaction: (id: string) => void;
   addChatMessage: (m: Omit<ChatMessage, "id" | "at">) => ChatMessage;
   clearChat: () => void;
+
+  // Lista de compras
+  shoppingLists: ShoppingList[];
+  activeShoppingListId: string | null;
+  addShoppingList: (l: { name: string; date?: string; financeCategory?: string; notes?: string }) => ShoppingList;
+  updateShoppingList: (id: string, patch: Partial<Omit<ShoppingList, "id" | "items">>) => void;
+  removeShoppingList: (id: string) => void;
+  duplicateShoppingList: (id: string, name?: string, date?: string) => ShoppingList | null;
+  setActiveShoppingList: (id: string | null) => void;
+  addShoppingItem: (
+    listId: string,
+    item: { name: string; quantity?: number; unit?: string; estimatedPrice?: number; category?: string; notes?: string },
+  ) => ShoppingItem | null;
+  updateShoppingItem: (listId: string, itemId: string, patch: Partial<Omit<ShoppingItem, "id">>) => void;
+  removeShoppingItem: (listId: string, itemId: string) => void;
+  /** Marca/desmarca comprado. Com preço pago, lança automaticamente no financeiro (sem duplicar). */
+  setShoppingItemPurchased: (listId: string, itemId: string, purchased: boolean, paidPrice?: number) => void;
 
 
   addDiscipline: (delta: number, reason: string) => void;
@@ -517,6 +563,158 @@ export const useStore = create<State>()(
         return msg;
       },
       clearChat: () => set({ assistantMessages: [] }),
+
+      // ---------- Lista de compras ----------
+      shoppingLists: [],
+      activeShoppingListId: null,
+
+      addShoppingList: (l) => {
+        const now = Date.now();
+        const list: ShoppingList = {
+          id: genId(),
+          name: l.name.trim() || "Nova lista",
+          date: l.date || todayKey(),
+          items: [],
+          financeCategory: l.financeCategory || "mercado",
+          notes: l.notes,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((s) => ({ shoppingLists: [list, ...s.shoppingLists], activeShoppingListId: list.id }));
+        return list;
+      },
+
+      updateShoppingList: (id, patch) =>
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === id ? { ...l, ...patch, updatedAt: Date.now() } : l,
+          ),
+        })),
+
+      removeShoppingList: (id) =>
+        set((s) => ({
+          shoppingLists: s.shoppingLists.filter((l) => l.id !== id),
+          activeShoppingListId: s.activeShoppingListId === id ? null : s.activeShoppingListId,
+        })),
+
+      duplicateShoppingList: (id, name, date) => {
+        const src = get().shoppingLists.find((l) => l.id === id);
+        if (!src) return null;
+        const now = Date.now();
+        const copy: ShoppingList = {
+          ...src,
+          id: genId(),
+          name: name || `${src.name} (cópia)`,
+          date: date || todayKey(),
+          done: false,
+          createdAt: now,
+          updatedAt: now,
+          items: src.items.map((i) => ({
+            ...i,
+            id: genId(),
+            purchased: false,
+            purchasedAt: undefined,
+            paidPrice: undefined,
+            transactionId: undefined,
+            createdAt: now,
+          })),
+        };
+        set((s) => ({ shoppingLists: [copy, ...s.shoppingLists], activeShoppingListId: copy.id }));
+        return copy;
+      },
+
+      setActiveShoppingList: (id) => set({ activeShoppingListId: id }),
+
+      addShoppingItem: (listId, item) => {
+        const list = get().shoppingLists.find((l) => l.id === listId);
+        if (!list) return null;
+        const it: ShoppingItem = {
+          id: genId(),
+          name: item.name.trim(),
+          quantity: item.quantity && item.quantity > 0 ? item.quantity : 1,
+          unit: item.unit?.trim() || "un",
+          estimatedPrice: item.estimatedPrice,
+          category: item.category || "outros",
+          notes: item.notes,
+          purchased: false,
+          createdAt: Date.now(),
+        };
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === listId ? { ...l, items: [...l.items, it], updatedAt: Date.now() } : l,
+          ),
+        }));
+        return it;
+      },
+
+      updateShoppingItem: (listId, itemId, patch) =>
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === listId
+              ? {
+                  ...l,
+                  updatedAt: Date.now(),
+                  items: l.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)),
+                }
+              : l,
+          ),
+        })),
+
+      removeShoppingItem: (listId, itemId) => {
+        const list = get().shoppingLists.find((l) => l.id === listId);
+        const item = list?.items.find((i) => i.id === itemId);
+        if (item?.transactionId) get().removeTransaction(item.transactionId);
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== itemId), updatedAt: Date.now() } : l,
+          ),
+        }));
+      },
+
+      setShoppingItemPurchased: (listId, itemId, purchased, paidPrice) => {
+        const list = get().shoppingLists.find((l) => l.id === listId);
+        const item = list?.items.find((i) => i.id === itemId);
+        if (!list || !item) return;
+
+        if (!purchased) {
+          // Desfaz: remove o lançamento financeiro gerado por este item.
+          if (item.transactionId) get().removeTransaction(item.transactionId);
+          get().updateShoppingItem(listId, itemId, {
+            purchased: false,
+            purchasedAt: undefined,
+            transactionId: undefined,
+          });
+          return;
+        }
+
+        const price = paidPrice ?? item.paidPrice ?? item.estimatedPrice;
+        const date = item.purchasedAt || todayKey();
+        let transactionId = item.transactionId;
+
+        if (price && price > 0) {
+          const category = item.category && item.category !== "outros" ? item.category : list.financeCategory;
+          if (transactionId && get().transactions.some((t) => t.id === transactionId)) {
+            // Já lançado: apenas atualiza (nunca duplica).
+            get().updateTransaction(transactionId, { amount: price, category, date });
+          } else {
+            const tx = get().addTransaction({
+              kind: "despesa",
+              amount: price,
+              category,
+              description: `${item.name}${item.quantity > 1 ? ` (${item.quantity} ${item.unit})` : ""} — ${list.name}`,
+              date,
+            });
+            transactionId = tx.id;
+          }
+        }
+
+        get().updateShoppingItem(listId, itemId, {
+          purchased: true,
+          purchasedAt: date,
+          paidPrice: price,
+          transactionId,
+        });
+      },
 
 
 
@@ -1191,6 +1389,8 @@ export const useStore = create<State>()(
           dismissedMissed: [],
           challenges: [],
           recentUnlocks: [],
+          shoppingLists: [],
+          activeShoppingListId: null,
         }),
     }),
     { name: "kairos-store-v1" },

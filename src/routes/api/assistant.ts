@@ -31,6 +31,14 @@ const ACTION_TYPES = [
   "anotacao_leitura",
   "arquivar_livro",
   "reiniciar_livro",
+  "criar_lista_compras",
+  "adicionar_item_compras",
+  "atualizar_item_compras",
+  "remover_item_compras",
+  "marcar_item_comprado",
+  "duplicar_lista_compras",
+  "finalizar_lista_compras",
+  "excluir_lista_compras",
 ] as const;
 
 const SCHEMA = {
@@ -84,6 +92,21 @@ excluir_livro: {"id"|"title"} | progresso_leitura: {"id"|"title","page":number} 
 sessao_leitura: {"id"|"title","minutes":number,"pagesRead"?,"date"?}
 criar_habito: {"name","kind"?,"target"?,"deadline"?} | concluir_habito: {"id"} | excluir_habito: {"id"}
 definir_minimo_diario: {"value":number}
+
+LISTA DE COMPRAS (categorias: mercado|higiene|limpeza|bebidas|alimentacao|farmacia|casa|eletronicos|roupas|outros):
+criar_lista_compras: {"name","date"?,"financeCategory"?,"items":[{"name","quantity"?,"unit"?,"estimatedPrice"?,"category"?,"notes"?}]}
+adicionar_item_compras: {"listId"?|"list"?,"items":[{"name","quantity"?,"unit"?,"estimatedPrice"?,"category"?}]}   // sem listId usa a lista ativa
+atualizar_item_compras: {"listId"?,"itemId"?|"item":"nome","patch":{"quantity"?,"unit"?,"estimatedPrice"?,"category"?,"name"?,"notes"?}}
+remover_item_compras: {"listId"?,"itemId"?|"item":"nome"}
+marcar_item_comprado: {"listId"?,"itemId"?|"item":"nome","purchased"?:true|false,"paidPrice"?:number}  // com paidPrice lança a despesa no financeiro automaticamente, sem duplicar
+duplicar_lista_compras: {"listId"?,"name"?,"date"?} | finalizar_lista_compras: {"listId"?,"reabrir"?:true} | excluir_lista_compras: {"listId"}
+
+REGRAS DE COMPRAS:
+- "Cria uma lista com arroz, feijão..." -> UMA ação criar_lista_compras com todos os itens, cada um com categoria adequada.
+- "Adiciona X na lista" sem citar lista -> adicionar_item_compras sem listId (usa a ativa). Se não existir lista nenhuma, crie uma antes.
+- "Comprei arroz por R$ 25" -> marcar_item_comprado com paidPrice 25 (nunca use registrar_transacao junto: geraria duplicidade).
+- Perguntas sobre a compra ("quanto já gastei", "o que falta") são respondidas com os dados de "compras" no contexto, sem ações.
+- Para tarefa de compras, use criar_tarefa com nome "🛒 Fazer compras" e alarmMinutesBefore conforme pedido.
 
 REGRA CRÍTICA DE DIAS DA SEMANA (nunca erre isso):
 - weekdays usa 0=domingo, 1=segunda, 2=terça, 3=quarta, 4=quinta, 5=sexta, 6=sábado.

@@ -2,6 +2,14 @@ import type { TransactionKind } from "@/lib/store";
 
 export const FINANCE_CATEGORIES = [
   "alimentacao",
+  "mercado",
+  "higiene",
+  "limpeza",
+  "bebidas",
+  "farmacia",
+  "casa",
+  "eletronicos",
+  "roupas",
   "transporte",
   "moradia",
   "saude",
@@ -15,6 +23,14 @@ export const FINANCE_CATEGORIES = [
 export type FinanceCategory = (typeof FINANCE_CATEGORIES)[number];
 
 export const financeCategoryLabel: Record<string, string> = {
+  mercado: "Mercado",
+  higiene: "Higiene",
+  limpeza: "Limpeza",
+  bebidas: "Bebidas",
+  farmacia: "Farmácia",
+  casa: "Casa",
+  eletronicos: "Eletrônicos",
+  roupas: "Roupas",
   alimentacao: "Alimentação",
   transporte: "Transporte",
   moradia: "Moradia",
@@ -27,6 +43,14 @@ export const financeCategoryLabel: Record<string, string> = {
 };
 
 export const financeCategoryColor: Record<string, string> = {
+  mercado: "#f59e0b",
+  higiene: "#06b6d4",
+  limpeza: "#0ea5e9",
+  bebidas: "#8b5cf6",
+  farmacia: "#f43f5e",
+  casa: "#84cc16",
+  eletronicos: "#6366f1",
+  roupas: "#d946ef",
   alimentacao: "#f97316",
   transporte: "#3b82f6",
   moradia: "#a855f7",

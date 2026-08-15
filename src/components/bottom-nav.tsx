@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarDays, BarChart3, BookOpen, BookMarked, Wallet } from "lucide-react";
+import { Home, CalendarDays, BarChart3, BookOpen, BookMarked, Wallet, ShoppingCart } from "lucide-react";
 
 const items = [
   { to: "/", label: "Início", icon: Home },
@@ -7,6 +7,7 @@ const items = [
   { to: "/stats", label: "Stats", icon: BarChart3 },
   { to: "/reading", label: "Leitura", icon: BookMarked },
   { to: "/devotional", label: "Devocional", icon: BookOpen },
+  { to: "/shopping", label: "Compras", icon: ShoppingCart },
   { to: "/finance", label: "Finanças", icon: Wallet },
 ] as const;
 
@@ -14,7 +15,7 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto max-w-[440px] grid grid-cols-6 h-16">
+      <div className="mx-auto max-w-[440px] grid grid-cols-7 h-16">
         {items.map((it) => {
           const Icon = it.icon;
           const active = it.to === "/" ? pathname === "/" : pathname.startsWith(it.to);
