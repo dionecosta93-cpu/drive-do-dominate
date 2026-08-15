@@ -67,12 +67,12 @@ export function AssistantFab() {
     if (recording) {
       setRecording(false);
       try {
-        const blob = await recorder.current!.stop();
+        const { blob, filename } = await recorder.current!.stop();
         recorder.current = null;
-        if (blob.size < 2048) return toast.error("Gravação vazia. Tente de novo.");
+        if (blob.size < 1024) return toast.error("Gravação vazia. Fale mais perto do microfone.");
         setBusy(true);
         const form = new FormData();
-        form.append("file", blob, "recording.wav");
+        form.append("file", blob, filename);
         const res = await fetch("/api/transcribe", { method: "POST", body: form });
         setBusy(false);
         if (!res.ok) return toast.error("Não consegui entender o áudio.");
@@ -83,6 +83,7 @@ export function AssistantFab() {
         setBusy(false);
         toast.error("Erro ao processar o áudio.");
       }
+
       return;
     }
     try {
