@@ -360,6 +360,103 @@ export function applyAssistantAction(action: AssistantAction): string {
       return "Hábito excluído.";
     }
 
+    // ---------- Lista de compras ----------
+    case "criar_lista_compras": {
+      const name = str(p, "name") ?? "Compras";
+      const list = s.addShoppingList({
+        name,
+        date: str(p, "date") ?? dateKey(),
+        financeCategory: str(p, "financeCategory") ?? "mercado",
+      });
+      const items = Array.isArray(p["items"]) ? (p["items"] as unknown[]) : [];
+      let added = 0;
+      for (const raw of items) {
+        const it = typeof raw === "string" ? { name: raw } : (raw as Record<string, unknown>);
+        const itemName = str(it, "name");
+        if (!itemName) continue;
+        s.addShoppingItem(list.id, {
+          name: itemName,
+          quantity: num(it, "quantity") ?? 1,
+          unit: str(it, "unit") ?? "un",
+          estimatedPrice: num(it, "estimatedPrice"),
+          category: str(it, "category") ?? guessCategory(itemName),
+          notes: str(it, "notes"),
+        });
+        added += 1;
+      }
+      return `Lista "${list.name}" criada com ${added} item(ns).`;
+    }
+    case "adicionar_item_compras": {
+      const list = findList(p);
+      if (!list) return "Lista de compras não encontrada.";
+      const raws = Array.isArray(p["items"]) ? (p["items"] as unknown[]) : [p];
+      let added = 0;
+      for (const raw of raws) {
+        const it = typeof raw === "string" ? { name: raw } : (raw as Record<string, unknown>);
+        const itemName = str(it, "name");
+        if (!itemName) continue;
+        s.addShoppingItem(list.id, {
+          name: itemName,
+          quantity: num(it, "quantity") ?? 1,
+          unit: str(it, "unit") ?? "un",
+          estimatedPrice: num(it, "estimatedPrice"),
+          category: str(it, "category") ?? guessCategory(itemName),
+          notes: str(it, "notes"),
+        });
+        added += 1;
+      }
+      return added ? `${added} item(ns) adicionado(s) em ${list.name}.` : "Nenhum item válido.";
+    }
+    case "atualizar_item_compras": {
+      const list = findList(p);
+      const item = list ? findItem(list, p) : undefined;
+      if (!list || !item) return "Item não encontrado.";
+      const patch = { ...((p["patch"] ?? p) as Record<string, unknown>) };
+      const clean: Record<string, unknown> = {};
+      for (const k of ["name", "quantity", "unit", "estimatedPrice", "paidPrice", "category", "notes"]) {
+        if (patch[k] !== undefined) clean[k] = patch[k];
+      }
+      s.updateShoppingItem(list.id, item.id, clean as never);
+      return `Item atualizado: ${item.name}.`;
+    }
+    case "remover_item_compras": {
+      const list = findList(p);
+      const item = list ? findItem(list, p) : undefined;
+      if (!list || !item) return "Item não encontrado.";
+      s.removeShoppingItem(list.id, item.id);
+      return `${item.name} removido de ${list.name}.`;
+    }
+    case "marcar_item_comprado": {
+      const list = findList(p);
+      const item = list ? findItem(list, p) : undefined;
+      if (!list || !item) return "Item não encontrado.";
+      const purchased = bool(p, "purchased") ?? true;
+      const price = num(p, "paidPrice") ?? num(p, "price");
+      s.setShoppingItemPurchased(list.id, item.id, purchased, price);
+      if (!purchased) return `${item.name} desmarcado.`;
+      return price
+        ? `${item.name} comprado por R$ ${price.toFixed(2).replace(".", ",")} e lançado no financeiro.`
+        : `${item.name} marcado como comprado.`;
+    }
+    case "duplicar_lista_compras": {
+      const list = findList(p);
+      if (!list) return "Lista não encontrada.";
+      const copy = s.duplicateShoppingList(list.id, str(p, "name"), str(p, "date"));
+      return copy ? `Lista repetida: ${copy.name}.` : "Não foi possível repetir.";
+    }
+    case "finalizar_lista_compras": {
+      const list = findList(p);
+      if (!list) return "Lista não encontrada.";
+      s.updateShoppingList(list.id, { done: bool(p, "reabrir") ? false : true });
+      return bool(p, "reabrir") ? `${list.name} reaberta.` : `${list.name} finalizada.`;
+    }
+    case "excluir_lista_compras": {
+      const list = findList(p);
+      if (!list) return "Lista não encontrada.";
+      s.removeShoppingList(list.id);
+      return `Lista ${list.name} excluída.`;
+    }
+
     // ---------- Configurações ----------
     case "definir_minimo_diario": {
       const n = num(p, "value");
