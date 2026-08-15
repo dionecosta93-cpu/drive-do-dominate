@@ -7,7 +7,7 @@
  *   cancelando o que ficou obsoleto — nunca sobra notificação antiga.
  * - Horários usam Date local do aparelho (sem UTC direto).
  */
-import { dateKey, taskAppearsOn, taskCompletedOn, type CompletedSession, type Task } from "@/lib/store";
+import { dateKey, taskAppearsOn, taskCompletedOn, useStore, type CompletedSession, type Task } from "@/lib/store";
 import { isNativeApp } from "@/lib/native";
 
 export const CHANNELS = {
