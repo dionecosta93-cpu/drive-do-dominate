@@ -2,6 +2,14 @@ import type { TransactionKind } from "@/lib/store";
 
 export const FINANCE_CATEGORIES = [
   "alimentacao",
+  "mercado",
+  "higiene",
+  "limpeza",
+  "bebidas",
+  "farmacia",
+  "casa",
+  "eletronicos",
+  "roupas",
   "transporte",
   "moradia",
   "saude",
