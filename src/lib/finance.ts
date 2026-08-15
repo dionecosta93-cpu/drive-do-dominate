@@ -43,6 +43,14 @@ export const financeCategoryLabel: Record<string, string> = {
 };
 
 export const financeCategoryColor: Record<string, string> = {
+  mercado: "#f59e0b",
+  higiene: "#06b6d4",
+  limpeza: "#0ea5e9",
+  bebidas: "#8b5cf6",
+  farmacia: "#f43f5e",
+  casa: "#84cc16",
+  eletronicos: "#6366f1",
+  roupas: "#d946ef",
   alimentacao: "#f97316",
   transporte: "#3b82f6",
   moradia: "#a855f7",
