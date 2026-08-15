@@ -23,6 +23,14 @@ export const FINANCE_CATEGORIES = [
 export type FinanceCategory = (typeof FINANCE_CATEGORIES)[number];
 
 export const financeCategoryLabel: Record<string, string> = {
+  mercado: "Mercado",
+  higiene: "Higiene",
+  limpeza: "Limpeza",
+  bebidas: "Bebidas",
+  farmacia: "Farmácia",
+  casa: "Casa",
+  eletronicos: "Eletrônicos",
+  roupas: "Roupas",
   alimentacao: "Alimentação",
   transporte: "Transporte",
   moradia: "Moradia",
