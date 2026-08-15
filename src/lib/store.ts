@@ -61,6 +61,8 @@ export interface Task {
   rolloverCount?: number;
   goalId?: string;
   objectiveId?: string;
+  /** Lista de compras vinculada (tarefa "fazer compras"). */
+  shoppingListId?: string;
 }
 
 const parseDate = (s: string) => new Date(s + "T00:00:00");
