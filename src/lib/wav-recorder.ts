@@ -1,15 +1,61 @@
-/** Records microphone audio and encodes it as a complete 16 kHz mono WAV file. */
+export interface Recording {
+  blob: Blob;
+  filename: string;
+}
+
+const MIME_CANDIDATES = [
+  "audio/webm;codecs=opus",
+  "audio/webm",
+  "audio/mp4",
+  "audio/ogg;codecs=opus",
+  "audio/ogg",
+];
+
+const extFor = (mime: string) =>
+  mime.includes("webm") ? "webm" : mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : "wav";
+
+/**
+ * Records microphone audio. Uses MediaRecorder when available (Android WebView,
+ * mobile Safari 14.3+, Chrome) and falls back to a WAV encoder built on
+ * ScriptProcessorNode for browsers without it.
+ */
 export class WavRecorder {
-  private ctx: AudioContext | null = null;
   private stream: MediaStream | null = null;
+  private media: MediaRecorder | null = null;
+  private mediaChunks: Blob[] = [];
+  private mime = "";
+
+  // WAV fallback
+  private ctx: AudioContext | null = null;
   private node: ScriptProcessorNode | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
   private chunks: Float32Array[] = [];
 
   async start() {
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const AC = window.AudioContext;
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error("mic_unsupported");
+    this.stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true },
+    });
+
+    const supported =
+      typeof MediaRecorder !== "undefined"
+        ? MIME_CANDIDATES.find((m) => MediaRecorder.isTypeSupported?.(m))
+        : undefined;
+
+    if (supported) {
+      this.mime = supported;
+      this.mediaChunks = [];
+      this.media = new MediaRecorder(this.stream, { mimeType: supported });
+      this.media.ondataavailable = (e) => {
+        if (e.data.size > 0) this.mediaChunks.push(e.data);
+      };
+      this.media.start(250);
+      return;
+    }
+
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     this.ctx = new AC();
+    if (this.ctx.state === "suspended") await this.ctx.resume();
     this.source = this.ctx.createMediaStreamSource(this.stream);
     this.node = this.ctx.createScriptProcessor(4096, 1, 1);
     this.chunks = [];
@@ -20,7 +66,21 @@ export class WavRecorder {
     this.node.connect(this.ctx.destination);
   }
 
-  async stop(): Promise<Blob> {
+  async stop(): Promise<Recording> {
+    if (this.media) {
+      const rec = this.media;
+      const blob = await new Promise<Blob>((resolve) => {
+        rec.onstop = () => resolve(new Blob(this.mediaChunks, { type: this.mime }));
+        if (rec.state !== "inactive") rec.stop();
+        else resolve(new Blob(this.mediaChunks, { type: this.mime }));
+      });
+      this.stream?.getTracks().forEach((t) => t.stop());
+      this.media = null;
+      this.stream = null;
+      this.mediaChunks = [];
+      return { blob, filename: `recording.${extFor(this.mime)}` };
+    }
+
     const rate = this.ctx?.sampleRate ?? 44100;
     this.stream?.getTracks().forEach((t) => t.stop());
     this.node?.disconnect();
@@ -29,7 +89,8 @@ export class WavRecorder {
     this.chunks = [];
     await this.ctx?.close();
     this.ctx = null;
-    return encodeWav(data, rate);
+    this.stream = null;
+    return { blob: encodeWav(data, rate), filename: "recording.wav" };
   }
 }
 
