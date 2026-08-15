@@ -564,6 +564,158 @@ export const useStore = create<State>()(
       },
       clearChat: () => set({ assistantMessages: [] }),
 
+      // ---------- Lista de compras ----------
+      shoppingLists: [],
+      activeShoppingListId: null,
+
+      addShoppingList: (l) => {
+        const now = Date.now();
+        const list: ShoppingList = {
+          id: genId(),
+          name: l.name.trim() || "Nova lista",
+          date: l.date || todayKey(),
+          items: [],
+          financeCategory: l.financeCategory || "mercado",
+          notes: l.notes,
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((s) => ({ shoppingLists: [list, ...s.shoppingLists], activeShoppingListId: list.id }));
+        return list;
+      },
+
+      updateShoppingList: (id, patch) =>
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === id ? { ...l, ...patch, updatedAt: Date.now() } : l,
+          ),
+        })),
+
+      removeShoppingList: (id) =>
+        set((s) => ({
+          shoppingLists: s.shoppingLists.filter((l) => l.id !== id),
+          activeShoppingListId: s.activeShoppingListId === id ? null : s.activeShoppingListId,
+        })),
+
+      duplicateShoppingList: (id, name, date) => {
+        const src = get().shoppingLists.find((l) => l.id === id);
+        if (!src) return null;
+        const now = Date.now();
+        const copy: ShoppingList = {
+          ...src,
+          id: genId(),
+          name: name || `${src.name} (cópia)`,
+          date: date || todayKey(),
+          done: false,
+          createdAt: now,
+          updatedAt: now,
+          items: src.items.map((i) => ({
+            ...i,
+            id: genId(),
+            purchased: false,
+            purchasedAt: undefined,
+            paidPrice: undefined,
+            transactionId: undefined,
+            createdAt: now,
+          })),
+        };
+        set((s) => ({ shoppingLists: [copy, ...s.shoppingLists], activeShoppingListId: copy.id }));
+        return copy;
+      },
+
+      setActiveShoppingList: (id) => set({ activeShoppingListId: id }),
+
+      addShoppingItem: (listId, item) => {
+        const list = get().shoppingLists.find((l) => l.id === listId);
+        if (!list) return null;
+        const it: ShoppingItem = {
+          id: genId(),
+          name: item.name.trim(),
+          quantity: item.quantity && item.quantity > 0 ? item.quantity : 1,
+          unit: item.unit?.trim() || "un",
+          estimatedPrice: item.estimatedPrice,
+          category: item.category || "outros",
+          notes: item.notes,
+          purchased: false,
+          createdAt: Date.now(),
+        };
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === listId ? { ...l, items: [...l.items, it], updatedAt: Date.now() } : l,
+          ),
+        }));
+        return it;
+      },
+
+      updateShoppingItem: (listId, itemId, patch) =>
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === listId
+              ? {
+                  ...l,
+                  updatedAt: Date.now(),
+                  items: l.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)),
+                }
+              : l,
+          ),
+        })),
+
+      removeShoppingItem: (listId, itemId) => {
+        const list = get().shoppingLists.find((l) => l.id === listId);
+        const item = list?.items.find((i) => i.id === itemId);
+        if (item?.transactionId) get().removeTransaction(item.transactionId);
+        set((s) => ({
+          shoppingLists: s.shoppingLists.map((l) =>
+            l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== itemId), updatedAt: Date.now() } : l,
+          ),
+        }));
+      },
+
+      setShoppingItemPurchased: (listId, itemId, purchased, paidPrice) => {
+        const list = get().shoppingLists.find((l) => l.id === listId);
+        const item = list?.items.find((i) => i.id === itemId);
+        if (!list || !item) return;
+
+        if (!purchased) {
+          // Desfaz: remove o lançamento financeiro gerado por este item.
+          if (item.transactionId) get().removeTransaction(item.transactionId);
+          get().updateShoppingItem(listId, itemId, {
+            purchased: false,
+            purchasedAt: undefined,
+            transactionId: undefined,
+          });
+          return;
+        }
+
+        const price = paidPrice ?? item.paidPrice ?? item.estimatedPrice;
+        const date = item.purchasedAt || todayKey();
+        let transactionId = item.transactionId;
+
+        if (price && price > 0) {
+          const category = item.category && item.category !== "outros" ? item.category : list.financeCategory;
+          if (transactionId && get().transactions.some((t) => t.id === transactionId)) {
+            // Já lançado: apenas atualiza (nunca duplica).
+            get().updateTransaction(transactionId, { amount: price, category, date });
+          } else {
+            const tx = get().addTransaction({
+              kind: "despesa",
+              amount: price,
+              category,
+              description: `${item.name}${item.quantity > 1 ? ` (${item.quantity} ${item.unit})` : ""} — ${list.name}`,
+              date,
+            });
+            transactionId = tx.id;
+          }
+        }
+
+        get().updateShoppingItem(listId, itemId, {
+          purchased: true,
+          purchasedAt: date,
+          paidPrice: price,
+          transactionId,
+        });
+      },
+
 
 
       addDiscipline: (delta, reason) =>
