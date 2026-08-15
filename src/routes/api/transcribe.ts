@@ -15,12 +15,14 @@ export const Route = createFileRoute("/api/transcribe")({
         } catch {
           return Response.json({ error: "bad_body" }, { status: 400 });
         }
-        if (!file || file.size < 2048) return Response.json({ error: "empty_audio" }, { status: 400 });
+        if (!file || file.size < 1024) return Response.json({ error: "empty_audio" }, { status: 400 });
         if (file.size > 20 * 1024 * 1024) return Response.json({ error: "too_large" }, { status: 413 });
 
         const upstream = new FormData();
         upstream.append("model", "openai/gpt-4o-transcribe");
-        upstream.append("file", file, "recording.wav");
+        upstream.append("language", "pt");
+        upstream.append("file", file, file.name || "recording.webm");
+
 
         const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
           method: "POST",
