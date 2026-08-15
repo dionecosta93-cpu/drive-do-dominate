@@ -324,8 +324,35 @@ export interface ChatMessage {
   at: number;
 }
 
+// ---------- Lista de compras ----------
+export interface ShoppingItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  estimatedPrice?: number;
+  paidPrice?: number;
+  category: string;
+  notes?: string;
+  purchased: boolean;
+  purchasedAt?: string; // YYYY-MM-DD
+  /** Lançamento financeiro gerado (evita duplicidade). */
+  transactionId?: string;
+  createdAt: number;
+}
 
-
+export interface ShoppingList {
+  id: string;
+  name: string;
+  date: string; // YYYY-MM-DD
+  items: ShoppingItem[];
+  /** Categoria financeira padrão usada ao registrar gastos. */
+  financeCategory: string;
+  notes?: string;
+  done?: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
 
 interface State {
   userName: string;
