@@ -615,5 +615,33 @@ export function buildAssistantContext(): string {
           data: t.date,
         })),
     },
+    compras: {
+      lista_ativa_id: s.activeShoppingListId,
+      listas: s.shoppingLists.slice(0, 20).map((l) => {
+        const t = listTotals(l);
+        return {
+          id: l.id,
+          nome: l.name,
+          data: l.date,
+          finalizada: !!l.done,
+          categoria_financeira: l.financeCategory,
+          total_estimado: t.estimated,
+          total_comprado: t.paid,
+          itens_comprados: `${t.done}/${t.total}`,
+          itens: l.items.map((i) => ({
+            id: i.id,
+            nome: i.name,
+            quantidade: i.quantity,
+            unidade: i.unit,
+            categoria: i.category,
+            preco_estimado: i.estimatedPrice ?? null,
+            preco_pago: i.paidPrice ?? null,
+            comprado: i.purchased,
+            data_compra: i.purchasedAt ?? null,
+            lancamento_id: i.transactionId ?? null,
+          })),
+        };
+      }),
+    },
   });
 }
