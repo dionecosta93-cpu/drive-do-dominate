@@ -59,6 +59,40 @@ function findBook(p: Record<string, unknown>): Book | undefined {
   );
 }
 
+/** Lista de compras alvo: por id, por nome, ou a lista ativa/mais recente não finalizada. */
+function findList(p: Record<string, unknown>): ShoppingList | undefined {
+  const s = useStore.getState();
+  const id = str(p, "listId") ?? str(p, "id");
+  if (id) {
+    const byId = s.shoppingLists.find((l) => l.id === id);
+    if (byId) return byId;
+  }
+  const name = (str(p, "list") ?? str(p, "listName") ?? "").toLowerCase().trim();
+  if (name) {
+    const byName =
+      s.shoppingLists.find((l) => l.name.toLowerCase() === name) ??
+      s.shoppingLists.find((l) => l.name.toLowerCase().includes(name));
+    if (byName) return byName;
+  }
+  const active = s.activeShoppingListId ? s.shoppingLists.find((l) => l.id === s.activeShoppingListId) : undefined;
+  return active ?? s.shoppingLists.find((l) => !l.done) ?? s.shoppingLists[0];
+}
+
+/** Item da lista por id ou nome aproximado. */
+function findItem(list: ShoppingList, p: Record<string, unknown>): ShoppingItem | undefined {
+  const id = str(p, "itemId");
+  if (id) {
+    const byId = list.items.find((i) => i.id === id);
+    if (byId) return byId;
+  }
+  const name = (str(p, "item") ?? str(p, "name") ?? "").toLowerCase().trim();
+  if (!name) return undefined;
+  return (
+    list.items.find((i) => i.name.toLowerCase() === name) ??
+    list.items.find((i) => i.name.toLowerCase().includes(name) || name.includes(i.name.toLowerCase()))
+  );
+}
+
 /** Applies an assistant action to the local store. Returns a human message. */
 export function applyAssistantAction(action: AssistantAction): string {
   const s = useStore.getState();
