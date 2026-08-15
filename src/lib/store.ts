@@ -394,6 +394,23 @@ interface State {
   addChatMessage: (m: Omit<ChatMessage, "id" | "at">) => ChatMessage;
   clearChat: () => void;
 
+  // Lista de compras
+  shoppingLists: ShoppingList[];
+  activeShoppingListId: string | null;
+  addShoppingList: (l: { name: string; date?: string; financeCategory?: string; notes?: string }) => ShoppingList;
+  updateShoppingList: (id: string, patch: Partial<Omit<ShoppingList, "id" | "items">>) => void;
+  removeShoppingList: (id: string) => void;
+  duplicateShoppingList: (id: string, name?: string, date?: string) => ShoppingList | null;
+  setActiveShoppingList: (id: string | null) => void;
+  addShoppingItem: (
+    listId: string,
+    item: { name: string; quantity?: number; unit?: string; estimatedPrice?: number; category?: string; notes?: string },
+  ) => ShoppingItem | null;
+  updateShoppingItem: (listId: string, itemId: string, patch: Partial<Omit<ShoppingItem, "id">>) => void;
+  removeShoppingItem: (listId: string, itemId: string) => void;
+  /** Marca/desmarca comprado. Com preço pago, lança automaticamente no financeiro (sem duplicar). */
+  setShoppingItemPurchased: (listId: string, itemId: string, purchased: boolean, paidPrice?: number) => void;
+
 
   addDiscipline: (delta: number, reason: string) => void;
   setDailyMinimum: (n: number) => void;
