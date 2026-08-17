@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, Pencil, Trash2, Play, Square, Star, Clock, Archive, RotateCcw, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { BookForm } from "@/components/book-form";
@@ -25,8 +25,10 @@ function BookDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const book = useStore((s) => s.books.find((b) => b.id === id));
-  const sessions = useStore((s) => s.readingSessions.filter((r) => r.bookId === id));
-  const notes = useStore((s) => s.readingNotes.filter((n) => n.bookId === id));
+  const allSessions = useStore((s) => s.readingSessions);
+  const allNotes = useStore((s) => s.readingNotes);
+  const sessions = useMemo(() => allSessions.filter((r) => r.bookId === id), [allSessions, id]);
+  const notes = useMemo(() => allNotes.filter((n) => n.bookId === id), [allNotes, id]);
   const updateBook = useStore((s) => s.updateBook);
   const removeBook = useStore((s) => s.removeBook);
   const toggleFav = useStore((s) => s.toggleBookFavorite);
