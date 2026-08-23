@@ -533,7 +533,27 @@ export const useStore = create<State>()(
       claimedMissions: [],
       dismissedMissed: [],
       dismissMissed: (taskId, date) =>
-        set((st) => ({ dismissedMissed: [...new Set([...st.dismissedMissed, `${taskId}|${date}`])].slice(-300) })),
+        set((st) => {
+          const key = `${taskId}|${date}`;
+          if (st.dismissedMissed.includes(key)) return st;
+          const task = st.tasks.find((t) => t.id === taskId);
+          const penalty = task ? disciplinePenalty(task.difficulty ?? 5) : 5;
+          return {
+            dismissedMissed: [...st.dismissedMissed, key].slice(-300),
+            discipline: clampDiscipline(st.discipline - penalty),
+            disciplineLog: [
+              ...st.disciplineLog.slice(-400),
+              {
+                id: genId(),
+                date,
+                delta: -penalty,
+                reason: `Tarefa dispensada: ${task?.name ?? "tarefa"}`,
+                at: Date.now(),
+              },
+            ],
+          };
+        }),
+
       challenges: [],
       recentUnlocks: [],
 
