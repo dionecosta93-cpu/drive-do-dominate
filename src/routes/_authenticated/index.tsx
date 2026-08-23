@@ -303,14 +303,24 @@ function Dashboard() {
                     {isDone ? (
                       <span className="text-[10px] font-bold text-discipline uppercase">Feito</span>
                     ) : (
-                      <button
-                        onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: t.id } })}
-                        className="bg-discipline text-black rounded-lg p-2 active:scale-95 transition-transform"
-                        aria-label="Iniciar foco"
-                      >
-                        <Play className="size-4" fill="currentColor" />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setCompletingId(t.id)}
+                          className="size-9 grid place-items-center rounded-lg border border-discipline/40 text-discipline active:scale-95 transition-transform"
+                          aria-label="Marcar como concluída"
+                        >
+                          <Check className="size-4" />
+                        </button>
+                        <button
+                          onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: t.id } })}
+                          className="bg-discipline text-black rounded-lg p-2 active:scale-95 transition-transform"
+                          aria-label="Iniciar foco"
+                        >
+                          <Play className="size-4" fill="currentColor" />
+                        </button>
+                      </>
                     )}
+
                   </div>
                 </div>
                 {(t.reward || t.consequence) && (
