@@ -81,7 +81,7 @@ criar_tarefa: {"name","description"?,"category":"treino|trabalho|estudo|vida|neg
 atualizar_tarefa: {"id","patch":{...campos da tarefa}}
 lembrete_tarefa: {"id"|"name","minutesBefore": 0|5|10|15|30|60|1440|null}  // null = desativar lembrete; reagenda a notificação nativa
 excluir_tarefa: {"id"} | duplicar_tarefa: {"id","date"?|"dates":[...]} | mover_tarefa: {"id","date","time"?}
-concluir_tarefa: {"id","date"} | reabrir_tarefa: {"id","date"?} | arquivar_tarefa: {"id","restore"?:true}
+concluir_tarefa: {"id","date","hora_realizada"?:"HH:MM" (hora real em que a pessoa fez; registro tardio não penaliza)} | reabrir_tarefa: {"id","date"?} | arquivar_tarefa: {"id","restore"?:true}
 registrar_transacao: {"kind":"receita|despesa","amount":number,"category":"alimentacao|transporte|moradia|saude|educacao|lazer|investimento|salario|outros","description"?,"paymentMethod"?,"notes"?,"date":"YYYY-MM-DD"}
 atualizar_transacao: {"id","patch":{...}} | excluir_transacao: {"id"}
 criar_meta: {"name","description"?,"deadline"?} | atualizar_meta: {"id","patch":{...}} | excluir_meta: {"id"}
