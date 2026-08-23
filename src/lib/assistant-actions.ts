@@ -195,9 +195,15 @@ export function applyAssistantAction(action: AssistantAction): string {
     case "concluir_tarefa": {
       const id = str(p, "id");
       if (!id) return "Tarefa não encontrada.";
-      s.completeTaskForDate(id, str(p, "date") ?? dateKey());
-      return "Tarefa concluída.";
+      const performed = str(p, "hora_realizada") ?? str(p, "performed_time");
+      const session = s.completeTaskForDate(id, str(p, "date") ?? dateKey(), performed);
+      return performed
+        ? `Tarefa concluída (realizada às ${performed}; registro tardio não penaliza).`
+        : session
+          ? "Tarefa concluída."
+          : "Tarefa concluída.";
     }
+
     case "reabrir_tarefa": {
       const id = str(p, "id");
       if (!id) return "Tarefa não encontrada.";

@@ -144,10 +144,17 @@ export interface CompletedSession {
   completedAt: number;
   hourOfDay: number;
   scheduledDate?: string;
+  /** 🕐 Horário planejado */
   scheduledTime?: string;
+  /** ✅ Horário em que a tarefa foi realmente realizada */
   completedTime?: string;
+  /** 📱 Horário em que o usuário registrou no app */
+  registeredTime?: string;
+  /** Momento (epoch) do registro no app */
+  registeredAt?: number;
   timingDeltaMinutes?: number;
   status?: "concluida";
+
   reflection?: string;
   feeling?: string;
 }
@@ -470,9 +477,11 @@ interface State {
   reopenTask: (id: string) => void;
   reopenTaskForDate: (id: string, date: string) => void;
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
-  completeTaskForDate: (id: string, date: string) => CompletedSession | null;
+  completeTaskForDate: (id: string, date: string, performedTime?: string) => CompletedSession | null;
+  setSessionPerformedTime: (sessionId: string, performedTime: string) => void;
   addReflection: (sessionId: string, feeling: string, reflection: string) => void;
   markDailyMission: () => void;
+
   setWeeklyGoal: (g: WeeklyGoal) => void;
   tickDay: () => void;
   reset: () => void;
@@ -1205,6 +1214,9 @@ export const useStore = create<State>()(
           scheduledDate: today,
           scheduledTime: task?.time,
           completedTime,
+          registeredTime: completedTime,
+          registeredAt: completedAt,
+
           timingDeltaMinutes: task ? minutesOfDay(completedTime) - minutesOfDay(task.time) : undefined,
           status: "concluida",
         };
@@ -1255,18 +1267,17 @@ export const useStore = create<State>()(
         return session;
       },
 
-      completeTaskForDate: (id, date) => {
+      completeTaskForDate: (id, date, performedTime) => {
         const state = get();
         const task = state.tasks.find((t) => t.id === id);
         if (!task || taskCompletedOn(id, state.sessions, date)) return null;
 
         const now = new Date();
-        const completedAt = new Date(
-          `${date}T${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`,
-        ).getTime();
-        const completedTime = timeKey(now);
         const isToday = date === todayKey();
-        const xp = isToday ? calcXp(task.difficulty, task.estimatedMinutes, task.estimatedMinutes * 60) : 0;
+        // ✅ horário de realização informado pelo usuário (fallback: agora, ou o horário planejado em dias passados)
+        const doneTime = performedTime ?? (isToday ? timeKey(now) : task.time);
+        const completedAt = new Date(`${date}T${doneTime}:00`).getTime();
+        const xp = calcXp(task.difficulty, task.estimatedMinutes, task.estimatedMinutes * 60);
         const session: CompletedSession = {
           id: genId(),
           taskId: task.id,
@@ -1278,11 +1289,13 @@ export const useStore = create<State>()(
           pauses: 0,
           xp,
           completedAt,
-          hourOfDay: now.getHours(),
+          hourOfDay: Number(doneTime.slice(0, 2)),
           scheduledDate: date,
           scheduledTime: task.time,
-          completedTime,
-          timingDeltaMinutes: minutesOfDay(completedTime) - minutesOfDay(task.time),
+          completedTime: doneTime,
+          registeredTime: timeKey(now),
+          registeredAt: now.getTime(),
+          timingDeltaMinutes: minutesOfDay(doneTime) - minutesOfDay(task.time),
           status: "concluida",
         };
 
@@ -1304,6 +1317,24 @@ export const useStore = create<State>()(
         get().syncAchievements();
         return session;
       },
+
+      setSessionPerformedTime: (sessionId, performedTime) =>
+        set((s) => ({
+          sessions: s.sessions.map((sess) => {
+            if (sess.id !== sessionId) return sess;
+            const date = sess.scheduledDate ?? dateKey(new Date(sess.completedAt));
+            return {
+              ...sess,
+              completedTime: performedTime,
+              completedAt: new Date(`${date}T${performedTime}:00`).getTime(),
+              hourOfDay: Number(performedTime.slice(0, 2)),
+              timingDeltaMinutes: sess.scheduledTime
+                ? minutesOfDay(performedTime) - minutesOfDay(sess.scheduledTime)
+                : sess.timingDeltaMinutes,
+            };
+          }),
+        })),
+
 
       addReflection: (sessionId, feeling, reflection) =>
         set((s) => ({

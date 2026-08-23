@@ -3,13 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { dateKey, taskCompletedOn, useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
-import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen } from "lucide-react";
+import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen, Check } from "lucide-react";
 import { devotionalOfTheDay } from "@/lib/devotional";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DisciplineBar } from "@/components/discipline-bar";
 import { buildNudges } from "@/lib/analytics";
 import { DailySummaryCard, MissedTasksAlerts } from "@/components/missed-alerts";
+import { DayReview } from "@/components/day-review";
+import { CompleteTaskDialog } from "@/components/complete-task-dialog";
+import { saveTaskOccurrence } from "@/lib/task-occurrences";
 
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -70,6 +73,9 @@ function Dashboard() {
   } = useStore();
 
   const [now, setNow] = useState(new Date());
+  const completeTaskForDate = useStore((s) => s.completeTaskForDate);
+  const [completingId, setCompletingId] = useState<string | null>(null);
+
   useEffect(() => {
     tickDay();
     const t = setInterval(() => setNow(new Date()), 1000 * 30);
@@ -166,6 +172,8 @@ function Dashboard() {
       </div>
 
       <MissedTasksAlerts />
+
+      <DayReview />
 
       {/* Motivação inteligente */}
       {nudges.length > 0 && (
@@ -303,14 +311,24 @@ function Dashboard() {
                     {isDone ? (
                       <span className="text-[10px] font-bold text-discipline uppercase">Feito</span>
                     ) : (
-                      <button
-                        onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: t.id } })}
-                        className="bg-discipline text-black rounded-lg p-2 active:scale-95 transition-transform"
-                        aria-label="Iniciar foco"
-                      >
-                        <Play className="size-4" fill="currentColor" />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setCompletingId(t.id)}
+                          className="size-9 grid place-items-center rounded-lg border border-discipline/40 text-discipline active:scale-95 transition-transform"
+                          aria-label="Marcar como concluída"
+                        >
+                          <Check className="size-4" />
+                        </button>
+                        <button
+                          onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: t.id } })}
+                          className="bg-discipline text-black rounded-lg p-2 active:scale-95 transition-transform"
+                          aria-label="Iniciar foco"
+                        >
+                          <Play className="size-4" fill="currentColor" />
+                        </button>
+                      </>
                     )}
+
                   </div>
                 </div>
                 {(t.reward || t.consequence) && (
@@ -334,6 +352,25 @@ function Dashboard() {
           })}
         </div>
       </section>
+
+      {completingId && (() => {
+        const ct = todayTasks.find((t) => t.id === completingId);
+        if (!ct) return null;
+        return (
+          <CompleteTaskDialog
+            taskName={ct.name}
+            scheduledTime={ct.time}
+            date={todayKey}
+            onConfirm={(performed) => {
+              const session = completeTaskForDate(ct.id, todayKey, performed);
+              if (session) void saveTaskOccurrence(session);
+              setCompletingId(null);
+              toast.success(`Concluída — realizada às ${performed}.`);
+            }}
+            onClose={() => setCompletingId(null)}
+          />
+        );
+      })()}
 
       {/* AI Insight */}
       {insight && (

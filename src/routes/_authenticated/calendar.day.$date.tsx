@@ -4,6 +4,7 @@ import { taskCompletedOn, useStore, todaysTasks, type Task, type TaskStatus } fr
 import { saveTaskOccurrence } from "@/lib/task-occurrences";
 import { ChevronLeft, ChevronRight, Plus, MoreVertical, Play, Check, RotateCcw, Copy, Move, Archive, Trash2, Edit, X } from "lucide-react";
 import { toast } from "sonner";
+import { CompleteTaskDialog } from "@/components/complete-task-dialog";
 
 export const Route = createFileRoute("/_authenticated/calendar/day/$date")({
   component: DayView,
@@ -50,6 +51,7 @@ function DayView() {
   const [moveTaskId, setMoveTaskId] = useState<string | null>(null);
   const [moveDate, setMoveDate] = useState(date);
   const [dupTaskId, setDupTaskId] = useState<string | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
 
   const closeMenu = () => setMenuId(null);
 
@@ -84,8 +86,24 @@ function DayView() {
     };
   };
 
+  const completingTask = list.find((t) => t.id === completingId);
+
   return (
     <div>
+      {completingTask && (
+        <CompleteTaskDialog
+          taskName={completingTask.name}
+          scheduledTime={completingTask.time}
+          date={date}
+          onConfirm={(performed) => {
+            const session = store.completeTaskForDate(completingTask.id, date, performed);
+            if (session) void saveTaskOccurrence(session);
+            setCompletingId(null);
+            toast.success(`Concluída neste dia — realizada às ${performed}.`);
+          }}
+          onClose={() => setCompletingId(null)}
+        />
+      )}
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => navigate({ to: "/calendar/day/$date", params: { date: shift(date, -1) } })}
           className="size-8 grid place-items-center rounded-full bg-surface border border-border">
@@ -183,7 +201,7 @@ function DayView() {
                     isDone={isDone}
                     onClose={closeMenu}
                     onEdit={() => { closeMenu(); navigate({ to: "/tasks/$id/edit", params: { id: t.id } }); }}
-                    onComplete={() => { const session = store.completeTaskForDate(t.id, date); if (session) void saveTaskOccurrence(session); closeMenu(); toast.success("Concluída somente neste dia."); }}
+                    onComplete={() => { closeMenu(); setCompletingId(t.id); }}
                     onReopen={() => { store.reopenTaskForDate(t.id, date); closeMenu(); toast("Reaberta somente neste dia."); }}
                     onPostpone={() => { store.setTaskStatus(t.id, "adiada"); closeMenu(); toast("Adiada."); }}
                     onCancel={() => { store.setTaskStatus(t.id, "cancelada"); closeMenu(); toast("Cancelada."); }}
