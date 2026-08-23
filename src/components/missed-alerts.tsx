@@ -52,12 +52,19 @@ export function MissedTasksAlerts() {
           <div className="grid grid-cols-3 gap-2 mt-3">
             <button
               onClick={() => {
-                completeTaskForDate(m.task.id, m.date);
-                toast.success("Tarefa recuperada. Disciplina em movimento. 🔥");
+                const session = completeTaskForDate(m.task.id, m.date, m.task.time);
+                if (session) void saveTaskOccurrence(session);
+                toast.success(`Concluída no horário programado (${m.task.time}). 🔥`);
               }}
               className="flex items-center justify-center gap-1 py-2 rounded-xl bg-discipline text-black text-[10px] font-bold uppercase"
             >
-              <Check className="size-3.5" /> Concluir
+              <Check className="size-3.5" /> Fiz no horário
+            </button>
+            <button
+              onClick={() => setCompleting(m.key)}
+              className="flex items-center justify-center gap-1 py-2 rounded-xl border border-discipline/40 text-[10px] font-bold uppercase text-discipline"
+            >
+              <Clock className="size-3.5" /> Escolher horário
             </button>
             <button
               onClick={() => setRescheduling(rescheduling === m.key ? null : m.key)}
@@ -65,6 +72,9 @@ export function MissedTasksAlerts() {
             >
               <CalendarClock className="size-3.5" /> Reagendar
             </button>
+          </div>
+          <div className="mt-2">
+
             <button
               onClick={() => dismissMissed(m.task.id, m.date)}
               className="py-2 rounded-xl border border-border text-[10px] font-bold uppercase text-muted-foreground"
