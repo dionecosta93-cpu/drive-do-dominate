@@ -351,6 +351,25 @@ function Dashboard() {
         </div>
       </section>
 
+      {completingId && (() => {
+        const ct = todayTasks.find((t) => t.id === completingId);
+        if (!ct) return null;
+        return (
+          <CompleteTaskDialog
+            taskName={ct.name}
+            scheduledTime={ct.time}
+            date={todayKey}
+            onConfirm={(performed) => {
+              const session = completeTaskForDate(ct.id, todayKey, performed);
+              if (session) void saveTaskOccurrence(session);
+              setCompletingId(null);
+              toast.success(`Concluída — realizada às ${performed}.`);
+            }}
+            onClose={() => setCompletingId(null)}
+          />
+        );
+      })()}
+
       {/* AI Insight */}
       {insight && (
         <div className="bg-info/10 border border-info/20 rounded-2xl p-4 mb-6 flex gap-3 animate-rise" style={{ animationDelay: "260ms" }}>
