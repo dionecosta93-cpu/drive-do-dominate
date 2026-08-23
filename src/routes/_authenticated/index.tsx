@@ -3,13 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { dateKey, taskCompletedOn, useStore, xpToLevel, todaysTasks } from "@/lib/store";
 import { startQuotes, dailyMissions, pickDaily } from "@/lib/quotes";
 import { generateInsight } from "@/lib/insights";
-import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen } from "lucide-react";
+import { Flame, Play, Plus, Sparkles, Target, Trophy, ChevronRight, LogOut, Pencil, BookOpen, Check } from "lucide-react";
 import { devotionalOfTheDay } from "@/lib/devotional";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DisciplineBar } from "@/components/discipline-bar";
 import { buildNudges } from "@/lib/analytics";
 import { DailySummaryCard, MissedTasksAlerts } from "@/components/missed-alerts";
+import { DayReview } from "@/components/day-review";
+import { CompleteTaskDialog } from "@/components/complete-task-dialog";
+import { saveTaskOccurrence } from "@/lib/task-occurrences";
 
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -70,6 +73,7 @@ function Dashboard() {
   } = useStore();
 
   const [now, setNow] = useState(new Date());
+  const [completingId, setCompletingId] = useState<string | null>(null);
   useEffect(() => {
     tickDay();
     const t = setInterval(() => setNow(new Date()), 1000 * 30);
@@ -166,6 +170,8 @@ function Dashboard() {
       </div>
 
       <MissedTasksAlerts />
+
+      <DayReview />
 
       {/* Motivação inteligente */}
       {nudges.length > 0 && (
