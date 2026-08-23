@@ -1214,6 +1214,9 @@ export const useStore = create<State>()(
           scheduledDate: today,
           scheduledTime: task?.time,
           completedTime,
+          registeredTime: completedTime,
+          registeredAt: completedAt,
+
           timingDeltaMinutes: task ? minutesOfDay(completedTime) - minutesOfDay(task.time) : undefined,
           status: "concluida",
         };
