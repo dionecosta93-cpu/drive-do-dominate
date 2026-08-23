@@ -479,8 +479,9 @@ interface State {
   completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
   completeTaskForDate: (id: string, date: string, performedTime?: string) => CompletedSession | null;
   setSessionPerformedTime: (sessionId: string, performedTime: string) => void;
-
+  addReflection: (sessionId: string, feeling: string, reflection: string) => void;
   markDailyMission: () => void;
+
   setWeeklyGoal: (g: WeeklyGoal) => void;
   tickDay: () => void;
   reset: () => void;
