@@ -74,14 +74,33 @@ export function MissedTasksAlerts() {
             </button>
           </div>
           <div className="mt-2">
-
             <button
               onClick={() => dismissMissed(m.task.id, m.date)}
-              className="py-2 rounded-xl border border-border text-[10px] font-bold uppercase text-muted-foreground"
+              className="w-full py-2 rounded-xl border border-border text-[10px] font-bold uppercase text-muted-foreground"
             >
-              Dispensar
+              Não fiz / Dispensar
             </button>
           </div>
+
+          {completing === m.key && (
+            <CompleteTaskDialog
+              taskName={m.task.name}
+              scheduledTime={m.task.time}
+              date={m.date}
+              onConfirm={(performed) => {
+                const session = completeTaskForDate(m.task.id, m.date, performed);
+                if (session) void saveTaskOccurrence(session);
+                setCompleting(null);
+                toast.success(`Realizada às ${performed}. Registro tardio não penaliza.`);
+              }}
+              onNotDone={() => {
+                dismissMissed(m.task.id, m.date);
+                setCompleting(null);
+              }}
+              onClose={() => setCompleting(null)}
+            />
+          )}
+
 
           {rescheduling === m.key && (
             <div className="mt-3 flex flex-wrap gap-2">
