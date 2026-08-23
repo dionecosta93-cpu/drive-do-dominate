@@ -144,10 +144,17 @@ export interface CompletedSession {
   completedAt: number;
   hourOfDay: number;
   scheduledDate?: string;
+  /** 🕐 Horário planejado */
   scheduledTime?: string;
+  /** ✅ Horário em que a tarefa foi realmente realizada */
   completedTime?: string;
+  /** 📱 Horário em que o usuário registrou no app */
+  registeredTime?: string;
+  /** Momento (epoch) do registro no app */
+  registeredAt?: number;
   timingDeltaMinutes?: number;
   status?: "concluida";
+
   reflection?: string;
   feeling?: string;
 }
