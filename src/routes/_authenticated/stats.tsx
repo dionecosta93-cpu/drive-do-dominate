@@ -213,3 +213,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </div>
   );
 }
+
+function Stat({ label, value, color = "" }: { label: string; value: string; color?: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-background/40 p-3">
+      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
+      <p className={`text-sm font-heading font-black ${color}`}>{value}</p>
+    </div>
+  );
+}
