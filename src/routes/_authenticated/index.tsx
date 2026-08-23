@@ -73,7 +73,9 @@ function Dashboard() {
   } = useStore();
 
   const [now, setNow] = useState(new Date());
+  const completeTaskForDate = useStore((s) => s.completeTaskForDate);
   const [completingId, setCompletingId] = useState<string | null>(null);
+
   useEffect(() => {
     tickDay();
     const t = setInterval(() => setNow(new Date()), 1000 * 30);
