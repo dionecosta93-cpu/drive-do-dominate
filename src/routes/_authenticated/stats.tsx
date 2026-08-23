@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useStore, xpToLevel } from "@/lib/store";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, Tooltip, CartesianGrid } from "recharts";
-import { useMemo } from "react";
+import { buildPerformance } from "@/lib/performance";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, Tooltip, CartesianGrid, Cell } from "recharts";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/stats")({
   component: Stats,
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/_authenticated/stats")({
 
 function Stats() {
   const { sessions, streak, longestStreak, xp } = useStore();
+
 
   const totalMinutes = sessions.reduce((a, b) => a + b.spentSeconds / 60, 0);
   const totalEstimated = sessions.reduce((a, b) => a + b.estimatedMinutes, 0);
