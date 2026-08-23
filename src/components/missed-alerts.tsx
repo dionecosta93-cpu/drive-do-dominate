@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, CalendarClock, Check, X } from "lucide-react";
+import { AlertTriangle, CalendarClock, Check, Clock, X } from "lucide-react";
 import { toast } from "sonner";
 import { dateKey, useStore } from "@/lib/store";
 import { dailySummary, missedTasks } from "@/lib/missed";
+import { CompleteTaskDialog } from "@/components/complete-task-dialog";
+import { saveTaskOccurrence } from "@/lib/task-occurrences";
 
 /** Alertas de tarefas não concluídas com ações rápidas. */
 export function MissedTasksAlerts() {
@@ -15,6 +17,8 @@ export function MissedTasksAlerts() {
   const completeTaskForDate = useStore((s) => s.completeTaskForDate);
   const moveTask = useStore((s) => s.moveTask);
   const [rescheduling, setRescheduling] = useState<string | null>(null);
+  const [completing, setCompleting] = useState<string | null>(null);
+
 
   const list = useMemo(() => missedTasks(tasks, sessions, dismissed).slice(0, 5), [tasks, sessions, dismissed]);
   if (list.length === 0) return null;
