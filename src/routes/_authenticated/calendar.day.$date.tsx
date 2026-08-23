@@ -51,6 +51,7 @@ function DayView() {
   const [moveTaskId, setMoveTaskId] = useState<string | null>(null);
   const [moveDate, setMoveDate] = useState(date);
   const [dupTaskId, setDupTaskId] = useState<string | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
 
   const closeMenu = () => setMenuId(null);
 

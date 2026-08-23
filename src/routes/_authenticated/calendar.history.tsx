@@ -8,6 +8,7 @@ export const Route = createFileRoute("/_authenticated/calendar/history")({
 
 function HistoryView() {
   const { sessions, tasks } = useStore();
+  const setSessionPerformedTime = useStore((st) => st.setSessionPerformedTime);
   const rows = useMemo(() => {
     return sessions
       .slice()
