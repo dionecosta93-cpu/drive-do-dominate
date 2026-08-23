@@ -45,9 +45,19 @@ function HistoryView() {
                 planejado {s.estimatedMinutes}min · real {minReal}min · pausas {s.pauses}
                 {s.scheduledDate ? ` · data ${s.scheduledDate}` : ""}
                 {s.scheduledTime ? ` · previsto ${s.scheduledTime}` : ""}
-                {s.completedTime ? ` · concluído ${s.completedTime}` : ""}
+                {s.completedTime ? ` · realizado ${s.completedTime}` : ""}
+                {s.registeredTime ? ` · registrado ${s.registeredTime}` : ""}
                 {typeof s.timingDeltaMinutes === "number" ? ` · ${s.timingDeltaMinutes > 0 ? "atraso" : s.timingDeltaMinutes < 0 ? "adiantado" : "no horário"} ${Math.abs(s.timingDeltaMinutes)}min` : ""}
                 {t?.editCount ? ` · ${t.editCount} edições` : ""}
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <label className="text-[10px] uppercase font-bold text-muted-foreground">✅ Realizado às</label>
+                <input
+                  type="time"
+                  value={s.completedTime ?? ""}
+                  onChange={(e) => e.target.value && setSessionPerformedTime(s.id, e.target.value)}
+                  className="bg-background border border-border rounded-lg px-2 py-1 text-[11px]"
+                />
               </div>
               {s.reflection && (
                 <p className="mt-2 text-xs italic text-muted-foreground border-l-2 border-discipline/40 pl-2">"{s.reflection}"</p>
