@@ -86,8 +86,24 @@ function DayView() {
     };
   };
 
+  const completingTask = list.find((t) => t.id === completingId);
+
   return (
     <div>
+      {completingTask && (
+        <CompleteTaskDialog
+          taskName={completingTask.name}
+          scheduledTime={completingTask.time}
+          date={date}
+          onConfirm={(performed) => {
+            const session = store.completeTaskForDate(completingTask.id, date, performed);
+            if (session) void saveTaskOccurrence(session);
+            setCompletingId(null);
+            toast.success(`Concluída neste dia — realizada às ${performed}.`);
+          }}
+          onClose={() => setCompletingId(null)}
+        />
+      )}
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => navigate({ to: "/calendar/day/$date", params: { date: shift(date, -1) } })}
           className="size-8 grid place-items-center rounded-full bg-surface border border-border">
