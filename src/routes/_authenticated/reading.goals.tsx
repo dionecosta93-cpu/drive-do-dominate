@@ -2,23 +2,43 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { readingGoalLabel, readingGoalProgress, readingStats, useStore, type ReadingGoalKind } from "@/lib/store";
+import {
+  readingGoalLabel,
+  readingGoalProgress,
+  readingStats,
+  useStore,
+  type ReadingGoalKind,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/reading/goals")({
   component: ReadingGoals,
   head: () => ({
     meta: [
       { title: "Metas de leitura — Disciplina Absoluta" },
-      { name: "description", content: "Defina metas de livros por ano, páginas e minutos por dia." },
+      {
+        name: "description",
+        content: "Defina metas de livros por ano, páginas e minutos por dia.",
+      },
       { property: "og:title", content: "Metas de leitura — Disciplina Absoluta" },
-      { property: "og:description", content: "Defina metas de livros por ano, páginas e minutos por dia." },
+      {
+        property: "og:description",
+        content: "Defina metas de livros por ano, páginas e minutos por dia.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
 });
 
-const kinds: ReadingGoalKind[] = ["livros-ano", "paginas-dia", "minutos-dia", "horas-semana", "paginas-semana", "paginas-mes", "paginas-ano"];
+const kinds: ReadingGoalKind[] = [
+  "livros-ano",
+  "paginas-dia",
+  "minutos-dia",
+  "horas-semana",
+  "paginas-semana",
+  "paginas-mes",
+  "paginas-ano",
+];
 
 function ReadingGoals() {
   const goals = useStore((s) => s.readingGoals);
@@ -44,7 +64,9 @@ function ReadingGoals() {
               key={k}
               onClick={() => setKind(k)}
               className={`py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition ${
-                kind === k ? "bg-discipline text-black border-discipline" : "bg-background border-border text-muted-foreground"
+                kind === k
+                  ? "bg-discipline text-black border-discipline"
+                  : "bg-background border-border text-muted-foreground"
               }`}
             >
               {readingGoalLabel[k]}
@@ -76,7 +98,9 @@ function ReadingGoals() {
       </div>
 
       {goals.length === 0 && (
-        <p className="text-xs text-muted-foreground">Nenhuma meta ainda. Defina um alvo e transforme leitura em hábito.</p>
+        <p className="text-xs text-muted-foreground">
+          Nenhuma meta ainda. Defina um alvo e transforme leitura em hábito.
+        </p>
       )}
 
       <div className="space-y-3">
@@ -88,15 +112,24 @@ function ReadingGoals() {
                 <p className="text-sm font-heading font-bold">
                   {g.target} {readingGoalLabel[g.kind]}
                 </p>
-                <button onClick={() => removeGoal(g.id)} className="text-muted-foreground hover:text-struggle" aria-label="Remover meta">
+                <button
+                  onClick={() => removeGoal(g.id)}
+                  className="text-muted-foreground hover:text-struggle"
+                  aria-label="Remover meta"
+                >
                   <Trash2 className="size-4" />
                 </button>
               </div>
               <div className="mt-3 flex items-center gap-3">
                 <div className="h-2 flex-1 bg-background rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-struggle via-warning to-discipline rounded-full transition-all" style={{ width: `${Math.max(p.pct, 2)}%` }} />
+                  <div
+                    className="h-full bg-gradient-to-r from-struggle via-warning to-discipline rounded-full transition-all"
+                    style={{ width: `${Math.max(p.pct, 2)}%` }}
+                  />
                 </div>
-                <span className="text-xs font-heading font-black text-discipline tabular-nums">{p.pct}%</span>
+                <span className="text-xs font-heading font-black text-discipline tabular-nums">
+                  {p.pct}%
+                </span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-2">
                 {p.current} de {g.target}

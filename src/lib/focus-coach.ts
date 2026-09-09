@@ -28,8 +28,6 @@ export const focusCoachLines: string[] = [
 ];
 
 export function pickFocusCoachLine(exclude?: string): string {
-  const pool = exclude
-    ? focusCoachLines.filter((line) => line !== exclude)
-    : focusCoachLines;
+  const pool = exclude ? focusCoachLines.filter((line) => line !== exclude) : focusCoachLines;
   return pool[Math.floor(Math.random() * pool.length)];
 }

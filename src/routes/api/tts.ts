@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { guardApiRequest } from "@/lib/api-guard";
 
 export const Route = createFileRoute("/api/tts")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const blocked = guardApiRequest(request);
+        if (blocked) return blocked;
         const key = process.env.LOVABLE_API_KEY;
         if (!key) {
           return new Response(JSON.stringify({ error: "missing_key" }), {
@@ -28,24 +31,21 @@ export const Route = createFileRoute("/api/tts")({
           });
         }
 
-        const upstream = await fetch(
-          "https://ai.gateway.lovable.dev/v1/audio/speech",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${key}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "openai/gpt-4o-mini-tts",
-              input: text,
-              voice: "onyx",
-              response_format: "mp3",
-              instructions:
-                "Fale em português brasileiro com voz masculina firme, grave, intensa e impactante — como um treinador militar motivando o atleta a não parar. Ritmo confiante, tom decisivo, sem gritar.",
-            }),
+        const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({
+            model: "openai/gpt-4o-mini-tts",
+            input: text,
+            voice: "onyx",
+            response_format: "mp3",
+            instructions:
+              "Fale em português brasileiro com voz masculina firme, grave, intensa e impactante — como um treinador militar motivando o atleta a não parar. Ritmo confiante, tom decisivo, sem gritar.",
+          }),
+        });
 
         if (!upstream.ok) {
           const errText = await upstream.text().catch(() => "");

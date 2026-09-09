@@ -1,4 +1,10 @@
-import { dateKey, taskCompletedOn, todaysTasks, type CompletedSession, type Task } from "@/lib/store";
+import {
+  dateKey,
+  taskCompletedOn,
+  todaysTasks,
+  type CompletedSession,
+  type Task,
+} from "@/lib/store";
 
 /** Mensagens motivacionais para tarefas não concluídas (variam por tarefa/dia). */
 export const MISSED_MESSAGES = [
@@ -58,7 +64,9 @@ export function missedTasks(
       out.push({ task: t, date, key, message: missedMessageFor(key) });
     }
   }
-  return out.sort((a, b) => (a.date === b.date ? a.task.time.localeCompare(b.task.time) : a.date < b.date ? 1 : -1));
+  return out.sort((a, b) =>
+    a.date === b.date ? a.task.time.localeCompare(b.task.time) : a.date < b.date ? 1 : -1,
+  );
 }
 
 export interface DailySummary {

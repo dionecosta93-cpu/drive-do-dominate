@@ -16,6 +16,11 @@ dist-ssr
 .nitro
 *.local
 
+# Env — só o .env.example vai para o repositório
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

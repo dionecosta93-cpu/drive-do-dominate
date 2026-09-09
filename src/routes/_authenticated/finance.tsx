@@ -25,9 +25,15 @@ export const Route = createFileRoute("/_authenticated/finance")({
   head: () => ({
     meta: [
       { title: "Finanças — Disciplina Absoluta" },
-      { name: "description", content: "Controle gastos, receitas, gráficos e relatórios financeiros por período." },
+      {
+        name: "description",
+        content: "Controle gastos, receitas, gráficos e relatórios financeiros por período.",
+      },
       { property: "og:title", content: "Finanças — Disciplina Absoluta" },
-      { property: "og:description", content: "Receitas, despesas, categorias e gráficos por período." },
+      {
+        property: "og:description",
+        content: "Receitas, despesas, categorias e gráficos por período.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -36,7 +42,15 @@ export const Route = createFileRoute("/_authenticated/finance")({
 
 type PeriodKind = "hoje" | "semana" | "mes" | "custom";
 
-const PAYMENT_METHODS = ["pix", "débito", "crédito", "dinheiro", "boleto", "transferência", "outro"];
+const PAYMENT_METHODS = [
+  "pix",
+  "débito",
+  "crédito",
+  "dinheiro",
+  "boleto",
+  "transferência",
+  "outro",
+];
 
 const addDays = (d: Date, n: number) => {
   const x = new Date(d);
@@ -101,14 +115,19 @@ function FinanceScreen() {
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
-    for (const t of list) if (t.kind === "despesa") map.set(t.category, (map.get(t.category) ?? 0) + t.amount);
-    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([category, total]) => ({ category, total }));
+    for (const t of list)
+      if (t.kind === "despesa") map.set(t.category, (map.get(t.category) ?? 0) + t.amount);
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, total]) => ({ category, total }));
   }, [list]);
 
   /** Série temporal: diária em períodos curtos, mensal em períodos longos. */
   const series = useMemo(() => {
     const spanDays = Math.round(
-      (new Date(`${range.end}T12:00:00`).getTime() - new Date(`${range.start}T12:00:00`).getTime()) / 86400000,
+      (new Date(`${range.end}T12:00:00`).getTime() -
+        new Date(`${range.start}T12:00:00`).getTime()) /
+        86400000,
     );
     const byMonth = spanDays > 92;
     const map = new Map<string, { key: string; receitas: number; despesas: number }>();
@@ -172,10 +191,13 @@ function FinanceScreen() {
     setShowForm(false);
   };
 
-  const field = "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-discipline";
+  const field =
+    "w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-discipline";
   const chip = (active: boolean) =>
     `shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border ${
-      active ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
+      active
+        ? "bg-discipline/20 border-discipline text-discipline"
+        : "bg-surface border-border text-muted-foreground"
     }`;
 
   return (
@@ -195,14 +217,27 @@ function FinanceScreen() {
 
       {/* Filtros por período */}
       <div className="flex gap-2 overflow-x-auto pb-3">
-        <button onClick={() => setKind("hoje")} className={chip(kind === "hoje")}>Hoje</button>
-        <button onClick={() => setKind("semana")} className={chip(kind === "semana")}>Esta semana</button>
-        <button onClick={() => setKind("mes")} className={chip(kind === "mes")}>Este mês</button>
-        <button onClick={() => setKind("custom")} className={chip(kind === "custom")}>Personalizado</button>
+        <button onClick={() => setKind("hoje")} className={chip(kind === "hoje")}>
+          Hoje
+        </button>
+        <button onClick={() => setKind("semana")} className={chip(kind === "semana")}>
+          Esta semana
+        </button>
+        <button onClick={() => setKind("mes")} className={chip(kind === "mes")}>
+          Este mês
+        </button>
+        <button onClick={() => setKind("custom")} className={chip(kind === "custom")}>
+          Personalizado
+        </button>
       </div>
       {kind === "custom" && (
         <div className="grid grid-cols-2 gap-2 mb-3">
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className={field} />
+          <input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className={field}
+          />
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className={field} />
         </div>
       )}
@@ -212,7 +247,10 @@ function FinanceScreen() {
         <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           <Wallet className="size-4" /> {range.label}
         </span>
-        <p className="font-heading font-black text-3xl tabular-nums mt-1" style={{ color: balance >= 0 ? "#22c55e" : "#ef4444" }}>
+        <p
+          className="font-heading font-black text-3xl tabular-nums mt-1"
+          style={{ color: balance >= 0 ? "#22c55e" : "#ef4444" }}
+        >
           {brl(balance)}
         </p>
         <div className="grid grid-cols-2 gap-3 mt-4">
@@ -230,7 +268,8 @@ function FinanceScreen() {
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground mt-3">
-          {list.length} lançamento(s) · {range.start.split("-").reverse().join("/")} a {range.end.split("-").reverse().join("/")}
+          {list.length} lançamento(s) · {range.start.split("-").reverse().join("/")} a{" "}
+          {range.end.split("-").reverse().join("/")}
         </p>
       </div>
 
@@ -241,7 +280,13 @@ function FinanceScreen() {
             <p className="text-[11px] font-bold uppercase tracking-widest text-discipline">
               {form.id ? "Editar lançamento" : "Novo lançamento"}
             </p>
-            <button onClick={() => { setShowForm(false); setForm(emptyForm); }} aria-label="Fechar">
+            <button
+              onClick={() => {
+                setShowForm(false);
+                setForm(emptyForm);
+              }}
+              aria-label="Fechar"
+            >
               <X className="size-4 text-muted-foreground" />
             </button>
           </div>
@@ -251,7 +296,9 @@ function FinanceScreen() {
                 key={k}
                 onClick={() => setForm({ ...form, kind: k })}
                 className={`py-2 rounded-xl text-[10px] font-bold uppercase border ${
-                  form.kind === k ? "bg-discipline text-black border-discipline" : "bg-background border-border text-muted-foreground"
+                  form.kind === k
+                    ? "bg-discipline text-black border-discipline"
+                    : "bg-background border-border text-muted-foreground"
                 }`}
               >
                 {k}
@@ -265,9 +312,15 @@ function FinanceScreen() {
             placeholder="Valor (R$)"
             className={field}
           />
-          <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={field}>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className={field}
+          >
             {FINANCE_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{financeCategoryLabel[c]}</option>
+              <option key={c} value={c}>
+                {financeCategoryLabel[c]}
+              </option>
             ))}
           </select>
           <select
@@ -277,10 +330,17 @@ function FinanceScreen() {
           >
             <option value="">Forma de pagamento</option>
             {PAYMENT_METHODS.map((m) => (
-              <option key={m} value={m}>{m}</option>
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
-          <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className={field} />
+          <input
+            type="date"
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            className={field}
+          />
           <input
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -294,7 +354,10 @@ function FinanceScreen() {
             placeholder="Observação"
             className={field}
           />
-          <button onClick={submit} className="w-full py-3 rounded-xl bg-discipline text-black text-xs font-bold uppercase">
+          <button
+            onClick={submit}
+            className="w-full py-3 rounded-xl bg-discipline text-black text-xs font-bold uppercase"
+          >
             {form.id ? "Salvar alterações" : "Registrar"}
           </button>
         </div>
@@ -303,12 +366,21 @@ function FinanceScreen() {
       {/* Gastos por categoria */}
       {byCategory.length > 0 && (
         <section className="mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Gastos por categoria</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Gastos por categoria
+          </p>
           <div className="bg-surface border border-border rounded-2xl p-3">
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={byCategory} dataKey="total" nameKey="category" innerRadius={45} outerRadius={75} paddingAngle={2}>
+                  <Pie
+                    data={byCategory}
+                    dataKey="total"
+                    nameKey="category"
+                    innerRadius={45}
+                    outerRadius={75}
+                    paddingAngle={2}
+                  >
                     {byCategory.map((c) => (
                       <Cell key={c.category} fill={financeCategoryColor[c.category] ?? "#71717a"} />
                     ))}
@@ -316,7 +388,12 @@ function FinanceScreen() {
                   <Tooltip
                     formatter={(v: number) => brl(v)}
                     labelFormatter={(l: string) => financeCategoryLabel[l] ?? l}
-                    contentStyle={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 12, fontSize: 12 }}
+                    contentStyle={{
+                      background: "#18181b",
+                      border: "1px solid #27272a",
+                      borderRadius: 12,
+                      fontSize: 12,
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -325,7 +402,10 @@ function FinanceScreen() {
               {byCategory.map((c) => (
                 <div key={c.category} className="flex items-center justify-between text-xs">
                   <span className="flex items-center gap-2">
-                    <span className="size-2.5 rounded-full" style={{ background: financeCategoryColor[c.category] ?? "#71717a" }} />
+                    <span
+                      className="size-2.5 rounded-full"
+                      style={{ background: financeCategoryColor[c.category] ?? "#71717a" }}
+                    />
                     {financeCategoryLabel[c.category] ?? c.category}
                   </span>
                   <span className="tabular-nums font-bold">{brl(c.total)}</span>
@@ -339,7 +419,9 @@ function FinanceScreen() {
       {/* Evolução no período */}
       {series.length > 0 && (
         <section className="mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Evolução do período</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Evolução do período
+          </p>
           <div className="bg-surface border border-border rounded-2xl p-3 h-56">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={series}>
@@ -348,11 +430,28 @@ function FinanceScreen() {
                 <YAxis tick={{ fontSize: 10, fill: "#a1a1aa" }} width={40} />
                 <Tooltip
                   formatter={(v: number) => brl(v)}
-                  contentStyle={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 12, fontSize: 12 }}
+                  contentStyle={{
+                    background: "#18181b",
+                    border: "1px solid #27272a",
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
                 />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="receitas" stroke="#22c55e" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="despesas" stroke="#ef4444" strokeWidth={2} dot={false} />
+                <Line
+                  type="monotone"
+                  dataKey="receitas"
+                  stroke="#22c55e"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="despesas"
+                  stroke="#ef4444"
+                  strokeWidth={2}
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -362,7 +461,9 @@ function FinanceScreen() {
       {/* Comparação mensal */}
       {monthlyCompare.length > 1 && (
         <section className="mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Comparação entre meses</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Comparação entre meses
+          </p>
           <div className="bg-surface border border-border rounded-2xl p-3 h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyCompare}>
@@ -371,7 +472,12 @@ function FinanceScreen() {
                 <YAxis tick={{ fontSize: 10, fill: "#a1a1aa" }} width={40} />
                 <Tooltip
                   formatter={(v: number) => brl(v)}
-                  contentStyle={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 12, fontSize: 12 }}
+                  contentStyle={{
+                    background: "#18181b",
+                    border: "1px solid #27272a",
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
                 />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="receitas" fill="#22c55e" radius={[4, 4, 0, 0]} />
@@ -384,8 +490,12 @@ function FinanceScreen() {
 
       {/* Histórico detalhado */}
       <section>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Histórico detalhado</p>
-        {list.length === 0 && <p className="text-xs text-muted-foreground">Nenhum lançamento neste período.</p>}
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+          Histórico detalhado
+        </p>
+        {list.length === 0 && (
+          <p className="text-xs text-muted-foreground">Nenhum lançamento neste período.</p>
+        )}
         <div className="space-y-2">
           {list.map((t) => (
             <div key={t.id} className="bg-surface border border-border rounded-xl p-3">
@@ -409,11 +519,16 @@ function FinanceScreen() {
                     {t.kind === "receita" ? "+" : "-"}
                     {brl(t.amount)}
                   </span>
-                  <button onClick={() => openEdit(t)} className="text-muted-foreground hover:text-discipline" aria-label="Editar">
+                  <button
+                    onClick={() => openEdit(t)}
+                    className="text-muted-foreground hover:text-discipline"
+                    aria-label="Editar"
+                  >
                     <Pencil className="size-4" />
                   </button>
                   <button
                     onClick={() => {
+                      if (!window.confirm("Excluir este lançamento?")) return;
                       removeTransaction(t.id);
                       toast.success("Lançamento excluído.");
                     }}

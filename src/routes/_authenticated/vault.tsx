@@ -4,7 +4,15 @@ import { Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/vault")({
   component: Vault,
-  head: () => ({ meta: [{ title: "Cofre da Vitória — Kairos" }, { name: "description", content: "Reveja suas vitórias e o que aprendeu com cada tarefa cumprida." }] }),
+  head: () => ({
+    meta: [
+      { title: "Cofre da Vitória — Disciplina Absoluta" },
+      {
+        name: "description",
+        content: "Reveja suas vitórias e o que aprendeu com cada tarefa cumprida.",
+      },
+    ],
+  }),
 });
 
 function Vault() {
@@ -40,10 +48,14 @@ function Vault() {
                 </div>
               </div>
               {s.feeling && (
-                <p className="text-xs mt-2"><b className="text-muted-foreground">Senti:</b> {s.feeling}</p>
+                <p className="text-xs mt-2">
+                  <b className="text-muted-foreground">Senti:</b> {s.feeling}
+                </p>
               )}
               {s.reflection && (
-                <p className="text-xs mt-1"><b className="text-muted-foreground">Aprendi:</b> {s.reflection}</p>
+                <p className="text-xs mt-1">
+                  <b className="text-muted-foreground">Aprendi:</b> {s.reflection}
+                </p>
               )}
             </div>
           ))}

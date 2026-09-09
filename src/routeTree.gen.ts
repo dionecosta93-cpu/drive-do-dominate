@@ -9,117 +9,58 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as ApiTtsRouteImport } from './routes/api/tts'
-import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
-import { Route as ApiBookSearchRouteImport } from './routes/api/book-search'
-import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
-import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
-import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
-import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
-import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
-import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
-import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
-import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authenticated/devotional'
-import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
-import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
-import { Route as AuthenticatedShoppingIndexRouteImport } from './routes/_authenticated/shopping.index'
-import { Route as AuthenticatedReadingIndexRouteImport } from './routes/_authenticated/reading.index'
-import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
+import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
+import { Route as AuthenticatedDevotionalRouteImport } from './routes/_authenticated/devotional'
+import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
+import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
+import { Route as AuthenticatedMotivationRouteImport } from './routes/_authenticated/motivation'
+import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
+import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
+import { Route as ApiAssistantRouteImport } from './routes/api/assistant'
+import { Route as ApiBookSearchRouteImport } from './routes/api/book-search'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AuthenticatedCalendarIndexRouteImport } from './routes/_authenticated/calendar.index'
-import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
-import { Route as AuthenticatedShoppingIdRouteImport } from './routes/_authenticated/shopping.$id'
-import { Route as AuthenticatedReadingStatsRouteImport } from './routes/_authenticated/reading.stats'
-import { Route as AuthenticatedReadingNewRouteImport } from './routes/_authenticated/reading.new'
-import { Route as AuthenticatedReadingGoalsRouteImport } from './routes/_authenticated/reading.goals'
-import { Route as AuthenticatedReadingIdRouteImport } from './routes/_authenticated/reading.$id'
-import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
-import { Route as AuthenticatedGoalsImpactRouteImport } from './routes/_authenticated/goals.impact'
-import { Route as AuthenticatedGoalsAssistantRouteImport } from './routes/_authenticated/goals.assistant'
-import { Route as AuthenticatedGoalsIdRouteImport } from './routes/_authenticated/goals.$id'
-import { Route as AuthenticatedFocusTaskIdRouteImport } from './routes/_authenticated/focus.$taskId'
-import { Route as AuthenticatedCalendarWeekRouteImport } from './routes/_authenticated/calendar.week'
-import { Route as AuthenticatedCalendarSearchRouteImport } from './routes/_authenticated/calendar.search'
-import { Route as AuthenticatedCalendarHistoryRouteImport } from './routes/_authenticated/calendar.history'
 import { Route as AuthenticatedCalendarArchivedRouteImport } from './routes/_authenticated/calendar.archived'
-import { Route as AuthenticatedTasksIdEditRouteImport } from './routes/_authenticated/tasks.$id.edit'
+import { Route as AuthenticatedCalendarHistoryRouteImport } from './routes/_authenticated/calendar.history'
+import { Route as AuthenticatedCalendarSearchRouteImport } from './routes/_authenticated/calendar.search'
+import { Route as AuthenticatedCalendarWeekRouteImport } from './routes/_authenticated/calendar.week'
+import { Route as AuthenticatedFocusTaskIdRouteImport } from './routes/_authenticated/focus.$taskId'
+import { Route as AuthenticatedGoalsIndexRouteImport } from './routes/_authenticated/goals.index'
+import { Route as AuthenticatedGoalsIdRouteImport } from './routes/_authenticated/goals.$id'
+import { Route as AuthenticatedGoalsAssistantRouteImport } from './routes/_authenticated/goals.assistant'
+import { Route as AuthenticatedGoalsImpactRouteImport } from './routes/_authenticated/goals.impact'
+import { Route as AuthenticatedGoalsNewRouteImport } from './routes/_authenticated/goals.new'
+import { Route as AuthenticatedReadingIndexRouteImport } from './routes/_authenticated/reading.index'
+import { Route as AuthenticatedReadingIdRouteImport } from './routes/_authenticated/reading.$id'
+import { Route as AuthenticatedReadingGoalsRouteImport } from './routes/_authenticated/reading.goals'
+import { Route as AuthenticatedReadingNewRouteImport } from './routes/_authenticated/reading.new'
+import { Route as AuthenticatedReadingStatsRouteImport } from './routes/_authenticated/reading.stats'
+import { Route as AuthenticatedShoppingIndexRouteImport } from './routes/_authenticated/shopping.index'
+import { Route as AuthenticatedShoppingIdRouteImport } from './routes/_authenticated/shopping.$id'
+import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks.index'
+import { Route as AuthenticatedTasksNewRouteImport } from './routes/_authenticated/tasks.new'
 import { Route as AuthenticatedCalendarDayDateRouteImport } from './routes/_authenticated/calendar.day.$date'
+import { Route as AuthenticatedTasksIdEditRouteImport } from './routes/_authenticated/tasks.$id.edit'
 
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const ApiTtsRoute = ApiTtsRouteImport.update({
-  id: '/api/tts',
-  path: '/api/tts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
-  id: '/api/transcribe',
-  path: '/api/transcribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiBookSearchRoute = ApiBookSearchRouteImport.update({
-  id: '/api/book-search',
-  path: '/api/book-search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAssistantRoute = ApiAssistantRouteImport.update({
-  id: '/api/assistant',
-  path: '/api/assistant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
-  id: '/vault',
-  path: '/vault',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
-  id: '/motivation',
-  path: '/motivation',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
-  id: '/missions',
-  path: '/missions',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
-  id: '/finance',
-  path: '/finance',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedDevotionalRoute = AuthenticatedDevotionalRouteImport.update({
-  id: '/devotional',
-  path: '/devotional',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
-  id: '/calendar',
-  path: '/calendar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAchievementsRoute =
@@ -128,110 +69,75 @@ const AuthenticatedAchievementsRoute =
     path: '/achievements',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
-  id: '/tasks/',
-  path: '/tasks/',
+const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedShoppingIndexRoute =
-  AuthenticatedShoppingIndexRouteImport.update({
-    id: '/shopping/',
-    path: '/shopping/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedReadingIndexRoute =
-  AuthenticatedReadingIndexRouteImport.update({
-    id: '/reading/',
-    path: '/reading/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedGoalsIndexRoute = AuthenticatedGoalsIndexRouteImport.update({
-  id: '/goals/',
-  path: '/goals/',
+const AuthenticatedDevotionalRoute = AuthenticatedDevotionalRouteImport.update({
+  id: '/devotional',
+  path: '/devotional',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMotivationRoute = AuthenticatedMotivationRouteImport.update({
+  id: '/motivation',
+  path: '/motivation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlansRoute = AuthenticatedPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiAssistantRoute = ApiAssistantRouteImport.update({
+  id: '/api/assistant',
+  path: '/api/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBookSearchRoute = ApiBookSearchRouteImport.update({
+  id: '/api/book-search',
+  path: '/api/book-search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedCalendarIndexRoute =
   AuthenticatedCalendarIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedCalendarRoute,
-  } as any)
-const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
-  id: '/tasks/new',
-  path: '/tasks/new',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedShoppingIdRoute = AuthenticatedShoppingIdRouteImport.update({
-  id: '/shopping/$id',
-  path: '/shopping/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedReadingStatsRoute =
-  AuthenticatedReadingStatsRouteImport.update({
-    id: '/reading/stats',
-    path: '/reading/stats',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedReadingNewRoute = AuthenticatedReadingNewRouteImport.update({
-  id: '/reading/new',
-  path: '/reading/new',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedReadingGoalsRoute =
-  AuthenticatedReadingGoalsRouteImport.update({
-    id: '/reading/goals',
-    path: '/reading/goals',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedReadingIdRoute = AuthenticatedReadingIdRouteImport.update({
-  id: '/reading/$id',
-  path: '/reading/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
-  id: '/goals/new',
-  path: '/goals/new',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGoalsImpactRoute =
-  AuthenticatedGoalsImpactRouteImport.update({
-    id: '/goals/impact',
-    path: '/goals/impact',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedGoalsAssistantRoute =
-  AuthenticatedGoalsAssistantRouteImport.update({
-    id: '/goals/assistant',
-    path: '/goals/assistant',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedGoalsIdRoute = AuthenticatedGoalsIdRouteImport.update({
-  id: '/goals/$id',
-  path: '/goals/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedFocusTaskIdRoute =
-  AuthenticatedFocusTaskIdRouteImport.update({
-    id: '/focus/$taskId',
-    path: '/focus/$taskId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedCalendarWeekRoute =
-  AuthenticatedCalendarWeekRouteImport.update({
-    id: '/week',
-    path: '/week',
-    getParentRoute: () => AuthenticatedCalendarRoute,
-  } as any)
-const AuthenticatedCalendarSearchRoute =
-  AuthenticatedCalendarSearchRouteImport.update({
-    id: '/search',
-    path: '/search',
-    getParentRoute: () => AuthenticatedCalendarRoute,
-  } as any)
-const AuthenticatedCalendarHistoryRoute =
-  AuthenticatedCalendarHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
     getParentRoute: () => AuthenticatedCalendarRoute,
   } as any)
 const AuthenticatedCalendarArchivedRoute =
@@ -240,17 +146,117 @@ const AuthenticatedCalendarArchivedRoute =
     path: '/archived',
     getParentRoute: () => AuthenticatedCalendarRoute,
   } as any)
-const AuthenticatedTasksIdEditRoute =
-  AuthenticatedTasksIdEditRouteImport.update({
-    id: '/tasks/$id/edit',
-    path: '/tasks/$id/edit',
+const AuthenticatedCalendarHistoryRoute =
+  AuthenticatedCalendarHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedCalendarSearchRoute =
+  AuthenticatedCalendarSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedCalendarWeekRoute =
+  AuthenticatedCalendarWeekRouteImport.update({
+    id: '/week',
+    path: '/week',
+    getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedFocusTaskIdRoute =
+  AuthenticatedFocusTaskIdRouteImport.update({
+    id: '/focus/$taskId',
+    path: '/focus/$taskId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGoalsIndexRoute = AuthenticatedGoalsIndexRouteImport.update({
+  id: '/goals/',
+  path: '/goals/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGoalsIdRoute = AuthenticatedGoalsIdRouteImport.update({
+  id: '/goals/$id',
+  path: '/goals/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGoalsAssistantRoute =
+  AuthenticatedGoalsAssistantRouteImport.update({
+    id: '/goals/assistant',
+    path: '/goals/assistant',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGoalsImpactRoute =
+  AuthenticatedGoalsImpactRouteImport.update({
+    id: '/goals/impact',
+    path: '/goals/impact',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGoalsNewRoute = AuthenticatedGoalsNewRouteImport.update({
+  id: '/goals/new',
+  path: '/goals/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReadingIndexRoute =
+  AuthenticatedReadingIndexRouteImport.update({
+    id: '/reading/',
+    path: '/reading/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReadingIdRoute = AuthenticatedReadingIdRouteImport.update({
+  id: '/reading/$id',
+  path: '/reading/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReadingGoalsRoute =
+  AuthenticatedReadingGoalsRouteImport.update({
+    id: '/reading/goals',
+    path: '/reading/goals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReadingNewRoute = AuthenticatedReadingNewRouteImport.update({
+  id: '/reading/new',
+  path: '/reading/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReadingStatsRoute =
+  AuthenticatedReadingStatsRouteImport.update({
+    id: '/reading/stats',
+    path: '/reading/stats',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedShoppingIndexRoute =
+  AuthenticatedShoppingIndexRouteImport.update({
+    id: '/shopping/',
+    path: '/shopping/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedShoppingIdRoute = AuthenticatedShoppingIdRouteImport.update({
+  id: '/shopping/$id',
+  path: '/shopping/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTasksNewRoute = AuthenticatedTasksNewRouteImport.update({
+  id: '/tasks/new',
+  path: '/tasks/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCalendarDayDateRoute =
   AuthenticatedCalendarDayDateRouteImport.update({
     id: '/day/$date',
     path: '/day/$date',
     getParentRoute: () => AuthenticatedCalendarRoute,
+  } as any)
+const AuthenticatedTasksIdEditRoute =
+  AuthenticatedTasksIdEditRouteImport.update({
+    id: '/tasks/$id/edit',
+    path: '/tasks/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/finance': typeof AuthenticatedFinanceRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/motivation': typeof AuthenticatedMotivationRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/finance': typeof AuthenticatedFinanceRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/motivation': typeof AuthenticatedMotivationRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/vault': typeof AuthenticatedVaultRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/motivation': typeof AuthenticatedMotivationRoute
+  '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/missions'
     | '/motivation'
+    | '/plans'
     | '/reports'
     | '/stats'
     | '/vault'
@@ -419,6 +429,7 @@ export interface FileRouteTypes {
     | '/finance'
     | '/missions'
     | '/motivation'
+    | '/plans'
     | '/reports'
     | '/stats'
     | '/vault'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/_authenticated/finance'
     | '/_authenticated/missions'
     | '/_authenticated/motivation'
+    | '/_authenticated/plans'
     | '/_authenticated/reports'
     | '/_authenticated/stats'
     | '/_authenticated/vault'
@@ -502,18 +514,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -523,81 +535,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/tts': {
-      id: '/api/tts'
-      path: '/api/tts'
-      fullPath: '/api/tts'
-      preLoaderRoute: typeof ApiTtsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/transcribe': {
-      id: '/api/transcribe'
-      path: '/api/transcribe'
-      fullPath: '/api/transcribe'
-      preLoaderRoute: typeof ApiTranscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/book-search': {
-      id: '/api/book-search'
-      path: '/api/book-search'
-      fullPath: '/api/book-search'
-      preLoaderRoute: typeof ApiBookSearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/assistant': {
-      id: '/api/assistant'
-      path: '/api/assistant'
-      fullPath: '/api/assistant'
-      preLoaderRoute: typeof ApiAssistantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/vault': {
-      id: '/_authenticated/vault'
-      path: '/vault'
-      fullPath: '/vault'
-      preLoaderRoute: typeof AuthenticatedVaultRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/stats': {
-      id: '/_authenticated/stats'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof AuthenticatedStatsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reports': {
-      id: '/_authenticated/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AuthenticatedReportsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/motivation': {
-      id: '/_authenticated/motivation'
-      path: '/motivation'
-      fullPath: '/motivation'
-      preLoaderRoute: typeof AuthenticatedMotivationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/missions': {
-      id: '/_authenticated/missions'
-      path: '/missions'
-      fullPath: '/missions'
-      preLoaderRoute: typeof AuthenticatedMissionsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/finance': {
-      id: '/_authenticated/finance'
-      path: '/finance'
-      fullPath: '/finance'
-      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/devotional': {
-      id: '/_authenticated/devotional'
-      path: '/devotional'
-      fullPath: '/devotional'
-      preLoaderRoute: typeof AuthenticatedDevotionalRouteImport
+    '/_authenticated/achievements': {
+      id: '/_authenticated/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/calendar': {
@@ -607,144 +549,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/achievements': {
-      id: '/_authenticated/achievements'
-      path: '/achievements'
-      fullPath: '/achievements'
-      preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
+    '/_authenticated/devotional': {
+      id: '/_authenticated/devotional'
+      path: '/devotional'
+      fullPath: '/devotional'
+      preLoaderRoute: typeof AuthenticatedDevotionalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/tasks/': {
-      id: '/_authenticated/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks/'
-      preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
+    '/_authenticated/finance': {
+      id: '/_authenticated/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/shopping/': {
-      id: '/_authenticated/shopping/'
-      path: '/shopping'
-      fullPath: '/shopping/'
-      preLoaderRoute: typeof AuthenticatedShoppingIndexRouteImport
+    '/_authenticated/missions': {
+      id: '/_authenticated/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AuthenticatedMissionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/reading/': {
-      id: '/_authenticated/reading/'
-      path: '/reading'
-      fullPath: '/reading/'
-      preLoaderRoute: typeof AuthenticatedReadingIndexRouteImport
+    '/_authenticated/motivation': {
+      id: '/_authenticated/motivation'
+      path: '/motivation'
+      fullPath: '/motivation'
+      preLoaderRoute: typeof AuthenticatedMotivationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/goals/': {
-      id: '/_authenticated/goals/'
-      path: '/goals'
-      fullPath: '/goals/'
-      preLoaderRoute: typeof AuthenticatedGoalsIndexRouteImport
+    '/_authenticated/plans': {
+      id: '/_authenticated/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof AuthenticatedPlansRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/stats': {
+      id: '/_authenticated/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof AuthenticatedStatsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vault': {
+      id: '/_authenticated/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof AuthenticatedVaultRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/assistant': {
+      id: '/api/assistant'
+      path: '/api/assistant'
+      fullPath: '/api/assistant'
+      preLoaderRoute: typeof ApiAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/book-search': {
+      id: '/api/book-search'
+      path: '/api/book-search'
+      fullPath: '/api/book-search'
+      preLoaderRoute: typeof ApiBookSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/calendar/': {
       id: '/_authenticated/calendar/'
       path: '/'
       fullPath: '/calendar/'
       preLoaderRoute: typeof AuthenticatedCalendarIndexRouteImport
-      parentRoute: typeof AuthenticatedCalendarRoute
-    }
-    '/_authenticated/tasks/new': {
-      id: '/_authenticated/tasks/new'
-      path: '/tasks/new'
-      fullPath: '/tasks/new'
-      preLoaderRoute: typeof AuthenticatedTasksNewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/shopping/$id': {
-      id: '/_authenticated/shopping/$id'
-      path: '/shopping/$id'
-      fullPath: '/shopping/$id'
-      preLoaderRoute: typeof AuthenticatedShoppingIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reading/stats': {
-      id: '/_authenticated/reading/stats'
-      path: '/reading/stats'
-      fullPath: '/reading/stats'
-      preLoaderRoute: typeof AuthenticatedReadingStatsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reading/new': {
-      id: '/_authenticated/reading/new'
-      path: '/reading/new'
-      fullPath: '/reading/new'
-      preLoaderRoute: typeof AuthenticatedReadingNewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reading/goals': {
-      id: '/_authenticated/reading/goals'
-      path: '/reading/goals'
-      fullPath: '/reading/goals'
-      preLoaderRoute: typeof AuthenticatedReadingGoalsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reading/$id': {
-      id: '/_authenticated/reading/$id'
-      path: '/reading/$id'
-      fullPath: '/reading/$id'
-      preLoaderRoute: typeof AuthenticatedReadingIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/goals/new': {
-      id: '/_authenticated/goals/new'
-      path: '/goals/new'
-      fullPath: '/goals/new'
-      preLoaderRoute: typeof AuthenticatedGoalsNewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/goals/impact': {
-      id: '/_authenticated/goals/impact'
-      path: '/goals/impact'
-      fullPath: '/goals/impact'
-      preLoaderRoute: typeof AuthenticatedGoalsImpactRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/goals/assistant': {
-      id: '/_authenticated/goals/assistant'
-      path: '/goals/assistant'
-      fullPath: '/goals/assistant'
-      preLoaderRoute: typeof AuthenticatedGoalsAssistantRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/goals/$id': {
-      id: '/_authenticated/goals/$id'
-      path: '/goals/$id'
-      fullPath: '/goals/$id'
-      preLoaderRoute: typeof AuthenticatedGoalsIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/focus/$taskId': {
-      id: '/_authenticated/focus/$taskId'
-      path: '/focus/$taskId'
-      fullPath: '/focus/$taskId'
-      preLoaderRoute: typeof AuthenticatedFocusTaskIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/calendar/week': {
-      id: '/_authenticated/calendar/week'
-      path: '/week'
-      fullPath: '/calendar/week'
-      preLoaderRoute: typeof AuthenticatedCalendarWeekRouteImport
-      parentRoute: typeof AuthenticatedCalendarRoute
-    }
-    '/_authenticated/calendar/search': {
-      id: '/_authenticated/calendar/search'
-      path: '/search'
-      fullPath: '/calendar/search'
-      preLoaderRoute: typeof AuthenticatedCalendarSearchRouteImport
-      parentRoute: typeof AuthenticatedCalendarRoute
-    }
-    '/_authenticated/calendar/history': {
-      id: '/_authenticated/calendar/history'
-      path: '/history'
-      fullPath: '/calendar/history'
-      preLoaderRoute: typeof AuthenticatedCalendarHistoryRouteImport
       parentRoute: typeof AuthenticatedCalendarRoute
     }
     '/_authenticated/calendar/archived': {
@@ -754,11 +647,130 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarArchivedRouteImport
       parentRoute: typeof AuthenticatedCalendarRoute
     }
-    '/_authenticated/tasks/$id/edit': {
-      id: '/_authenticated/tasks/$id/edit'
-      path: '/tasks/$id/edit'
-      fullPath: '/tasks/$id/edit'
-      preLoaderRoute: typeof AuthenticatedTasksIdEditRouteImport
+    '/_authenticated/calendar/history': {
+      id: '/_authenticated/calendar/history'
+      path: '/history'
+      fullPath: '/calendar/history'
+      preLoaderRoute: typeof AuthenticatedCalendarHistoryRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/calendar/search': {
+      id: '/_authenticated/calendar/search'
+      path: '/search'
+      fullPath: '/calendar/search'
+      preLoaderRoute: typeof AuthenticatedCalendarSearchRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/calendar/week': {
+      id: '/_authenticated/calendar/week'
+      path: '/week'
+      fullPath: '/calendar/week'
+      preLoaderRoute: typeof AuthenticatedCalendarWeekRouteImport
+      parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/focus/$taskId': {
+      id: '/_authenticated/focus/$taskId'
+      path: '/focus/$taskId'
+      fullPath: '/focus/$taskId'
+      preLoaderRoute: typeof AuthenticatedFocusTaskIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/goals/': {
+      id: '/_authenticated/goals/'
+      path: '/goals'
+      fullPath: '/goals/'
+      preLoaderRoute: typeof AuthenticatedGoalsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/goals/$id': {
+      id: '/_authenticated/goals/$id'
+      path: '/goals/$id'
+      fullPath: '/goals/$id'
+      preLoaderRoute: typeof AuthenticatedGoalsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/goals/assistant': {
+      id: '/_authenticated/goals/assistant'
+      path: '/goals/assistant'
+      fullPath: '/goals/assistant'
+      preLoaderRoute: typeof AuthenticatedGoalsAssistantRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/goals/impact': {
+      id: '/_authenticated/goals/impact'
+      path: '/goals/impact'
+      fullPath: '/goals/impact'
+      preLoaderRoute: typeof AuthenticatedGoalsImpactRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/goals/new': {
+      id: '/_authenticated/goals/new'
+      path: '/goals/new'
+      fullPath: '/goals/new'
+      preLoaderRoute: typeof AuthenticatedGoalsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/': {
+      id: '/_authenticated/reading/'
+      path: '/reading'
+      fullPath: '/reading/'
+      preLoaderRoute: typeof AuthenticatedReadingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/$id': {
+      id: '/_authenticated/reading/$id'
+      path: '/reading/$id'
+      fullPath: '/reading/$id'
+      preLoaderRoute: typeof AuthenticatedReadingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/goals': {
+      id: '/_authenticated/reading/goals'
+      path: '/reading/goals'
+      fullPath: '/reading/goals'
+      preLoaderRoute: typeof AuthenticatedReadingGoalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/new': {
+      id: '/_authenticated/reading/new'
+      path: '/reading/new'
+      fullPath: '/reading/new'
+      preLoaderRoute: typeof AuthenticatedReadingNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reading/stats': {
+      id: '/_authenticated/reading/stats'
+      path: '/reading/stats'
+      fullPath: '/reading/stats'
+      preLoaderRoute: typeof AuthenticatedReadingStatsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/shopping/': {
+      id: '/_authenticated/shopping/'
+      path: '/shopping'
+      fullPath: '/shopping/'
+      preLoaderRoute: typeof AuthenticatedShoppingIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/shopping/$id': {
+      id: '/_authenticated/shopping/$id'
+      path: '/shopping/$id'
+      fullPath: '/shopping/$id'
+      preLoaderRoute: typeof AuthenticatedShoppingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks/': {
+      id: '/_authenticated/tasks/'
+      path: '/tasks'
+      fullPath: '/tasks/'
+      preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tasks/new': {
+      id: '/_authenticated/tasks/new'
+      path: '/tasks/new'
+      fullPath: '/tasks/new'
+      preLoaderRoute: typeof AuthenticatedTasksNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/calendar/day/$date': {
@@ -767,6 +779,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/calendar/day/$date'
       preLoaderRoute: typeof AuthenticatedCalendarDayDateRouteImport
       parentRoute: typeof AuthenticatedCalendarRoute
+    }
+    '/_authenticated/tasks/$id/edit': {
+      id: '/_authenticated/tasks/$id/edit'
+      path: '/tasks/$id/edit'
+      fullPath: '/tasks/$id/edit'
+      preLoaderRoute: typeof AuthenticatedTasksIdEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
@@ -801,6 +820,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedMotivationRoute: typeof AuthenticatedMotivationRoute
+  AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
   AuthenticatedVaultRoute: typeof AuthenticatedVaultRoute
@@ -830,6 +850,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedMotivationRoute: AuthenticatedMotivationRoute,
+  AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedStatsRoute: AuthenticatedStatsRoute,
   AuthenticatedVaultRoute: AuthenticatedVaultRoute,

@@ -29,7 +29,11 @@ export function NotificationPermissionCard() {
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-discipline">
           <BellRing className="size-4" /> Notificações desativadas
         </p>
-        <button onClick={() => setHidden(true)} aria-label="Fechar" className="text-muted-foreground">
+        <button
+          onClick={() => setHidden(true)}
+          aria-label="Fechar"
+          className="text-muted-foreground"
+        >
           <X className="size-4" />
         </button>
       </div>
@@ -45,7 +49,9 @@ export function NotificationPermissionCard() {
             await syncTaskNotifications(tasks, sessions);
             toast.success("Notificações ativadas. Seus lembretes já foram agendados.");
           } else {
-            toast.error("Permissão negada. Ative em Configurações do Android > Apps > Forja > Notificações.");
+            toast.error(
+              "Permissão negada. Ative em Configurações do Android > Apps > Forja > Notificações.",
+            );
           }
         }}
         className="mt-3 w-full rounded-xl bg-discipline py-2 text-[11px] font-bold uppercase text-black"

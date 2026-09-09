@@ -1,0 +1,46 @@
+# Normalize line endings to LF on checkout/commit for all text files.
+# Prevents CRLF corruption (and thousands of phantom prettier/eslint errors)
+# when the repo is cloned on Windows with core.autocrlf=true.
+* text=auto eol=lf
+
+# Explicitly LF for source and config
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.sql   text eol=lf
+*.toml  text eol=lf
+*.svg   text eol=lf
+
+# Lockfiles - keep LF, treat as generated (collapsed in diffs)
+package-lock.json  -diff linguist-generated
+bun.lock           -diff linguist-generated
+src/routeTree.gen.ts -diff linguist-generated
+
+# Gradle wrapper needs LF
+gradlew  text eol=lf
+
+# Binary assets - never touch
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.mp3   binary
+*.wav   binary
+*.jar   binary
+*.keystore binary
+*.jks   binary

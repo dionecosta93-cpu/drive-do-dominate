@@ -114,11 +114,12 @@ export function BookForm({
     setAiResults([]);
   };
 
-  const num = (v: string) => (Number(v) || 0) || undefined;
+  const num = (v: string) => Number(v) || 0 || undefined;
 
   const field =
     "w-full bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-discipline";
-  const label = "block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5";
+  const label =
+    "block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5";
   const sectionTitle = "text-[11px] font-bold uppercase tracking-widest text-discipline mb-3 mt-6";
 
   return (
@@ -155,7 +156,10 @@ export function BookForm({
           comments,
           learnings,
           quotes,
-          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
         });
       }}
     >
@@ -165,7 +169,8 @@ export function BookForm({
           <Sparkles className="size-3.5" /> Cadastro inteligente
         </p>
         <p className="text-[11px] text-muted-foreground mb-3">
-          Digite o nome do livro (e o autor, se souber). A IA preenche capa, sinopse, páginas, editora e mais.
+          Digite o nome do livro (e o autor, se souber). A IA preenche capa, sinopse, páginas,
+          editora e mais.
         </p>
         <div className="flex gap-2">
           <input
@@ -181,7 +186,11 @@ export function BookForm({
             className="px-4 rounded-xl bg-discipline text-black text-xs font-bold uppercase disabled:opacity-50"
             aria-label="Buscar com IA"
           >
-            {aiLoading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
+            {aiLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Search className="size-4" />
+            )}
           </button>
         </div>
         {aiError && <p className="text-[11px] text-struggle mt-2">{aiError}</p>}
@@ -195,13 +204,21 @@ export function BookForm({
                 className="w-full flex gap-3 text-left bg-background border border-border rounded-xl p-2.5 hover:border-discipline transition"
               >
                 {r.cover && (
-                  <img src={r.cover} alt={`Capa de ${r.title}`} className="w-10 h-14 object-cover rounded border border-border" />
+                  <img
+                    src={r.cover}
+                    alt={`Capa de ${r.title}`}
+                    className="w-10 h-14 object-cover rounded border border-border"
+                  />
                 )}
                 <div className="min-w-0">
                   <p className="text-sm font-bold truncate">{r.title}</p>
                   <p className="text-[11px] text-muted-foreground truncate">{r.author}</p>
                   <p className="text-[10px] font-mono text-muted-foreground">
-                    {[r.publisher, r.publishedYear || null, r.totalPages ? `${r.totalPages} pág.` : null]
+                    {[
+                      r.publisher,
+                      r.publishedYear || null,
+                      r.totalPages ? `${r.totalPages} pág.` : null,
+                    ]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
@@ -216,7 +233,13 @@ export function BookForm({
 
       <div>
         <label className={label}>Título</label>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} className={field} placeholder="Hábitos Atômicos" required />
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={field}
+          placeholder="Hábitos Atômicos"
+          required
+        />
       </div>
 
       <div>
@@ -227,11 +250,21 @@ export function BookForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={label}>Autor</label>
-          <input value={author} onChange={(e) => setAuthor(e.target.value)} className={field} placeholder="James Clear" />
+          <input
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            className={field}
+            placeholder="James Clear"
+          />
         </div>
         <div>
           <label className={label}>Categoria</label>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} className={field} placeholder="Produtividade" />
+          <input
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={field}
+            placeholder="Produtividade"
+          />
         </div>
         <div>
           <label className={label}>Gênero</label>
@@ -239,15 +272,29 @@ export function BookForm({
         </div>
         <div>
           <label className={label}>Idioma</label>
-          <input value={language} onChange={(e) => setLanguage(e.target.value)} className={field} placeholder="Português" />
+          <input
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className={field}
+            placeholder="Português"
+          />
         </div>
         <div>
           <label className={label}>Editora</label>
-          <input value={publisher} onChange={(e) => setPublisher(e.target.value)} className={field} />
+          <input
+            value={publisher}
+            onChange={(e) => setPublisher(e.target.value)}
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Ano</label>
-          <input value={publishedYear} onChange={(e) => setPublishedYear(e.target.value)} inputMode="numeric" className={field} />
+          <input
+            value={publishedYear}
+            onChange={(e) => setPublishedYear(e.target.value)}
+            inputMode="numeric"
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>ISBN</label>
@@ -255,19 +302,41 @@ export function BookForm({
         </div>
         <div>
           <label className={label}>Nota média da obra</label>
-          <input value={averageRating} onChange={(e) => setAverageRating(e.target.value)} inputMode="decimal" className={field} placeholder="4.5" />
+          <input
+            value={averageRating}
+            onChange={(e) => setAverageRating(e.target.value)}
+            inputMode="decimal"
+            className={field}
+            placeholder="4.5"
+          />
         </div>
       </div>
 
       <div>
         <label className={label}>Sinopse</label>
-        <textarea value={synopsis} onChange={(e) => setSynopsis(e.target.value)} rows={4} className={field} />
+        <textarea
+          value={synopsis}
+          onChange={(e) => setSynopsis(e.target.value)}
+          rows={4}
+          className={field}
+        />
       </div>
 
       <div>
         <label className={label}>Capa (URL)</label>
-        <input value={cover} onChange={(e) => setCover(e.target.value)} className={field} placeholder="https://..." />
-        {cover && <img src={cover} alt={`Capa de ${title}`} className="mt-2 h-28 rounded-lg border border-border object-cover" />}
+        <input
+          value={cover}
+          onChange={(e) => setCover(e.target.value)}
+          className={field}
+          placeholder="https://..."
+        />
+        {cover && (
+          <img
+            src={cover}
+            alt={`Capa de ${title}`}
+            className="mt-2 h-28 rounded-lg border border-border object-cover"
+          />
+        )}
       </div>
 
       <p className={sectionTitle}>Progresso e metas</p>
@@ -275,43 +344,95 @@ export function BookForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={label}>Total de páginas</label>
-          <input value={totalPages} onChange={(e) => setTotalPages(e.target.value)} inputMode="numeric" className={field} placeholder="320" />
+          <input
+            value={totalPages}
+            onChange={(e) => setTotalPages(e.target.value)}
+            inputMode="numeric"
+            className={field}
+            placeholder="320"
+          />
         </div>
         <div>
           <label className={label}>Página atual</label>
-          <input value={currentPage} onChange={(e) => setCurrentPage(e.target.value)} inputMode="numeric" className={field} placeholder="0" />
+          <input
+            value={currentPage}
+            onChange={(e) => setCurrentPage(e.target.value)}
+            inputMode="numeric"
+            className={field}
+            placeholder="0"
+          />
         </div>
         <div>
           <label className={label}>Total de capítulos</label>
-          <input value={totalChapters} onChange={(e) => setTotalChapters(e.target.value)} inputMode="numeric" className={field} />
+          <input
+            value={totalChapters}
+            onChange={(e) => setTotalChapters(e.target.value)}
+            inputMode="numeric"
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Capítulo atual</label>
-          <input value={currentChapter} onChange={(e) => setCurrentChapter(e.target.value)} inputMode="numeric" className={field} />
+          <input
+            value={currentChapter}
+            onChange={(e) => setCurrentChapter(e.target.value)}
+            inputMode="numeric"
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Meta de páginas/dia</label>
-          <input value={dailyPageGoal} onChange={(e) => setDailyPageGoal(e.target.value)} inputMode="numeric" className={field} />
+          <input
+            value={dailyPageGoal}
+            onChange={(e) => setDailyPageGoal(e.target.value)}
+            inputMode="numeric"
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Meta de minutos/dia</label>
-          <input value={dailyMinutesGoal} onChange={(e) => setDailyMinutesGoal(e.target.value)} inputMode="numeric" className={field} />
+          <input
+            value={dailyMinutesGoal}
+            onChange={(e) => setDailyMinutesGoal(e.target.value)}
+            inputMode="numeric"
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Tempo estimado (min)</label>
-          <input value={estimatedMinutes} onChange={(e) => setEstimatedMinutes(e.target.value)} inputMode="numeric" className={field} />
+          <input
+            value={estimatedMinutes}
+            onChange={(e) => setEstimatedMinutes(e.target.value)}
+            inputMode="numeric"
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Meta de conclusão</label>
-          <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className={field} />
+          <input
+            type="date"
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Início</label>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={field} />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className={field}
+          />
         </div>
         <div>
           <label className={label}>Conclusão</label>
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={field} />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className={field}
+          />
         </div>
       </div>
 
@@ -324,7 +445,9 @@ export function BookForm({
               type="button"
               onClick={() => setStatus(s)}
               className={`py-2 rounded-xl text-[9px] font-bold uppercase tracking-wider border transition ${
-                status === s ? "bg-discipline text-black border-discipline" : "bg-surface border-border text-muted-foreground"
+                status === s
+                  ? "bg-discipline text-black border-discipline"
+                  : "bg-surface border-border text-muted-foreground"
               }`}
             >
               {bookStatusLabel[s]}
@@ -354,29 +477,56 @@ export function BookForm({
 
       <div>
         <label className={label}>Comentários pessoais</label>
-        <textarea value={comments} onChange={(e) => setComments(e.target.value)} rows={3} className={field} />
+        <textarea
+          value={comments}
+          onChange={(e) => setComments(e.target.value)}
+          rows={3}
+          className={field}
+        />
       </div>
 
       <div>
         <label className={label}>Principais aprendizados</label>
-        <textarea value={learnings} onChange={(e) => setLearnings(e.target.value)} rows={3} className={field} />
+        <textarea
+          value={learnings}
+          onChange={(e) => setLearnings(e.target.value)}
+          rows={3}
+          className={field}
+        />
       </div>
 
       <div>
         <label className={label}>Frases marcantes</label>
-        <textarea value={quotes} onChange={(e) => setQuotes(e.target.value)} rows={3} className={field} />
+        <textarea
+          value={quotes}
+          onChange={(e) => setQuotes(e.target.value)}
+          rows={3}
+          className={field}
+        />
       </div>
 
       <div>
         <label className={label}>Tags (separadas por vírgula)</label>
-        <input value={tags} onChange={(e) => setTags(e.target.value)} className={field} placeholder="foco, hábitos" />
+        <input
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          className={field}
+          placeholder="foco, hábitos"
+        />
       </div>
 
       <div className="flex gap-3 pt-2">
-        <button type="button" onClick={onCancel} className="flex-1 py-3 rounded-xl border border-border text-xs font-bold uppercase text-muted-foreground">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 py-3 rounded-xl border border-border text-xs font-bold uppercase text-muted-foreground"
+        >
           Cancelar
         </button>
-        <button type="submit" className="flex-1 py-3 rounded-xl bg-discipline text-black text-xs font-bold uppercase">
+        <button
+          type="submit"
+          className="flex-1 py-3 rounded-xl bg-discipline text-black text-xs font-bold uppercase"
+        >
           {submitLabel}
         </button>
       </div>

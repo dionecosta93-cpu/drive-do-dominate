@@ -59,7 +59,9 @@ export const buildPerformance = (
   }
 
   const active = days.filter((d) => d.total > 0);
-  const average = active.length ? Math.round(active.reduce((a, d) => a + d.pct, 0) / active.length) : 0;
+  const average = active.length
+    ? Math.round(active.reduce((a, d) => a + d.pct, 0) / active.length)
+    : 0;
   const best = active.length ? active.reduce((a, b) => (b.pct > a.pct ? b : a)) : null;
   const worst = active.length ? active.reduce((a, b) => (b.pct < a.pct ? b : a)) : null;
 

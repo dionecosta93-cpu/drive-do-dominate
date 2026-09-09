@@ -23,7 +23,7 @@ import { initNativeShell, isNativeApp, notify } from "@/lib/native";
 import { syncTaskNotifications, listenNotificationActions } from "@/lib/notifications";
 import { NotificationPermissionCard } from "@/components/notification-permission";
 import { setupServiceWorker } from "@/lib/pwa";
-
+import { track, setAnalyticsUser } from "@/lib/track";
 
 function NotFoundComponent() {
   return (
@@ -90,15 +90,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#050505" },
       { title: "Disciplina Absoluta — Domine seu dia" },
-      { name: "description", content: "Elimine a procrastinação e construa disciplina absoluta. Rotina, foco, metas, hábitos e recompensas — tudo sincronizado na nuvem." },
+      {
+        name: "description",
+        content:
+          "Elimine a procrastinação e construa disciplina absoluta. Rotina, foco, metas, hábitos e recompensas — tudo sincronizado na nuvem.",
+      },
       { name: "author", content: "Disciplina Absoluta" },
       { property: "og:title", content: "Disciplina Absoluta — Domine seu dia" },
-      { property: "og:description", content: "Elimine a procrastinação e construa disciplina absoluta. Rotina, foco, metas, hábitos e recompensas — tudo sincronizado na nuvem." },
+      {
+        property: "og:description",
+        content:
+          "Elimine a procrastinação e construa disciplina absoluta. Rotina, foco, metas, hábitos e recompensas — tudo sincronizado na nuvem.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Disciplina Absoluta — Domine seu dia" },
-      { name: "twitter:description", content: "Elimine a procrastinação e construa disciplina absoluta." },
-
+      {
+        name: "twitter:description",
+        content: "Elimine a procrastinação e construa disciplina absoluta.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -143,19 +153,27 @@ function RootComponent() {
   const firedAlarms = useRef(new Set<string>());
 
   useEffect(() => {
+    track("app_open");
     // Hydrate current session immediately (in case page loaded already signed in).
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) void attachCloudSyncForUser(data.user.id);
+      if (data.user) {
+        setAnalyticsUser(data.user.id);
+        void attachCloudSyncForUser(data.user.id);
+      }
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
+        setAnalyticsUser(null);
         detachCloudSync();
         useStore.getState().reset();
         router.invalidate();
         return;
       }
-      if (session?.user) void attachCloudSyncForUser(session.user.id);
+      if (session?.user) {
+        setAnalyticsUser(session.user.id);
+        void attachCloudSyncForUser(session.user.id);
+      }
       router.invalidate();
     });
     return () => sub.subscription.unsubscribe();
@@ -164,8 +182,14 @@ function RootComponent() {
   useEffect(() => {
     const ring = () => {
       try {
-        const AC = (window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
-          || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const AC =
+          (
+            window as unknown as {
+              AudioContext: typeof AudioContext;
+              webkitAudioContext?: typeof AudioContext;
+            }
+          ).AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         if (!AC) return;
         const ac = new AC();
         [880, 660, 880].forEach((freq, i) => {
@@ -182,7 +206,9 @@ function RootComponent() {
           oscillator.start(start);
           oscillator.stop(start + 0.17);
         });
-      } catch { /* ignore unavailable audio */ }
+      } catch {
+        /* ignore unavailable audio */
+      }
     };
 
     const checkAlarms = () => {
@@ -190,7 +216,8 @@ function RootComponent() {
       const now = Date.now();
       for (const task of todaysTasks(tasks, today)) {
         if (!task.alarmMinutesBefore || taskCompletedOn(task.id, sessions, today)) continue;
-        const alarmAt = new Date(`${today}T${task.time}:00`).getTime() - task.alarmMinutesBefore * 60_000;
+        const alarmAt =
+          new Date(`${today}T${task.time}:00`).getTime() - task.alarmMinutesBefore * 60_000;
         const key = `${today}:${task.id}:${task.alarmMinutesBefore}`;
         if (now < alarmAt || now > alarmAt + 60_000 || firedAlarms.current.has(key)) continue;
         firedAlarms.current.add(key);
@@ -200,7 +227,6 @@ function RootComponent() {
         void notify("Forja", message);
       }
     };
-
 
     checkAlarms();
     const interval = window.setInterval(checkAlarms, 30_000);
@@ -225,7 +251,8 @@ function RootComponent() {
     let remove: (() => void) | undefined;
     void import("@capacitor/app").then(({ App }) =>
       App.addListener("appStateChange", ({ isActive }) => {
-        if (isActive) void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
+        if (isActive)
+          void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
       }).then((h) => {
         remove = () => void h.remove();
       }),
@@ -275,4 +302,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

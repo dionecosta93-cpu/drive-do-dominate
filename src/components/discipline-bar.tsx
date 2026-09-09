@@ -13,7 +13,10 @@ export function DisciplineBar({ compact = false }: { compact?: boolean }) {
         <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           <ShieldCheck className="size-4" style={{ color: tier.color }} /> Disciplina
         </span>
-        <span className="font-heading font-black text-lg tabular-nums" style={{ color: tier.color }}>
+        <span
+          className="font-heading font-black text-lg tabular-nums"
+          style={{ color: tier.color }}
+        >
           {discipline}
           <span className="text-[10px] text-muted-foreground font-medium">/{DISCIPLINE_MAX}</span>
         </span>
@@ -30,7 +33,10 @@ export function DisciplineBar({ compact = false }: { compact?: boolean }) {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)] animate-[shimmer_2.5s_infinite]" />
         </div>
       </div>
-      <p className="mt-2 text-[10px] uppercase tracking-widest font-bold" style={{ color: tier.color }}>
+      <p
+        className="mt-2 text-[10px] uppercase tracking-widest font-bold"
+        style={{ color: tier.color }}
+      >
         Nível {tier.name}
       </p>
     </div>

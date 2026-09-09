@@ -4,16 +4,29 @@ import { ArrowLeft, CalendarPlus, Check, Copy, Plus, Trash2, Undo2 } from "lucid
 import { toast } from "sonner";
 import { useStore, dateKey, type ShoppingItem } from "@/lib/store";
 import { brl } from "@/lib/finance";
-import { listTotals, parseItemsText, SHOPPING_CATEGORIES, shoppingCategoryLabel, UNITS } from "@/lib/shopping";
+import {
+  listTotals,
+  parseItemsText,
+  SHOPPING_CATEGORIES,
+  shoppingCategoryLabel,
+  UNITS,
+} from "@/lib/shopping";
 
 export const Route = createFileRoute("/_authenticated/shopping/$id")({
   component: ShoppingDetail,
   head: () => ({
     meta: [
       { title: "Minha lista de compras — Disciplina Absoluta" },
-      { name: "description", content: "Itens, quantidades, preços e progresso da sua compra, com lançamento automático no financeiro." },
+      {
+        name: "description",
+        content:
+          "Itens, quantidades, preços e progresso da sua compra, com lançamento automático no financeiro.",
+      },
       { property: "og:title", content: "Minha lista de compras — Disciplina Absoluta" },
-      { property: "og:description", content: "Marque itens comprados e registre os gastos automaticamente." },
+      {
+        property: "og:description",
+        content: "Marque itens comprados e registre os gastos automaticamente.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -41,7 +54,10 @@ function ShoppingDetail() {
     return (
       <div className="mx-auto max-w-[440px] px-4 pt-10 text-center">
         <p className="text-sm text-muted-foreground">Lista não encontrada.</p>
-        <Link to="/shopping" className="mt-4 inline-block rounded-md bg-discipline px-4 py-2 text-sm font-bold text-background">
+        <Link
+          to="/shopping"
+          className="mt-4 inline-block rounded-md bg-discipline px-4 py-2 text-sm font-bold text-background"
+        >
           Voltar
         </Link>
       </div>
@@ -133,7 +149,10 @@ function ShoppingDetail() {
           Itens comprados: {totals.done}/{totals.total}
         </div>
         <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-muted">
-          <div className="h-full bg-discipline transition-all" style={{ width: `${totals.pct}%` }} />
+          <div
+            className="h-full bg-discipline transition-all"
+            style={{ width: `${totals.pct}%` }}
+          />
         </div>
       </div>
 
@@ -166,18 +185,30 @@ function ShoppingDetail() {
                   item.purchased ? setPurchased(list.id, item.id, false) : setPriceFor(item.id)
                 }
                 className={`flex size-9 shrink-0 items-center justify-center rounded-md border ${
-                  item.purchased ? "border-discipline bg-discipline text-background" : "border-input"
+                  item.purchased
+                    ? "border-discipline bg-discipline text-background"
+                    : "border-input"
                 }`}
                 aria-label={item.purchased ? "Desfazer" : "Marcar como comprado"}
               >
-                {item.purchased ? <Check className="size-5" /> : <span className="size-4 rounded-sm border border-muted-foreground" />}
+                {item.purchased ? (
+                  <Check className="size-5" />
+                ) : (
+                  <span className="size-4 rounded-sm border border-muted-foreground" />
+                )}
               </button>
-              <button className="min-w-0 flex-1 text-left" onClick={() => setEditing(editing === item.id ? null : item.id)}>
-                <div className={`truncate font-bold ${item.purchased ? "text-muted-foreground line-through" : ""}`}>
+              <button
+                className="min-w-0 flex-1 text-left"
+                onClick={() => setEditing(editing === item.id ? null : item.id)}
+              >
+                <div
+                  className={`truncate font-bold ${item.purchased ? "text-muted-foreground line-through" : ""}`}
+                >
                   {item.name}
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  {item.quantity} {item.unit} · {shoppingCategoryLabel[item.category] ?? item.category}
+                  {item.quantity} {item.unit} ·{" "}
+                  {shoppingCategoryLabel[item.category] ?? item.category}
                   {item.estimatedPrice ? ` · est. ${brl(item.estimatedPrice)}` : ""}
                   {item.purchased && item.paidPrice ? ` · pago ${brl(item.paidPrice)}` : ""}
                   {item.purchased && item.purchasedAt
@@ -186,11 +217,19 @@ function ShoppingDetail() {
                 </div>
               </button>
               {item.purchased && (
-                <button onClick={() => setPurchased(list.id, item.id, false)} className="p-1 text-muted-foreground" aria-label="Desfazer">
+                <button
+                  onClick={() => setPurchased(list.id, item.id, false)}
+                  className="p-1 text-muted-foreground"
+                  aria-label="Desfazer"
+                >
                   <Undo2 className="size-4" />
                 </button>
               )}
-              <button onClick={() => removeShoppingItem(list.id, item.id)} className="p-1 text-destructive" aria-label="Excluir item">
+              <button
+                onClick={() => removeShoppingItem(list.id, item.id)}
+                className="p-1 text-destructive"
+                aria-label="Excluir item"
+              >
                 <Trash2 className="size-4" />
               </button>
             </div>
@@ -206,7 +245,10 @@ function ShoppingDetail() {
                   placeholder="Preço pago (R$)"
                   className="flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm"
                 />
-                <button onClick={() => confirmPurchase(item)} className="rounded-md bg-discipline px-3 text-sm font-bold text-background">
+                <button
+                  onClick={() => confirmPurchase(item)}
+                  className="rounded-md bg-discipline px-3 text-sm font-bold text-background"
+                >
                   Comprado
                 </button>
               </div>
@@ -223,7 +265,9 @@ function ShoppingDetail() {
                   type="number"
                   min={1}
                   value={item.quantity}
-                  onChange={(e) => updateShoppingItem(list.id, item.id, { quantity: Number(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    updateShoppingItem(list.id, item.id, { quantity: Number(e.target.value) || 1 })
+                  }
                   className="rounded-md border border-input bg-background px-2 py-1"
                 />
                 <select
@@ -242,13 +286,17 @@ function ShoppingDetail() {
                   placeholder="Preço estimado"
                   value={item.estimatedPrice ?? ""}
                   onChange={(e) =>
-                    updateShoppingItem(list.id, item.id, { estimatedPrice: Number(e.target.value.replace(",", ".")) || undefined })
+                    updateShoppingItem(list.id, item.id, {
+                      estimatedPrice: Number(e.target.value.replace(",", ".")) || undefined,
+                    })
                   }
                   className="rounded-md border border-input bg-background px-2 py-1"
                 />
                 <select
                   value={item.category}
-                  onChange={(e) => updateShoppingItem(list.id, item.id, { category: e.target.value })}
+                  onChange={(e) =>
+                    updateShoppingItem(list.id, item.id, { category: e.target.value })
+                  }
                   className="rounded-md border border-input bg-background px-2 py-1"
                 >
                   {SHOPPING_CATEGORIES.map((c) => (
@@ -271,7 +319,10 @@ function ShoppingDetail() {
 
       {/* Ações */}
       <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold uppercase">
-        <button onClick={createShoppingTask} className="flex items-center justify-center gap-1 rounded-md border border-input py-2">
+        <button
+          onClick={createShoppingTask}
+          className="flex items-center justify-center gap-1 rounded-md border border-input py-2"
+        >
           <CalendarPlus className="size-4" /> Criar tarefa
         </button>
         <button

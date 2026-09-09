@@ -3,7 +3,12 @@ import { Search, History, Archive, CalendarDays } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/calendar")({
   component: CalendarLayout,
-  head: () => ({ meta: [{ title: "Agenda — Disciplina Absoluta" }, { name: "description", content: "Sua agenda inteligente de missões." }] }),
+  head: () => ({
+    meta: [
+      { title: "Agenda — Disciplina Absoluta" },
+      { name: "description", content: "Sua agenda inteligente de missões." },
+    ],
+  }),
 });
 
 function CalendarLayout() {
@@ -22,13 +27,25 @@ function CalendarLayout() {
           <h1 className="text-xl font-heading font-extrabold uppercase truncate">Agenda</h1>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Link to="/calendar/search" aria-label="Buscar" className="size-9 grid place-items-center rounded-full border border-border bg-surface">
+          <Link
+            to="/calendar/search"
+            aria-label="Buscar"
+            className="size-9 grid place-items-center rounded-full border border-border bg-surface"
+          >
             <Search className="size-4" />
           </Link>
-          <Link to="/calendar/history" aria-label="Histórico" className="size-9 grid place-items-center rounded-full border border-border bg-surface">
+          <Link
+            to="/calendar/history"
+            aria-label="Histórico"
+            className="size-9 grid place-items-center rounded-full border border-border bg-surface"
+          >
             <History className="size-4" />
           </Link>
-          <Link to="/calendar/archived" aria-label="Arquivadas" className="size-9 grid place-items-center rounded-full border border-border bg-surface">
+          <Link
+            to="/calendar/archived"
+            aria-label="Arquivadas"
+            className="size-9 grid place-items-center rounded-full border border-border bg-surface"
+          >
             <Archive className="size-4" />
           </Link>
         </div>

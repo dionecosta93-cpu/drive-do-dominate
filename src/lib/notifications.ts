@@ -7,7 +7,14 @@
  *   cancelando o que ficou obsoleto — nunca sobra notificação antiga.
  * - Horários usam Date local do aparelho (sem UTC direto).
  */
-import { dateKey, taskAppearsOn, taskCompletedOn, useStore, type CompletedSession, type Task } from "@/lib/store";
+import {
+  dateKey,
+  taskAppearsOn,
+  taskCompletedOn,
+  useStore,
+  type CompletedSession,
+  type Task,
+} from "@/lib/store";
 import { isNativeApp } from "@/lib/native";
 
 export const CHANNELS = {
@@ -115,7 +122,10 @@ export function planNotifications(
         const list = useStore.getState().shoppingLists.find((l) => l.id === task.shoppingListId);
         if (list) {
           const pending = list.items.filter((i) => !i.purchased);
-          const estimated = pending.reduce((sum, i) => sum + (i.estimatedPrice ?? 0) * (i.quantity || 1), 0);
+          const estimated = pending.reduce(
+            (sum, i) => sum + (i.estimatedPrice ?? 0) * (i.quantity || 1),
+            0,
+          );
           shoppingSuffix = `\n🛒 ${pending.length} item(ns) pendentes${estimated > 0 ? ` · est. R$ ${estimated.toFixed(2).replace(".", ",")}` : ""}`;
         }
       }
@@ -134,7 +144,11 @@ export function planNotifications(
       }
 
       // Cobrança pós-horário: verifica conclusão quando dispara (recalculada a cada sync).
-      const cobrancaAt = atLocal(date, task.endTime || task.time, task.endTime ? 15 : (task.estimatedMinutes || 0) + 15);
+      const cobrancaAt = atLocal(
+        date,
+        task.endTime || task.time,
+        task.endTime ? 15 : (task.estimatedMinutes || 0) + 15,
+      );
       if (cobrancaAt.getTime() > now.getTime() && cobrancaAt.getTime() > start.getTime()) {
         out.push({
           id: notificationId(task.id, date, "cobranca"),
@@ -219,7 +233,10 @@ export async function notificationsGranted(): Promise<boolean> {
  * e cria as que valem agora. Chamada em toda mudança de tarefa/conclusão,
  * na abertura do app e ao voltar do segundo plano.
  */
-export async function syncTaskNotifications(tasks: Task[], sessions: CompletedSession[]): Promise<number> {
+export async function syncTaskNotifications(
+  tasks: Task[],
+  sessions: CompletedSession[],
+): Promise<number> {
   const ln = await plugin();
   if (!ln) return 0;
   try {
@@ -278,11 +295,17 @@ export interface NotificationTap {
 }
 
 /** Escuta toques/ações nas notificações. Retorna função de limpeza. */
-export async function listenNotificationActions(handler: (t: NotificationTap) => void): Promise<() => void> {
+export async function listenNotificationActions(
+  handler: (t: NotificationTap) => void,
+): Promise<() => void> {
   const ln = await plugin();
   if (!ln) return () => {};
   const sub = await ln.addListener("localNotificationActionPerformed", (event) => {
-    const extra = (event.notification.extra ?? {}) as { taskId?: string; date?: string; kind?: string };
+    const extra = (event.notification.extra ?? {}) as {
+      taskId?: string;
+      date?: string;
+      kind?: string;
+    };
     handler({ ...extra, actionId: event.actionId });
   });
   return () => void sub.remove();

@@ -22,7 +22,8 @@ export const Route = createFileRoute("/_authenticated/devotional")({
       { property: "og:title", content: "Devocional de Produtividade — Disciplina Absoluta" },
       {
         property: "og:description",
-        content: "Leitura diária de grandes livros com reflexão e uma ação concreta para executar hoje.",
+        content:
+          "Leitura diária de grandes livros com reflexão e uma ação concreta para executar hoje.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -45,7 +46,9 @@ function DevotionalPage() {
 
   const done = readDate === todayKey;
 
-  const list = devotionals.filter((d) => (theme === "Todos" ? true : d.theme === theme) && d.id !== today.id);
+  const list = devotionals.filter(
+    (d) => (theme === "Todos" ? true : d.theme === theme) && d.id !== today.id,
+  );
 
   return (
     <div className="px-5 pt-6 pb-24 animate-rise">
@@ -58,12 +61,15 @@ function DevotionalPage() {
         <h1 className="text-2xl font-heading font-extrabold uppercase">Devocional</h1>
       </div>
       <p className="text-xs text-muted-foreground mb-6">
-        Um trecho por dia de livros sobre produtividade, mentalidade e negócios — com reflexão e ação.
+        Um trecho por dia de livros sobre produtividade, mentalidade e negócios — com reflexão e
+        ação.
       </p>
 
       {/* Leitura do dia */}
       <article className="bg-surface border border-discipline/30 rounded-2xl p-5 mb-8">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-3">Leitura de hoje</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-3">
+          Leitura de hoje
+        </p>
         <Quote className="size-5 text-discipline/60 mb-2" />
         <p className="text-lg font-heading leading-snug text-pretty mb-3">"{today.excerpt}"</p>
         <p className="text-xs text-muted-foreground mb-4">
@@ -71,12 +77,16 @@ function DevotionalPage() {
         </p>
 
         <div className="border-t border-border pt-4 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Reflexão</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+            Reflexão
+          </p>
           <p className="text-sm leading-snug text-pretty">{today.reflection}</p>
         </div>
 
         <div className="bg-background rounded-xl p-4 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-warning mb-1">Aplique hoje</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-warning mb-1">
+            Aplique hoje
+          </p>
           <p className="text-sm leading-snug text-pretty">{today.action}</p>
         </div>
 
@@ -123,7 +133,9 @@ function DevotionalPage() {
         {list.map((d) => (
           <details key={d.id} className="bg-surface border border-border rounded-2xl p-4 group">
             <summary className="cursor-pointer list-none">
-              <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mb-1">{d.theme}</p>
+              <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+                {d.theme}
+              </p>
               <p className="text-sm font-medium leading-snug text-pretty">"{d.excerpt}"</p>
               <p className="text-[11px] text-muted-foreground mt-2">
                 {d.book} · {d.author}
@@ -131,11 +143,15 @@ function DevotionalPage() {
             </summary>
             <div className="mt-3 border-t border-border pt-3 space-y-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Reflexão</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+                  Reflexão
+                </p>
                 <p className="text-sm leading-snug text-pretty">{d.reflection}</p>
               </div>
               <div className="bg-background rounded-xl p-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-warning mb-1">Aplique</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-warning mb-1">
+                  Aplique
+                </p>
                 <p className="text-sm leading-snug text-pretty">{d.action}</p>
               </div>
             </div>

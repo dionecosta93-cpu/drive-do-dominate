@@ -6,7 +6,7 @@ import { saveTaskOccurrence } from "@/lib/task-occurrences";
 import { pickFocusCoachLine } from "@/lib/focus-coach";
 import { Pause, Play, Check, X, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
-
+import { trackFeature } from "@/lib/track";
 
 export const Route = createFileRoute("/_authenticated/focus/$taskId")({
   component: FocusMode,
@@ -22,7 +22,9 @@ function FocusMode() {
   const linkedGoal = lifeGoals.find((g) => g.id === task?.goalId);
   const todayKey = dateKey();
   const nextTask = useMemo(() => {
-    const list = todaysTasks(tasks, todayKey).slice().sort((a, b) => a.time.localeCompare(b.time));
+    const list = todaysTasks(tasks, todayKey)
+      .slice()
+      .sort((a, b) => a.time.localeCompare(b.time));
     return list.find((t) => t.id !== taskId && !taskCompletedOn(t.id, sessions, todayKey));
   }, [tasks, taskId, sessions, todayKey]);
 
@@ -44,7 +46,33 @@ function FocusMode() {
   const coachLastLine = useRef<string | undefined>(undefined);
   const coachAudioRef = useRef<HTMLAudioElement | null>(null);
   const coachMutedRef = useRef(false);
-  useEffect(() => { coachMutedRef.current = coachMuted; }, [coachMuted]);
+
+  // Rede de segurança: garante que a reflexão do Cofre da Vitória seja salva
+  // mesmo se o usuário sair pela seta "voltar" do aparelho.
+  const reflectionSavedRef = useRef(false);
+  const pendingReflectionRef = useRef<{ id: string; feeling: string; reflection: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    // Nova ocorrência (troca de tarefa sem desmontar): rearma a rede de segurança.
+    reflectionSavedRef.current = false;
+  }, [taskId]);
+  useEffect(() => {
+    pendingReflectionRef.current = session ? { id: session.id, feeling, reflection } : null;
+  }, [session, feeling, reflection]);
+  useEffect(
+    () => () => {
+      const p = pendingReflectionRef.current;
+      if (p && !reflectionSavedRef.current && (p.feeling || p.reflection)) {
+        addReflection(p.id, p.feeling, p.reflection);
+      }
+    },
+    [addReflection],
+  );
+
+  useEffect(() => {
+    coachMutedRef.current = coachMuted;
+  }, [coachMuted]);
 
   const speakCoach = useCallback(async (line: string) => {
     if (coachMutedRef.current) return;
@@ -58,21 +86,31 @@ function FocusMode() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       if (coachAudioRef.current) {
-        try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+        try {
+          coachAudioRef.current.pause();
+        } catch {
+          /* ignore */
+        }
       }
       const audio = new Audio(url);
       audio.volume = 0.95;
       coachAudioRef.current = audio;
       audio.onended = () => URL.revokeObjectURL(url);
       if (coachMutedRef.current) return;
-      await audio.play().catch(() => { /* autoplay blocked */ });
-    } catch { /* ignore network */ }
+      await audio.play().catch(() => {
+        /* autoplay blocked */
+      });
+    } catch {
+      /* ignore network */
+    }
   }, []);
-
 
   useEffect(() => {
     if (phase !== "breathe") return;
-    if (breatheLeft <= 0) { setPhase("quote"); return; }
+    if (breatheLeft <= 0) {
+      setPhase("quote");
+      return;
+    }
     const t = setTimeout(() => setBreatheLeft((n) => n - 1), 1000);
     return () => clearTimeout(t);
   }, [phase, breatheLeft]);
@@ -81,7 +119,9 @@ function FocusMode() {
     if (phase !== "running") return;
     startedAt.current = Date.now();
     const t = setInterval(() => {
-      setElapsed(accumulated.current + Math.floor((Date.now() - (startedAt.current ?? Date.now())) / 1000));
+      setElapsed(
+        accumulated.current + Math.floor((Date.now() - (startedAt.current ?? Date.now())) / 1000),
+      );
     }, 500);
     return () => clearInterval(t);
   }, [phase]);
@@ -110,25 +150,39 @@ function FocusMode() {
   useEffect(() => {
     if (phase === "running") return;
     if (coachAudioRef.current) {
-      try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+      try {
+        coachAudioRef.current.pause();
+      } catch {
+        /* ignore */
+      }
       coachAudioRef.current = null;
     }
   }, [phase]);
 
-  useEffect(() => () => {
-    if (coachAudioRef.current) {
-      try { coachAudioRef.current.pause(); } catch { /* ignore */ }
-    }
-  }, []);
-
-
+  useEffect(
+    () => () => {
+      if (coachAudioRef.current) {
+        try {
+          coachAudioRef.current.pause();
+        } catch {
+          /* ignore */
+        }
+      }
+    },
+    [],
+  );
 
   if (!task) {
     return (
       <div className="min-h-screen grid place-items-center px-6 text-center">
         <div>
           <p className="text-muted-foreground mb-4">Tarefa não encontrada.</p>
-          <button onClick={() => navigate({ to: "/" })} className="bg-white text-black px-4 py-2 rounded-lg font-bold">Início</button>
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="bg-white text-black px-4 py-2 rounded-lg font-bold"
+          >
+            Início
+          </button>
         </div>
       </div>
     );
@@ -160,17 +214,32 @@ function FocusMode() {
     }
     const spent = accumulated.current;
     const s = completeSession({
-      taskId: task.id, taskName: task.name, category: task.category,
-      difficulty: task.difficulty, estimatedMinutes: task.estimatedMinutes,
-      spentSeconds: spent, pauses,
+      taskId: task.id,
+      taskName: task.name,
+      category: task.category,
+      difficulty: task.difficulty,
+      estimatedMinutes: task.estimatedMinutes,
+      spentSeconds: spent,
+      pauses,
     });
     void saveTaskOccurrence(s);
+    trackFeature("focus_completed", {
+      category: task.category,
+      pauses,
+      over_estimate: spent > task.estimatedMinutes * 60,
+    });
     setSession(s);
     setPhase("done");
     // Victory sound
     try {
-      const AC = (window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
-        || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AC =
+        (
+          window as unknown as {
+            AudioContext: typeof AudioContext;
+            webkitAudioContext?: typeof AudioContext;
+          }
+        ).AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ac = new AC();
       const notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach((f, i) => {
@@ -178,14 +247,18 @@ function FocusMode() {
         const g = ac.createGain();
         o.frequency.value = f;
         o.type = "triangle";
-        o.connect(g); g.connect(ac.destination);
+        o.connect(g);
+        g.connect(ac.destination);
         const start = ac.currentTime + i * 0.12;
         g.gain.setValueAtTime(0, start);
         g.gain.linearRampToValueAtTime(0.25, start + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
-        o.start(start); o.stop(start + 0.4);
+        o.start(start);
+        o.stop(start + 0.4);
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   // BREATHE
@@ -193,10 +266,15 @@ function FocusMode() {
     return (
       <FullScreen>
         <div className="text-center">
-          <p className="text-discipline text-[10px] font-bold tracking-[0.4em] uppercase mb-8">Respire fundo</p>
+          <p className="text-discipline text-[10px] font-bold tracking-[0.4em] uppercase mb-8">
+            Respire fundo
+          </p>
           <div className="relative mx-auto size-56 grid place-items-center mb-10">
             <div className="absolute inset-0 rounded-full border-2 border-discipline/30 animate-breathe" />
-            <div className="absolute inset-6 rounded-full border border-discipline/20 animate-breathe" style={{ animationDelay: "0.6s" }} />
+            <div
+              className="absolute inset-6 rounded-full border border-discipline/20 animate-breathe"
+              style={{ animationDelay: "0.6s" }}
+            />
             <span className="text-7xl font-heading font-black tabular-nums">{breatheLeft}</span>
           </div>
           <h2 className="text-xl font-heading font-bold uppercase mb-2">{task.name}</h2>
@@ -207,7 +285,8 @@ function FocusMode() {
                 Por que esta tarefa é importante?
               </p>
               <p className="text-xs text-pretty">
-                Ela te aproxima da meta "{linkedGoal.name}".{linkedGoal.motivation ? ` ${linkedGoal.motivation}` : ""}
+                Ela te aproxima da meta "{linkedGoal.name}".
+                {linkedGoal.motivation ? ` ${linkedGoal.motivation}` : ""}
               </p>
             </div>
           )}
@@ -221,7 +300,9 @@ function FocusMode() {
     return (
       <FullScreen>
         <div className="text-center max-w-sm">
-          <h4 className="text-2xl md:text-3xl font-heading font-black leading-tight mb-10 text-pretty">"{quote}"</h4>
+          <h4 className="text-2xl md:text-3xl font-heading font-black leading-tight mb-10 text-pretty">
+            "{quote}"
+          </h4>
           <div className="w-16 h-1 bg-discipline mx-auto rounded-full mb-12 animate-pulse-glow" />
           <button
             onClick={() => setPhase("running")}
@@ -236,9 +317,10 @@ function FocusMode() {
 
   // DONE
   if (phase === "done" && session) {
-    const efficiency = session.spentSeconds > 0
-      ? Math.round((task.estimatedMinutes * 60 / session.spentSeconds) * 100)
-      : 100;
+    const efficiency =
+      session.spentSeconds > 0
+        ? Math.round(((task.estimatedMinutes * 60) / session.spentSeconds) * 100)
+        : 100;
     return (
       <FullScreen>
         <div className="text-center max-w-sm w-full animate-victory">
@@ -251,23 +333,36 @@ function FocusMode() {
           <div className="grid grid-cols-3 gap-2 mb-6">
             <Stat label="Previsto" value={`${task.estimatedMinutes}m`} />
             <Stat label="Gasto" value={fmt(session.spentSeconds)} />
-            <Stat label="Eficiência" value={`${efficiency}%`} color={efficiency >= 100 ? "text-discipline" : "text-warning"} />
+            <Stat
+              label="Eficiência"
+              value={`${efficiency}%`}
+              color={efficiency >= 100 ? "text-discipline" : "text-warning"}
+            />
           </div>
           <div className="grid grid-cols-2 gap-2 mb-6">
             <Stat label="XP ganho" value={`+${session.xp}`} color="text-discipline" />
-            <Stat label="Pausas" value={String(session.pauses)} color={session.pauses > 0 ? "text-warning" : "text-discipline"} />
+            <Stat
+              label="Pausas"
+              value={String(session.pauses)}
+              color={session.pauses > 0 ? "text-warning" : "text-discipline"}
+            />
           </div>
 
           <div className="bg-surface border border-border rounded-xl p-4 mb-4 text-left">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Cofre da Vitória</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+              Cofre da Vitória
+            </p>
             <input
               placeholder="Como se sentiu?"
-              value={feeling} onChange={(e) => setFeeling(e.target.value)}
+              value={feeling}
+              onChange={(e) => setFeeling(e.target.value)}
               className="w-full bg-transparent border-b border-border py-2 mb-2 focus:outline-none focus:border-discipline text-sm"
             />
             <textarea
               placeholder="O que aprendeu?"
-              value={reflection} onChange={(e) => setReflection(e.target.value)} rows={2}
+              value={reflection}
+              onChange={(e) => setReflection(e.target.value)}
+              rows={2}
               className="w-full bg-transparent border-b border-border py-2 focus:outline-none focus:border-discipline resize-none text-sm"
             />
           </div>
@@ -276,6 +371,7 @@ function FocusMode() {
             {nextTask && (
               <button
                 onClick={() => {
+                  reflectionSavedRef.current = true;
                   if (feeling || reflection) addReflection(session.id, feeling, reflection);
                   navigate({ to: "/focus/$taskId", params: { taskId: nextTask.id } });
                 }}
@@ -286,6 +382,7 @@ function FocusMode() {
             )}
             <button
               onClick={() => {
+                reflectionSavedRef.current = true;
                 if (feeling || reflection) addReflection(session.id, feeling, reflection);
                 navigate({ to: "/" });
               }}
@@ -303,12 +400,16 @@ function FocusMode() {
   return (
     <FullScreen>
       <div className="absolute top-6 left-0 right-0 text-center">
-        <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">Modo Foco</p>
+        <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
+          Modo Foco
+        </p>
         <p className="text-sm font-heading font-bold mt-1 truncate px-8">{task.name}</p>
       </div>
 
       <div className="text-center">
-        <div className={`text-[88px] leading-none font-heading font-black tabular-nums mb-3 ${over ? "text-struggle" : "text-white"}`}>
+        <div
+          className={`text-[88px] leading-none font-heading font-black tabular-nums mb-3 ${over ? "text-struggle" : "text-white"}`}
+        >
           {fmt(elapsed)}
         </div>
         <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
@@ -317,7 +418,10 @@ function FocusMode() {
         <div className="w-64 h-1 bg-surface rounded-full mt-6 mx-auto overflow-hidden">
           <div
             className={`h-full ${over ? "bg-struggle" : "bg-discipline"} transition-all duration-500`}
-            style={{ width: `${progress}%`, boxShadow: over ? "0 0 8px #ef4444" : "0 0 8px #22c55e" }}
+            style={{
+              width: `${progress}%`,
+              boxShadow: over ? "0 0 8px #ef4444" : "0 0 8px #22c55e",
+            }}
           />
         </div>
         {pauses > 0 && (
@@ -329,7 +433,6 @@ function FocusMode() {
           </p>
         )}
       </div>
-
 
       <div className="absolute bottom-8 inset-x-0 px-6 space-y-3">
         <button
@@ -387,7 +490,11 @@ function FocusMode() {
           setCoachMuted((m) => {
             const next = !m;
             if (next && coachAudioRef.current) {
-              try { coachAudioRef.current.pause(); } catch { /* ignore */ }
+              try {
+                coachAudioRef.current.pause();
+              } catch {
+                /* ignore */
+              }
             }
             return next;
           });
@@ -405,7 +512,6 @@ function FocusMode() {
       >
         <X className="size-5" />
       </button>
-
     </FullScreen>
   );
 }
@@ -421,7 +527,9 @@ function FullScreen({ children }: { children: React.ReactNode }) {
 function Stat({ label, value, color = "" }: { label: string; value: string; color?: string }) {
   return (
     <div className="bg-surface border border-border rounded-xl p-3">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
+      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+        {label}
+      </p>
       <p className={`text-lg font-heading font-black ${color}`}>{value}</p>
     </div>
   );

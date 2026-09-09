@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/lib/store";
-import { applyAssistantAction, buildAssistantContext, type AssistantAction } from "@/lib/assistant-actions";
+import {
+  applyAssistantAction,
+  buildAssistantContext,
+  type AssistantAction,
+} from "@/lib/assistant-actions";
 import { WavRecorder } from "@/lib/wav-recorder";
 import { Bot, Mic, Send, Square, X, Check, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -120,15 +124,28 @@ export function AssistantFab() {
                 <Bot className="size-4 text-discipline" />
               </span>
               <div>
-                <h2 className="font-heading font-extrabold uppercase text-sm leading-none">Assistente</h2>
+                <h2 className="font-heading font-extrabold uppercase text-sm leading-none">
+                  Assistente
+                </h2>
                 <p className="text-[10px] text-muted-foreground">Tarefas · Agenda · Finanças</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={() => { clearChat(); setPending([]); }} className="p-2 text-muted-foreground" aria-label="Limpar conversa">
+              <button
+                onClick={() => {
+                  clearChat();
+                  setPending([]);
+                }}
+                className="p-2 text-muted-foreground"
+                aria-label="Limpar conversa"
+              >
                 <Trash2 className="size-4" />
               </button>
-              <button onClick={() => setOpen(false)} className="p-2 text-muted-foreground" aria-label="Fechar">
+              <button
+                onClick={() => setOpen(false)}
+                className="p-2 text-muted-foreground"
+                aria-label="Fechar"
+              >
                 <X className="size-5" />
               </button>
             </div>
@@ -155,7 +172,10 @@ export function AssistantFab() {
                   </p>
                 </div>
               ) : (
-                <p key={m.id} className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                <p
+                  key={m.id}
+                  className="text-sm text-foreground whitespace-pre-wrap leading-relaxed"
+                >
                   {m.content}
                 </p>
               ),
@@ -177,10 +197,16 @@ export function AssistantFab() {
                   ))}
                 </ul>
                 <div className="flex gap-2 pt-1">
-                  <button onClick={applyAll} className="flex-1 flex items-center justify-center gap-1 bg-discipline text-black rounded-xl py-2 text-xs font-bold uppercase">
+                  <button
+                    onClick={applyAll}
+                    className="flex-1 flex items-center justify-center gap-1 bg-discipline text-black rounded-xl py-2 text-xs font-bold uppercase"
+                  >
                     <Check className="size-4" /> Autorizar
                   </button>
-                  <button onClick={() => setPending([])} className="px-4 rounded-xl border border-border text-xs font-bold uppercase text-muted-foreground">
+                  <button
+                    onClick={() => setPending([])}
+                    className="px-4 rounded-xl border border-border text-xs font-bold uppercase text-muted-foreground"
+                  >
                     Descartar
                   </button>
                 </div>
@@ -207,7 +233,9 @@ export function AssistantFab() {
               onClick={() => void toggleMic()}
               aria-label={recording ? "Parar gravação" : "Gravar áudio"}
               className={`size-11 shrink-0 rounded-2xl flex items-center justify-center border ${
-                recording ? "bg-struggle text-white border-struggle animate-pulse" : "bg-surface border-border text-muted-foreground"
+                recording
+                  ? "bg-struggle text-white border-struggle animate-pulse"
+                  : "bg-surface border-border text-muted-foreground"
               }`}
             >
               {recording ? <Square className="size-4" /> : <Mic className="size-5" />}

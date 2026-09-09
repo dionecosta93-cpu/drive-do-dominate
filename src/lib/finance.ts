@@ -62,7 +62,6 @@ export const financeCategoryColor: Record<string, string> = {
   outros: "#71717a",
 };
 
-export const brl = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+export const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export const kindSign = (kind: TransactionKind) => (kind === "receita" ? 1 : -1);

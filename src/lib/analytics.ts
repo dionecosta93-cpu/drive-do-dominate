@@ -1,4 +1,10 @@
-import { dateKey, taskAppearsOn, taskCompletedOn, type CompletedSession, type Task } from "@/lib/store";
+import {
+  dateKey,
+  taskAppearsOn,
+  taskCompletedOn,
+  type CompletedSession,
+  type Task,
+} from "@/lib/store";
 
 const sessionDate = (s: CompletedSession) => s.scheduledDate ?? dateKey(new Date(s.completedAt));
 const weekdayNames = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -50,7 +56,8 @@ export const buildReport = (tasks: Task[], sessions: CompletedSession[]): Report
   }
 
   const minutesMap = new Map<string, number>();
-  for (const s of sessions) minutesMap.set(s.category, (minutesMap.get(s.category) ?? 0) + s.spentSeconds / 60);
+  for (const s of sessions)
+    minutesMap.set(s.category, (minutesMap.get(s.category) ?? 0) + s.spentSeconds / 60);
   const minutesByCategory = [...minutesMap.entries()]
     .map(([k, v]) => [k, Math.round(v)] as [string, number])
     .sort((a, b) => b[1] - a[1]);
@@ -95,7 +102,9 @@ export const buildReport = (tasks: Task[], sessions: CompletedSession[]): Report
   return {
     topTask: byName[0] ? { name: byName[0][0], count: byName[0][1] } : null,
     bestHour: byHour[0] ? { hour: byHour[0][0], count: byHour[0][1] } : null,
-    bestWeekday: byWeekday[0] ? { name: weekdayNames[byWeekday[0][0]]!, count: byWeekday[0][1] } : null,
+    bestWeekday: byWeekday[0]
+      ? { name: weekdayNames[byWeekday[0][0]]!, count: byWeekday[0][1] }
+      : null,
     worstCategory,
     minutesByCategory,
     totalMinutes,
@@ -211,16 +220,20 @@ export const buildNudges = (
   const dayTasks = tasks.filter((t) => taskAppearsOn(t, today));
   const pending = dayTasks.filter((t) => !taskCompletedOn(t.id, sessions, today)).length;
 
-  if (streak > 0 && doneToday === 0) out.push(`Falta apenas uma tarefa para manter sua sequência de ${streak} dias.`);
+  if (streak > 0 && doneToday === 0)
+    out.push(`Falta apenas uma tarefa para manter sua sequência de ${streak} dias.`);
   if (pending === 1) out.push("Falta apenas 1 missão para fechar o dia inteiro.");
 
-  const lastStudy = sessions.filter((s) => s.category === "estudo").sort((a, b) => b.completedAt - a.completedAt)[0];
+  const lastStudy = sessions
+    .filter((s) => s.category === "estudo")
+    .sort((a, b) => b.completedAt - a.completedAt)[0];
   if (lastStudy) {
     const days = Math.floor((Date.now() - lastStudy.completedAt) / 86400000);
     if (days >= 3) out.push(`Você está há ${days} dias sem estudar. Vamos retomar?`);
   }
 
-  if (sessions.length > 0 && sessions.length % 10 >= 8) out.push("Você está perto de desbloquear uma nova conquista.");
+  if (sessions.length > 0 && sessions.length % 10 >= 8)
+    out.push("Você está perto de desbloquear uma nova conquista.");
 
   return out.slice(0, 3);
 };

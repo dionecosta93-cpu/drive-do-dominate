@@ -9,7 +9,8 @@ import {
 } from "@/lib/discipline";
 
 export type Priority = "baixa" | "media" | "alta";
-export type Category = "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude" | "familia" | "espiritual";
+export type Category =
+  "treino" | "trabalho" | "estudo" | "vida" | "negocios" | "saude" | "familia" | "espiritual";
 export type Repetition =
   | "nenhuma"
   | "diaria"
@@ -21,12 +22,7 @@ export type Repetition =
   | "mensal"
   | "anual"
   | "personalizada";
-export type TaskStatus =
-  | "nao-iniciada"
-  | "em-andamento"
-  | "concluida"
-  | "adiada"
-  | "cancelada";
+export type TaskStatus = "nao-iniciada" | "em-andamento" | "concluida" | "adiada" | "cancelada";
 
 export interface Task {
   id: string;
@@ -404,20 +400,40 @@ interface State {
   // Lista de compras
   shoppingLists: ShoppingList[];
   activeShoppingListId: string | null;
-  addShoppingList: (l: { name: string; date?: string; financeCategory?: string; notes?: string }) => ShoppingList;
+  addShoppingList: (l: {
+    name: string;
+    date?: string;
+    financeCategory?: string;
+    notes?: string;
+  }) => ShoppingList;
   updateShoppingList: (id: string, patch: Partial<Omit<ShoppingList, "id" | "items">>) => void;
   removeShoppingList: (id: string) => void;
   duplicateShoppingList: (id: string, name?: string, date?: string) => ShoppingList | null;
   setActiveShoppingList: (id: string | null) => void;
   addShoppingItem: (
     listId: string,
-    item: { name: string; quantity?: number; unit?: string; estimatedPrice?: number; category?: string; notes?: string },
+    item: {
+      name: string;
+      quantity?: number;
+      unit?: string;
+      estimatedPrice?: number;
+      category?: string;
+      notes?: string;
+    },
   ) => ShoppingItem | null;
-  updateShoppingItem: (listId: string, itemId: string, patch: Partial<Omit<ShoppingItem, "id">>) => void;
+  updateShoppingItem: (
+    listId: string,
+    itemId: string,
+    patch: Partial<Omit<ShoppingItem, "id">>,
+  ) => void;
   removeShoppingItem: (listId: string, itemId: string) => void;
   /** Marca/desmarca comprado. Com preço pago, lança automaticamente no financeiro (sem duplicar). */
-  setShoppingItemPurchased: (listId: string, itemId: string, purchased: boolean, paidPrice?: number) => void;
-
+  setShoppingItemPurchased: (
+    listId: string,
+    itemId: string,
+    purchased: boolean,
+    paidPrice?: number,
+  ) => void;
 
   addDiscipline: (delta: number, reason: string) => void;
   setDailyMinimum: (n: number) => void;
@@ -428,8 +444,6 @@ interface State {
   clearRecentUnlocks: () => void;
   syncAchievements: () => string[];
 
-
-
   addBook: (b: Partial<Book> & { title: string }) => Book;
   updateBook: (id: string, patch: Partial<Book>) => void;
   removeBook: (id: string) => void;
@@ -438,7 +452,11 @@ interface State {
   addReadingSession: (s: Omit<ReadingSession, "id">) => void;
   removeReadingSession: (id: string) => void;
   updateReadingSession: (id: string, patch: Partial<ReadingSession>) => void;
-  updateReadingLog: (bookId: string, logId: string, patch: { page?: number; chapter?: number; date?: string }) => void;
+  updateReadingLog: (
+    bookId: string,
+    logId: string,
+    patch: { page?: number; chapter?: number; date?: string },
+  ) => void;
   removeReadingLog: (bookId: string, logId: string) => void;
   addReadingGoal: (g: Omit<ReadingGoal, "id" | "createdAt">) => void;
   removeReadingGoal: (id: string) => void;
@@ -451,10 +469,21 @@ interface State {
   restartBook: (id: string) => void;
   updateReadingProgress: (
     id: string,
-    v: { page?: number; chapter?: number; pagesReadToday?: number; minutes?: number; date?: string },
+    v: {
+      page?: number;
+      chapter?: number;
+      pagesReadToday?: number;
+      minutes?: number;
+      date?: string;
+    },
   ) => void;
 
-  addLifeGoal: (g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & { status?: LifeGoalStatus; objectives?: GoalObjective[] }) => LifeGoal;
+  addLifeGoal: (
+    g: Omit<LifeGoal, "id" | "createdAt" | "objectives" | "status"> & {
+      status?: LifeGoalStatus;
+      objectives?: GoalObjective[];
+    },
+  ) => LifeGoal;
 
   updateLifeGoal: (id: string, patch: Partial<LifeGoal>) => void;
   removeLifeGoal: (id: string) => void;
@@ -462,10 +491,11 @@ interface State {
   toggleObjective: (goalId: string, objectiveId: string) => void;
   removeObjective: (goalId: string, objectiveId: string) => void;
 
-
   setUserName: (n: string) => void;
   setOnboarded: (b: boolean) => void;
-  addTask: (t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string }) => Task;
+  addTask: (
+    t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string },
+  ) => Task;
   updateTask: (id: string, patch: Partial<Task>) => void;
   removeTask: (id: string) => void;
   duplicateTask: (id: string, newDate?: string) => void;
@@ -476,8 +506,14 @@ interface State {
   setTaskStatus: (id: string, status: TaskStatus) => void;
   reopenTask: (id: string) => void;
   reopenTaskForDate: (id: string, date: string) => void;
-  completeSession: (s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">) => CompletedSession;
-  completeTaskForDate: (id: string, date: string, performedTime?: string) => CompletedSession | null;
+  completeSession: (
+    s: Omit<CompletedSession, "id" | "completedAt" | "hourOfDay" | "xp">,
+  ) => CompletedSession;
+  completeTaskForDate: (
+    id: string,
+    date: string,
+    performedTime?: string,
+  ) => CompletedSession | null;
   setSessionPerformedTime: (sessionId: string, performedTime: string) => void;
   addReflection: (sessionId: string, feeling: string, reflection: string) => void;
   markDailyMission: () => void;
@@ -492,9 +528,10 @@ const todayKey = () => dateKey();
 const calcXp = (difficulty: number, estimatedMinutes: number, spentSeconds: number) => {
   const base = difficulty * 20;
   const timeBonus = Math.min(estimatedMinutes, 120) * 1.5;
-  const efficiencyMult = estimatedMinutes > 0
-    ? Math.max(0.7, Math.min(1.5, (estimatedMinutes * 60) / Math.max(spentSeconds, 1)))
-    : 1;
+  const efficiencyMult =
+    estimatedMinutes > 0
+      ? Math.max(0.7, Math.min(1.5, (estimatedMinutes * 60) / Math.max(spentSeconds, 1)))
+      : 1;
   return Math.round((base + timeBonus) * efficiencyMult);
 };
 
@@ -583,8 +620,11 @@ export const useStore = create<State>()(
         return tx;
       },
       updateTransaction: (id, patch) =>
-        set((s) => ({ transactions: s.transactions.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
-      removeTransaction: (id) => set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) })),
+        set((s) => ({
+          transactions: s.transactions.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        })),
+      removeTransaction: (id) =>
+        set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) })),
 
       addChatMessage: (m) => {
         const msg: ChatMessage = { id: genId(), role: m.role, content: m.content, at: Date.now() };
@@ -695,7 +735,9 @@ export const useStore = create<State>()(
         if (item?.transactionId) get().removeTransaction(item.transactionId);
         set((s) => ({
           shoppingLists: s.shoppingLists.map((l) =>
-            l.id === listId ? { ...l, items: l.items.filter((i) => i.id !== itemId), updatedAt: Date.now() } : l,
+            l.id === listId
+              ? { ...l, items: l.items.filter((i) => i.id !== itemId), updatedAt: Date.now() }
+              : l,
           ),
         }));
       },
@@ -721,7 +763,8 @@ export const useStore = create<State>()(
         let transactionId = item.transactionId;
 
         if (price && price > 0) {
-          const category = item.category && item.category !== "outros" ? item.category : list.financeCategory;
+          const category =
+            item.category && item.category !== "outros" ? item.category : list.financeCategory;
           if (transactionId && get().transactions.some((t) => t.id === transactionId)) {
             // Já lançado: apenas atualiza (nunca duplica).
             get().updateTransaction(transactionId, { amount: price, category, date });
@@ -745,8 +788,6 @@ export const useStore = create<State>()(
         });
       },
 
-
-
       addDiscipline: (delta, reason) =>
         set((s) => ({
           discipline: clampDiscipline(s.discipline + delta),
@@ -759,15 +800,22 @@ export const useStore = create<State>()(
       setDailyMinimum: (n) => set({ dailyMinimum: Math.max(1, Math.round(n)) }),
 
       claimMission: (id) =>
-        set((s) => (s.claimedMissions.includes(id) ? s : { claimedMissions: [...s.claimedMissions, id] })),
+        set((s) =>
+          s.claimedMissions.includes(id) ? s : { claimedMissions: [...s.claimedMissions, id] },
+        ),
 
       addChallenge: (c) =>
-        set((s) => ({ challenges: [...s.challenges, { ...c, id: genId(), createdAt: Date.now() }] })),
+        set((s) => ({
+          challenges: [...s.challenges, { ...c, id: genId(), createdAt: Date.now() }],
+        })),
 
       toggleChallenge: (id) =>
-        set((s) => ({ challenges: s.challenges.map((c) => (c.id === id ? { ...c, done: !c.done } : c)) })),
+        set((s) => ({
+          challenges: s.challenges.map((c) => (c.id === id ? { ...c, done: !c.done } : c)),
+        })),
 
-      removeChallenge: (id) => set((s) => ({ challenges: s.challenges.filter((c) => c.id !== id) })),
+      removeChallenge: (id) =>
+        set((s) => ({ challenges: s.challenges.filter((c) => c.id !== id) })),
 
       clearRecentUnlocks: () => set({ recentUnlocks: [] }),
 
@@ -781,7 +829,9 @@ export const useStore = create<State>()(
           hoursByCategory[sess.category] = (hoursByCategory[sess.category] ?? 0) + h;
         }
         const readingHours = s.readingSessions.reduce((a, r) => a + r.minutes, 0) / 60;
-        const dates = new Set(s.sessions.map((x) => x.scheduledDate ?? dateKey(new Date(x.completedAt))));
+        const dates = new Set(
+          s.sessions.map((x) => x.scheduledDate ?? dateKey(new Date(x.completedAt))),
+        );
         let perfectDays = 0;
         for (const d of dates) {
           const st = dayStats(s.tasks, s.sessions, d);
@@ -801,17 +851,21 @@ export const useStore = create<State>()(
           earlyFinish: s.sessions.some((x) => x.spentSeconds < x.estimatedMinutes * 60),
           perfectDays,
         };
-        const newIds = evaluateAchievements(stats, s.achievements.map((a) => a.id));
+        const newIds = evaluateAchievements(
+          stats,
+          s.achievements.map((a) => a.id),
+        );
         if (newIds.length) {
           set({
-            achievements: [...s.achievements, ...newIds.map((id) => ({ id, unlockedAt: Date.now() }))],
+            achievements: [
+              ...s.achievements,
+              ...newIds.map((id) => ({ id, unlockedAt: Date.now() })),
+            ],
             recentUnlocks: [...s.recentUnlocks, ...newIds],
           });
         }
         return newIds;
       },
-
-
 
       addBook: (b) => {
         const now = Date.now();
@@ -846,7 +900,9 @@ export const useStore = create<State>()(
 
       toggleBookFavorite: (id) =>
         set((s) => ({
-          books: s.books.map((b) => (b.id === id ? { ...b, favorite: !b.favorite, updatedAt: Date.now() } : b)),
+          books: s.books.map((b) =>
+            b.id === id ? { ...b, favorite: !b.favorite, updatedAt: Date.now() } : b,
+          ),
         })),
 
       logReadingProgress: (id, page) =>
@@ -879,7 +935,10 @@ export const useStore = create<State>()(
               : v.pagesReadToday !== undefined
                 ? book.currentPage + v.pagesReadToday
                 : book.currentPage;
-          const page = Math.max(0, book.totalPages ? Math.min(fromPages, book.totalPages) : fromPages);
+          const page = Math.max(
+            0,
+            book.totalPages ? Math.min(fromPages, book.totalPages) : fromPages,
+          );
           const done = book.totalPages > 0 && page >= book.totalPages;
           const changed = page !== book.currentPage || v.chapter !== undefined;
           const updated: Book = {
@@ -942,7 +1001,9 @@ export const useStore = create<State>()(
 
       archiveBook: (id, restore) =>
         set((s) => ({
-          books: s.books.map((b) => (b.id === id ? { ...b, archived: !restore, updatedAt: Date.now() } : b)),
+          books: s.books.map((b) =>
+            b.id === id ? { ...b, archived: !restore, updatedAt: Date.now() } : b,
+          ),
         })),
 
       restartBook: (id) =>
@@ -990,7 +1051,9 @@ export const useStore = create<State>()(
                   }
                 : l,
             );
-            const last = [...logs].sort((a, c) => (a.date === c.date ? a.at - c.at : a.date < c.date ? -1 : 1)).at(-1);
+            const last = [...logs]
+              .sort((a, c) => (a.date === c.date ? a.at - c.at : a.date < c.date ? -1 : 1))
+              .at(-1);
             return {
               ...b,
               logs,
@@ -1006,19 +1069,25 @@ export const useStore = create<State>()(
           books: s.books.map((b) => {
             if (b.id !== bookId) return b;
             const logs = b.logs.filter((l) => l.id !== logId);
-            const last = [...logs].sort((a, c) => (a.date === c.date ? a.at - c.at : a.date < c.date ? -1 : 1)).at(-1);
+            const last = [...logs]
+              .sort((a, c) => (a.date === c.date ? a.at - c.at : a.date < c.date ? -1 : 1))
+              .at(-1);
             return { ...b, logs, currentPage: last ? last.page : 0, updatedAt: Date.now() };
           }),
         })),
 
       addReadingGoal: (g) =>
-        set((s) => ({ readingGoals: [...s.readingGoals, { ...g, id: genId(), createdAt: Date.now() }] })),
+        set((s) => ({
+          readingGoals: [...s.readingGoals, { ...g, id: genId(), createdAt: Date.now() }],
+        })),
 
       removeReadingGoal: (id) =>
         set((s) => ({ readingGoals: s.readingGoals.filter((g) => g.id !== id) })),
 
       updateReadingGoal: (id, patch) =>
-        set((s) => ({ readingGoals: s.readingGoals.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+        set((s) => ({
+          readingGoals: s.readingGoals.map((g) => (g.id === id ? { ...g, ...patch } : g)),
+        })),
 
       addReadingNote: (n) => {
         const note: ReadingNote = {
@@ -1033,11 +1102,12 @@ export const useStore = create<State>()(
       },
 
       updateReadingNote: (id, text) =>
-        set((s) => ({ readingNotes: s.readingNotes.map((n) => (n.id === id ? { ...n, text } : n)) })),
+        set((s) => ({
+          readingNotes: s.readingNotes.map((n) => (n.id === id ? { ...n, text } : n)),
+        })),
 
       removeReadingNote: (id) =>
         set((s) => ({ readingNotes: s.readingNotes.filter((n) => n.id !== id) })),
-
 
       addLifeGoal: (g) => {
         const goal: LifeGoal = {
@@ -1057,7 +1127,9 @@ export const useStore = create<State>()(
       removeLifeGoal: (id) =>
         set((s) => ({
           lifeGoals: s.lifeGoals.filter((g) => g.id !== id),
-          tasks: s.tasks.map((t) => (t.goalId === id ? { ...t, goalId: undefined, objectiveId: undefined } : t)),
+          tasks: s.tasks.map((t) =>
+            t.goalId === id ? { ...t, goalId: undefined, objectiveId: undefined } : t,
+          ),
         })),
 
       addObjective: (goalId, name) =>
@@ -1071,7 +1143,12 @@ export const useStore = create<State>()(
         set((s) => ({
           lifeGoals: s.lifeGoals.map((g) =>
             g.id === goalId
-              ? { ...g, objectives: g.objectives.map((o) => (o.id === objectiveId ? { ...o, done: !o.done } : o)) }
+              ? {
+                  ...g,
+                  objectives: g.objectives.map((o) =>
+                    o.id === objectiveId ? { ...o, done: !o.done } : o,
+                  ),
+                }
               : g,
           ),
         })),
@@ -1086,10 +1163,10 @@ export const useStore = create<State>()(
                 }
               : g,
           ),
-          tasks: s.tasks.map((t) => (t.objectiveId === objectiveId ? { ...t, objectiveId: undefined } : t)),
+          tasks: s.tasks.map((t) =>
+            t.objectiveId === objectiveId ? { ...t, objectiveId: undefined } : t,
+          ),
         })),
-
-
 
       setUserName: (userName) => set({ userName }),
       setOnboarded: (onboarded) => set({ onboarded }),
@@ -1114,8 +1191,7 @@ export const useStore = create<State>()(
           ),
         })),
 
-      removeTask: (id) =>
-        set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+      removeTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 
       duplicateTask: (id, newDate) => {
         const src = get().tasks.find((t) => t.id === id);
@@ -1194,8 +1270,11 @@ export const useStore = create<State>()(
                 }
               : t,
           ),
-          completedToday: date === todayKey() ? s.completedToday.filter((tid) => tid !== id) : s.completedToday,
-          sessions: s.sessions.filter((sess) => !(sess.taskId === id && completionDateForSession(sess) === date)),
+          completedToday:
+            date === todayKey() ? s.completedToday.filter((tid) => tid !== id) : s.completedToday,
+          sessions: s.sessions.filter(
+            (sess) => !(sess.taskId === id && completionDateForSession(sess) === date),
+          ),
         })),
 
       completeSession: (partial) => {
@@ -1217,7 +1296,9 @@ export const useStore = create<State>()(
           registeredTime: completedTime,
           registeredAt: completedAt,
 
-          timingDeltaMinutes: task ? minutesOfDay(completedTime) - minutesOfDay(task.time) : undefined,
+          timingDeltaMinutes: task
+            ? minutesOfDay(completedTime) - minutesOfDay(task.time)
+            : undefined,
           status: "concluida",
         };
         let newStreak = state.streak;
@@ -1239,12 +1320,16 @@ export const useStore = create<State>()(
         if (newStreak >= 30) unlock("thirty_days");
         if (session.pauses === 0) unlock("no_pauses");
         if (session.spentSeconds < session.estimatedMinutes * 60) unlock("finished_early");
-        const focusHours = (state.sessions.reduce((a, b) => a + b.spentSeconds, 0) + session.spentSeconds) / 3600;
+        const focusHours =
+          (state.sessions.reduce((a, b) => a + b.spentSeconds, 0) + session.spentSeconds) / 3600;
         if (focusHours >= 100) unlock("hundred_hours");
 
         set({
           sessions: [...state.sessions, session],
-          completedToday: state.lastActiveDay === today ? [...state.completedToday, session.taskId] : [session.taskId],
+          completedToday:
+            state.lastActiveDay === today
+              ? [...state.completedToday, session.taskId]
+              : [session.taskId],
           xp: newXp,
           streak: newStreak,
           longestStreak: Math.max(state.longestStreak, newStreak),
@@ -1301,7 +1386,10 @@ export const useStore = create<State>()(
 
         set((s) => ({
           sessions: [...s.sessions, session],
-          completedToday: isToday && !s.completedToday.includes(id) ? [...s.completedToday, id] : s.completedToday,
+          completedToday:
+            isToday && !s.completedToday.includes(id)
+              ? [...s.completedToday, id]
+              : s.completedToday,
           xp: s.xp + xp,
           tasks: s.tasks.map((t) =>
             t.id === id
@@ -1335,7 +1423,6 @@ export const useStore = create<State>()(
           }),
         })),
 
-
       addReflection: (sessionId, feeling, reflection) =>
         set((s) => ({
           sessions: s.sessions.map((sess) =>
@@ -1352,7 +1439,8 @@ export const useStore = create<State>()(
         const today = todayKey();
         const rolledTasks = state.tasks.map((t) => {
           const completedOnScheduledDate =
-            t.lastCompletedDate === t.scheduledDate || taskCompletedOn(t.id, state.sessions, t.scheduledDate);
+            t.lastCompletedDate === t.scheduledDate ||
+            taskCompletedOn(t.id, state.sessions, t.scheduledDate);
           return t.repetition === "nenhuma" &&
             !t.archived &&
             t.status !== "cancelada" &&
@@ -1456,7 +1544,11 @@ export const dayStats = (tasks: Task[], sessions: CompletedSession[], date: stri
   const dayEnd = dayStart + 86400000;
   const doneIds = new Set(
     sessions
-      .filter((s) => completionDateForSession(s) === date || (s.completedAt >= dayStart && s.completedAt < dayEnd))
+      .filter(
+        (s) =>
+          completionDateForSession(s) === date ||
+          (s.completedAt >= dayStart && s.completedAt < dayEnd),
+      )
       .map((s) => s.taskId),
   );
   // Also count tasks marked concluida for this date via lastCompletedDate
@@ -1507,7 +1599,13 @@ export const goalProgress = (goal: LifeGoal, tasks: Task[], sessions: CompletedS
   const objectivesDone = goal.objectives.filter((o) => o.done).length;
 
   if (goal.status === "concluida") {
-    return { pct: 100, completions, linkedTasks: linkedTasks.length, objectivesDone, objectivesTotal };
+    return {
+      pct: 100,
+      completions,
+      linkedTasks: linkedTasks.length,
+      objectivesDone,
+      objectivesTotal,
+    };
   }
   if (typeof goal.manualProgress === "number") {
     return {
@@ -1527,7 +1625,13 @@ export const goalProgress = (goal: LifeGoal, tasks: Task[], sessions: CompletedS
       ? Math.round(objectivePct * 0.6 + executionPct * 0.4)
       : Math.round(executionPct);
 
-  return { pct: Math.max(0, Math.min(100, pct)), completions, linkedTasks: linkedTasks.length, objectivesDone, objectivesTotal };
+  return {
+    pct: Math.max(0, Math.min(100, pct)),
+    completions,
+    linkedTasks: linkedTasks.length,
+    objectivesDone,
+    objectivesTotal,
+  };
 };
 
 const daysAgoKey = (days: number) => {
@@ -1564,7 +1668,9 @@ export const goalImpact = (goals: LifeGoal[], tasks: Task[], sessions: Completed
     active
       .filter((r) => r.goal.status === "em-andamento")
       .slice()
-      .sort((a, b) => a.weekCount - b.weekCount || (a.lastActivity ?? 0) - (b.lastActivity ?? 0))[0] ?? null;
+      .sort(
+        (a, b) => a.weekCount - b.weekCount || (a.lastActivity ?? 0) - (b.lastActivity ?? 0),
+      )[0] ?? null;
 
   const unlinkedToday = tasks.filter((t) => !t.goalId && !t.archived).length;
 
@@ -1583,7 +1689,9 @@ export const bookStatusLabel: Record<BookStatus, string> = {
 };
 
 export const bookProgress = (b: Book) =>
-  b.totalPages > 0 ? Math.max(0, Math.min(100, Math.round((b.currentPage / b.totalPages) * 100))) : 0;
+  b.totalPages > 0
+    ? Math.max(0, Math.min(100, Math.round((b.currentPage / b.totalPages) * 100)))
+    : 0;
 
 export const readingGoalLabel: Record<ReadingGoalKind, string> = {
   "livros-ano": "livros por ano",
@@ -1655,11 +1763,15 @@ export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
   const topCategories = countBy(books.map((b) => b.category));
   const topAuthors = countBy(books.map((b) => b.author));
 
-  const booksThisYear = completed.filter((b) => (b.endDate ?? "").startsWith(String(new Date().getFullYear()))).length;
+  const booksThisYear = completed.filter((b) =>
+    (b.endDate ?? "").startsWith(String(new Date().getFullYear())),
+  ).length;
 
   // Agregações por mês / ano (páginas e minutos)
   const yearPrefix = today.slice(0, 4);
-  const pagesThisWeek = [...pagesByDay.entries()].filter(([d]) => d >= week).reduce((a, [, v]) => a + v, 0);
+  const pagesThisWeek = [...pagesByDay.entries()]
+    .filter(([d]) => d >= week)
+    .reduce((a, [, v]) => a + v, 0);
   const pagesThisMonth = [...pagesByDay.entries()]
     .filter(([d]) => d.startsWith(monthPrefix))
     .reduce((a, [, v]) => a + v, 0);
@@ -1668,23 +1780,34 @@ export const readingStats = (books: Book[], sessions: ReadingSession[]) => {
     .reduce((a, [, v]) => a + v, 0);
 
   const pagesByMonth = new Map<string, number>();
-  for (const [d, v] of pagesByDay) pagesByMonth.set(d.slice(0, 7), (pagesByMonth.get(d.slice(0, 7)) ?? 0) + v);
+  for (const [d, v] of pagesByDay)
+    pagesByMonth.set(d.slice(0, 7), (pagesByMonth.get(d.slice(0, 7)) ?? 0) + v);
   const minutesByMonth = new Map<string, number>();
   for (const s of sessions)
-    minutesByMonth.set(s.date.slice(0, 7), (minutesByMonth.get(s.date.slice(0, 7)) ?? 0) + s.minutes);
+    minutesByMonth.set(
+      s.date.slice(0, 7),
+      (minutesByMonth.get(s.date.slice(0, 7)) ?? 0) + s.minutes,
+    );
   const monthly = [...new Set([...pagesByMonth.keys(), ...minutesByMonth.keys()])]
     .sort()
-    .map((m) => ({ mes: m, paginas: pagesByMonth.get(m) ?? 0, minutos: minutesByMonth.get(m) ?? 0 }));
+    .map((m) => ({
+      mes: m,
+      paginas: pagesByMonth.get(m) ?? 0,
+      minutos: minutesByMonth.get(m) ?? 0,
+    }));
 
   const pagesByYear = new Map<string, number>();
-  for (const [d, v] of pagesByDay) pagesByYear.set(d.slice(0, 4), (pagesByYear.get(d.slice(0, 4)) ?? 0) + v);
+  for (const [d, v] of pagesByDay)
+    pagesByYear.set(d.slice(0, 4), (pagesByYear.get(d.slice(0, 4)) ?? 0) + v);
   const yearly = [...pagesByYear.entries()].sort().map(([ano, paginas]) => ({ ano, paginas }));
 
   const totalPagesLogged = [...pagesByDay.values()].reduce((a, v) => a + v, 0);
   // Velocidade média de leitura em páginas por minuto/hora
   const pagesPerMinute = totalMinutes > 0 ? totalPagesLogged / totalMinutes : 0;
   const pagesPerHour = Math.round(pagesPerMinute * 60);
-  const avgMinutesPerDay = Math.round(totalMinutes / Math.max(new Set(sessions.map((s) => s.date)).size, 1));
+  const avgMinutesPerDay = Math.round(
+    totalMinutes / Math.max(new Set(sessions.map((s) => s.date)).size, 1),
+  );
 
   // Maior sequência de dias lendo (histórica)
   const activeSorted = [...activeDays].sort();
@@ -1741,7 +1864,9 @@ export const bookStats = (b: Book, sessions: ReadingSession[], notes: ReadingNot
   const pct = bookProgress(b);
   const remainingPages = Math.max(0, (b.totalPages || 0) - b.currentPage);
   const remainingChapters =
-    b.totalChapters && b.totalChapters > 0 ? Math.max(0, b.totalChapters - (b.currentChapter ?? 0)) : null;
+    b.totalChapters && b.totalChapters > 0
+      ? Math.max(0, b.totalChapters - (b.currentChapter ?? 0))
+      : null;
   const avgPagesPerDay = dayList.length ? Math.round(b.currentPage / dayList.length) : 0;
   const avgMinutesPerDay = dayList.length ? Math.round(totalMinutes / dayList.length) : 0;
   const pagesPerMinute = totalMinutes > 0 ? b.currentPage / totalMinutes : 0;
@@ -1758,7 +1883,9 @@ export const bookStats = (b: Book, sessions: ReadingSession[], notes: ReadingNot
       ? Math.max(
           1,
           Math.round(
-            (new Date(`${b.endDate}T12:00:00`).getTime() - new Date(`${b.startDate}T12:00:00`).getTime()) / 86400000,
+            (new Date(`${b.endDate}T12:00:00`).getTime() -
+              new Date(`${b.startDate}T12:00:00`).getTime()) /
+              86400000,
           ),
         )
       : null;
@@ -1780,7 +1907,9 @@ export const bookStats = (b: Book, sessions: ReadingSession[], notes: ReadingNot
   // Páginas por dia necessárias para bater a meta de conclusão
   let pagesPerDayNeeded: number | null = null;
   if (b.targetDate && remainingPages > 0) {
-    const diff = Math.ceil((new Date(`${b.targetDate}T12:00:00`).getTime() - Date.now()) / 86400000);
+    const diff = Math.ceil(
+      (new Date(`${b.targetDate}T12:00:00`).getTime() - Date.now()) / 86400000,
+    );
     pagesPerDayNeeded = diff > 0 ? Math.ceil(remainingPages / diff) : remainingPages;
   }
 

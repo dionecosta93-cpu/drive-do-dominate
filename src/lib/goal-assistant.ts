@@ -29,8 +29,9 @@ export function assistantSuggestions(
 ): Suggestion[] {
   const today = dateKey();
   const out: Suggestion[] = [];
-  const pending = tasks
-    .filter((t) => taskAppearsOn(t, today) && !taskCompletedOn(t.id, sessions, today));
+  const pending = tasks.filter(
+    (t) => taskAppearsOn(t, today) && !taskCompletedOn(t.id, sessions, today),
+  );
 
   const goalById = new Map(goals.map((g) => [g.id, g]));
   const impact = goalImpact(goals, tasks, sessions);
@@ -39,9 +40,17 @@ export function assistantSuggestions(
   const scored = pending
     .map((t) => {
       const goal = t.goalId ? goalById.get(t.goalId) : undefined;
-      const goalBoost = goal ? (goal.status === "em-andamento" ? priorityWeight[goal.priority] * 2 : 1) : 0;
+      const goalBoost = goal
+        ? goal.status === "em-andamento"
+          ? priorityWeight[goal.priority] * 2
+          : 1
+        : 0;
       const rollover = (t.rolloverCount ?? 0) * 2;
-      return { task: t, score: priorityWeight[t.priority] * 2 + t.difficulty / 2 + goalBoost + rollover, goal };
+      return {
+        task: t,
+        score: priorityWeight[t.priority] * 2 + t.difficulty / 2 + goalBoost + rollover,
+        goal,
+      };
     })
     .sort((a, b) => b.score - a.score);
 
@@ -76,9 +85,7 @@ export function assistantSuggestions(
   }
 
   // 3. Tarefas de maior impacto no futuro
-  const highImpact = scored
-    .filter((s) => s.goal && s.goal.status === "em-andamento")
-    .slice(0, 3);
+  const highImpact = scored.filter((s) => s.goal && s.goal.status === "em-andamento").slice(0, 3);
   for (const s of highImpact.slice(1)) {
     out.push({
       kind: "alto-impacto",
@@ -90,7 +97,11 @@ export function assistantSuggestions(
   }
 
   // 4. Equilíbrio de vida
-  const last14 = sessions.filter((s) => (s.scheduledDate ?? dateKey(new Date(s.completedAt))) >= dateKey(new Date(Date.now() - 13 * 86400000)));
+  const last14 = sessions.filter(
+    (s) =>
+      (s.scheduledDate ?? dateKey(new Date(s.completedAt))) >=
+      dateKey(new Date(Date.now() - 13 * 86400000)),
+  );
   const byCat = new Map<string, number>();
   for (const s of last14) byCat.set(s.category, (byCat.get(s.category) ?? 0) + 1);
   const pillars: { key: string; label: string }[] = [

@@ -32,15 +32,14 @@ const SYNC_KEYS = [
   "dismissedMissed",
   "shoppingLists",
   "activeShoppingListId",
-
 ] as const;
-
 
 type SyncSnapshot = Partial<Record<(typeof SYNC_KEYS)[number], unknown>>;
 
 const snapshotFromState = (s: ReturnType<typeof useStore.getState>): SyncSnapshot => {
   const out: SyncSnapshot = {};
-  for (const k of SYNC_KEYS) (out as Record<string, unknown>)[k] = (s as unknown as Record<string, unknown>)[k];
+  for (const k of SYNC_KEYS)
+    (out as Record<string, unknown>)[k] = (s as unknown as Record<string, unknown>)[k];
   return out;
 };
 

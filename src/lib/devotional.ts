@@ -1,4 +1,5 @@
-export type DevotionalTheme = "Produtividade" | "Mentalidade" | "Negócios" | "Disciplina" | "Liderança";
+export type DevotionalTheme =
+  "Produtividade" | "Mentalidade" | "Negócios" | "Disciplina" | "Liderança";
 
 export interface Devotional {
   id: string;
@@ -31,15 +32,15 @@ export const devotionals: Devotional[] = [
       "A capacidade de realizar trabalho profundo está se tornando cada vez mais rara e, ao mesmo tempo, cada vez mais valiosa na economia atual.",
     reflection:
       "Quem consegue ficar 90 minutos sem tocar no celular já está à frente de 95% das pessoas. Foco virou vantagem competitiva.",
-    action: "Bloqueie um período de 90 minutos sem notificações e trabalhe na sua tarefa mais difícil.",
+    action:
+      "Bloqueie um período de 90 minutos sem notificações e trabalhe na sua tarefa mais difícil.",
   },
   {
     id: "d3",
     theme: "Produtividade",
     book: "Hábitos Atômicos",
     author: "James Clear",
-    excerpt:
-      "Você não sobe ao nível dos seus objetivos. Você cai ao nível dos seus sistemas.",
+    excerpt: "Você não sobe ao nível dos seus objetivos. Você cai ao nível dos seus sistemas.",
     reflection:
       "Motivação some. Sistema permanece. Se sua rotina não sustenta a meta, a meta é apenas um desejo com data.",
     action: "Transforme uma meta sua em um hábito diário de no máximo 15 minutos.",
@@ -84,7 +85,8 @@ export const devotionals: Devotional[] = [
       "Você tem poder sobre a sua mente, não sobre os eventos externos. Perceba isso e encontrará força.",
     reflection:
       "Reclamar do cenário consome a mesma energia necessária para mudá-lo. Disciplina é escolher onde essa energia vai.",
-    action: "Escreva uma coisa que está fora do seu controle e decida deliberadamente parar de gastar energia com ela.",
+    action:
+      "Escreva uma coisa que está fora do seu controle e decida deliberadamente parar de gastar energia com ela.",
   },
   {
     id: "d8",
@@ -104,14 +106,16 @@ export const devotionals: Devotional[] = [
     excerpt: "O vento apaga a vela e alimenta o fogo.",
     reflection:
       "Pressão revela o que você construiu. Rotinas frágeis quebram no primeiro imprevisto; rotinas antifrágeis usam o caos como combustível.",
-    action: "Defina hoje a versão mínima da sua rotina — o que você cumpre mesmo em um dia caótico.",
+    action:
+      "Defina hoje a versão mínima da sua rotina — o que você cumpre mesmo em um dia caótico.",
   },
   {
     id: "d10",
     theme: "Disciplina",
     book: "Disciplina é Liberdade",
     author: "Jocko Willink",
-    excerpt: "A disciplina equivale à liberdade. Quanto mais disciplina você tem, mais liberdade conquista.",
+    excerpt:
+      "A disciplina equivale à liberdade. Quanto mais disciplina você tem, mais liberdade conquista.",
     reflection:
       "Quem não se comanda é comandado pelo impulso. Cada decisão adiada entrega um pedaço da sua autonomia.",
     action: "Cumpra hoje, sem negociar, a tarefa que você menos tem vontade de fazer.",
@@ -131,7 +135,8 @@ export const devotionals: Devotional[] = [
     theme: "Disciplina",
     book: "Coragem para Ser Imperfeito",
     author: "Brené Brown",
-    excerpt: "O perfeccionismo não é busca por excelência: é medo de julgamento com roupa de virtude.",
+    excerpt:
+      "O perfeccionismo não é busca por excelência: é medo de julgamento com roupa de virtude.",
     reflection:
       "Muita procrastinação é perfeccionismo disfarçado. Entregar imperfeito e corrigir vence esperar o momento ideal.",
     action: "Entregue hoje algo em versão 80% em vez de adiar buscando o 100%.",
@@ -161,7 +166,8 @@ export const devotionals: Devotional[] = [
     theme: "Negócios",
     book: "Os Axiomas de Zurique",
     author: "Max Gunther",
-    excerpt: "A preocupação não é doença, é sinal de saúde. Se você não está preocupado, não está arriscando o suficiente.",
+    excerpt:
+      "A preocupação não é doença, é sinal de saúde. Se você não está preocupado, não está arriscando o suficiente.",
     reflection:
       "Conforto e crescimento raramente moram no mesmo lugar. O desconforto calculado é o preço da evolução patrimonial.",
     action: "Liste um risco pequeno e reversível que você pode assumir esta semana.",
@@ -171,7 +177,8 @@ export const devotionals: Devotional[] = [
     theme: "Negócios",
     book: "Pai Rico, Pai Pobre",
     author: "Robert Kiyosaki",
-    excerpt: "Não é quanto dinheiro você ganha, mas quanto dinheiro você mantém e quanto ele trabalha para você.",
+    excerpt:
+      "Não é quanto dinheiro você ganha, mas quanto dinheiro você mantém e quanto ele trabalha para você.",
     reflection:
       "Renda alta com hábitos fracos é só uma esteira mais rápida. Liberdade financeira é comportamento, depois planilha.",
     action: "Separe hoje um percentual fixo da sua renda antes de qualquer gasto.",

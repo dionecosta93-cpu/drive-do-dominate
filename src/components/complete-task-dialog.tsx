@@ -18,7 +18,14 @@ interface Props {
 }
 
 /** Pergunta quando a tarefa foi realmente realizada (separado do horário de registro). */
-export function CompleteTaskDialog({ taskName, scheduledTime, date, onConfirm, onNotDone, onClose }: Props) {
+export function CompleteTaskDialog({
+  taskName,
+  scheduledTime,
+  date,
+  onConfirm,
+  onNotDone,
+  onClose,
+}: Props) {
   const registered = nowTime();
   const [mode, setMode] = useState<"scheduled" | "now" | "custom">("scheduled");
   const [custom, setCustom] = useState(scheduledTime);
@@ -32,7 +39,9 @@ export function CompleteTaskDialog({ taskName, scheduledTime, date, onConfirm, o
         mode === id ? "border-discipline bg-discipline/10" : "border-border bg-background"
       }`}
     >
-      <span className={`size-4 rounded-full border-2 shrink-0 ${mode === id ? "border-discipline bg-discipline" : "border-border"}`} />
+      <span
+        className={`size-4 rounded-full border-2 shrink-0 ${mode === id ? "border-discipline bg-discipline" : "border-border"}`}
+      />
       <span className="min-w-0">
         <span className="block text-sm font-bold">{label}</span>
         <span className="block text-[11px] text-muted-foreground">{hint}</span>
@@ -53,7 +62,11 @@ export function CompleteTaskDialog({ taskName, scheduledTime, date, onConfirm, o
               {date.split("-").reverse().join("/")} · planejada {scheduledTime}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Fechar" className="size-8 grid place-items-center rounded-lg border border-border">
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="size-8 grid place-items-center rounded-lg border border-border"
+          >
             <X className="size-4" />
           </button>
         </div>
@@ -61,9 +74,21 @@ export function CompleteTaskDialog({ taskName, scheduledTime, date, onConfirm, o
         <p className="text-sm text-muted-foreground my-3">Você realizou essa tarefa:</p>
 
         <div className="space-y-2">
-          <Option id="scheduled" label={`No horário programado — ${scheduledTime}`} hint="Sem atraso e sem penalização" />
-          <Option id="now" label={`Agora — ${registered}`} hint="Realizada depois do horário planejado" />
-          <Option id="custom" label="Escolher outro horário" hint="Informe a hora real da execução" />
+          <Option
+            id="scheduled"
+            label={`No horário programado — ${scheduledTime}`}
+            hint="Sem atraso e sem penalização"
+          />
+          <Option
+            id="now"
+            label={`Agora — ${registered}`}
+            hint="Realizada depois do horário planejado"
+          />
+          <Option
+            id="custom"
+            label="Escolher outro horário"
+            hint="Informe a hora real da execução"
+          />
         </div>
 
         {mode === "custom" && (

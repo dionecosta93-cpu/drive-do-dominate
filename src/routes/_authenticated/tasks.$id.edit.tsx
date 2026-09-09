@@ -25,7 +25,10 @@ function EditTask() {
 
   return (
     <div className="px-5 pt-6 pb-24 animate-rise">
-      <button onClick={() => history.back()} className="flex items-center gap-1 text-muted-foreground text-xs mb-4">
+      <button
+        onClick={() => history.back()}
+        className="flex items-center gap-1 text-muted-foreground text-xs mb-4"
+      >
         <ChevronLeft className="size-4" /> Voltar
       </button>
       <h1 className="text-2xl font-heading font-extrabold uppercase mb-6">Editar Missão</h1>

@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_authenticated/goals/impact")({
   head: () => ({
     meta: [
       { title: "Painel de Impacto — Disciplina Absoluta" },
-      { name: "description", content: "Veja quais metas recebem mais atenção e quais estão sendo negligenciadas." },
+      {
+        name: "description",
+        content: "Veja quais metas recebem mais atenção e quais estão sendo negligenciadas.",
+      },
       { property: "og:title", content: "Painel de Impacto — Disciplina Absoluta" },
-      { property: "og:description", content: "Veja quais metas recebem mais atenção e quais estão sendo negligenciadas." },
+      {
+        property: "og:description",
+        content: "Veja quais metas recebem mais atenção e quais estão sendo negligenciadas.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -30,16 +36,22 @@ function ImpactPanel() {
       <h1 className="text-2xl font-heading font-extrabold uppercase mb-6">Painel de Impacto</h1>
 
       {goals.length === 0 && (
-        <p className="text-sm text-muted-foreground">Crie metas para acompanhar o impacto das suas tarefas.</p>
+        <p className="text-sm text-muted-foreground">
+          Crie metas para acompanhar o impacto das suas tarefas.
+        </p>
       )}
 
       {impact.mostAttention && (
         <div className="bg-discipline/10 border border-discipline/20 rounded-2xl p-4 mb-3 flex gap-3">
           <TrendingUp className="size-5 text-discipline shrink-0" />
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-0.5">Mais atenção</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-0.5">
+              Mais atenção
+            </p>
             <p className="text-sm font-medium">{impact.mostAttention.goal.name}</p>
-            <p className="text-[11px] text-muted-foreground">{impact.mostAttention.weekCount} execuções nos últimos 7 dias</p>
+            <p className="text-[11px] text-muted-foreground">
+              {impact.mostAttention.weekCount} execuções nos últimos 7 dias
+            </p>
           </div>
         </div>
       )}
@@ -48,9 +60,13 @@ function ImpactPanel() {
         <div className="bg-struggle/10 border border-struggle/20 rounded-2xl p-4 mb-6 flex gap-3">
           <AlertTriangle className="size-5 text-struggle shrink-0" />
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-struggle mb-0.5">Negligenciada</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-struggle mb-0.5">
+              Negligenciada
+            </p>
             <p className="text-sm font-medium">{impact.neglected.goal.name}</p>
-            <p className="text-[11px] text-muted-foreground">Sem execução na última semana. Agende uma ação hoje.</p>
+            <p className="text-[11px] text-muted-foreground">
+              Sem execução na última semana. Agende uma ação hoje.
+            </p>
           </div>
         </div>
       )}
@@ -68,9 +84,13 @@ function ImpactPanel() {
                 <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
                   {goalCategoryLabel[r.goal.category]}
                 </p>
-                <h2 className="font-heading font-bold text-base leading-tight truncate">{r.goal.name}</h2>
+                <h2 className="font-heading font-bold text-base leading-tight truncate">
+                  {r.goal.name}
+                </h2>
               </div>
-              <span className="font-heading font-black text-lg text-discipline tabular-nums">{r.pct}%</span>
+              <span className="font-heading font-black text-lg text-discipline tabular-nums">
+                {r.pct}%
+              </span>
             </div>
             <div className="h-2 w-full bg-background rounded-full overflow-hidden mb-3">
               <div
@@ -90,7 +110,8 @@ function ImpactPanel() {
 
       {impact.unlinkedToday > 0 && (
         <p className="text-[11px] text-muted-foreground mt-6">
-          {impact.unlinkedToday} tarefas ainda não estão ligadas a nenhuma meta. Vincule-as para dar propósito à rotina.
+          {impact.unlinkedToday} tarefas ainda não estão ligadas a nenhuma meta. Vincule-as para dar
+          propósito à rotina.
         </p>
       )}
     </div>

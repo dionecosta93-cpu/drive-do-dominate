@@ -37,7 +37,8 @@ function HistoryView() {
             <div key={s.id} className="bg-surface border border-border rounded-xl p-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] font-mono font-bold text-discipline">
-                  {d.toLocaleDateString("pt-BR")} · {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  {d.toLocaleDateString("pt-BR")} ·{" "}
+                  {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                 </span>
                 <span className="text-[10px] font-mono text-muted-foreground">+{s.xp} XP</span>
               </div>
@@ -48,11 +49,15 @@ function HistoryView() {
                 {s.scheduledTime ? ` · previsto ${s.scheduledTime}` : ""}
                 {s.completedTime ? ` · realizado ${s.completedTime}` : ""}
                 {s.registeredTime ? ` · registrado ${s.registeredTime}` : ""}
-                {typeof s.timingDeltaMinutes === "number" ? ` · ${s.timingDeltaMinutes > 0 ? "atraso" : s.timingDeltaMinutes < 0 ? "adiantado" : "no horário"} ${Math.abs(s.timingDeltaMinutes)}min` : ""}
+                {typeof s.timingDeltaMinutes === "number"
+                  ? ` · ${s.timingDeltaMinutes > 0 ? "atraso" : s.timingDeltaMinutes < 0 ? "adiantado" : "no horário"} ${Math.abs(s.timingDeltaMinutes)}min`
+                  : ""}
                 {t?.editCount ? ` · ${t.editCount} edições` : ""}
               </div>
               <div className="mt-2 flex items-center gap-2">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground">✅ Realizado às</label>
+                <label className="text-[10px] uppercase font-bold text-muted-foreground">
+                  ✅ Realizado às
+                </label>
                 <input
                   type="time"
                   value={s.completedTime ?? ""}
@@ -61,7 +66,9 @@ function HistoryView() {
                 />
               </div>
               {s.reflection && (
-                <p className="mt-2 text-xs italic text-muted-foreground border-l-2 border-discipline/40 pl-2">"{s.reflection}"</p>
+                <p className="mt-2 text-xs italic text-muted-foreground border-l-2 border-discipline/40 pl-2">
+                  "{s.reflection}"
+                </p>
               )}
             </div>
           );

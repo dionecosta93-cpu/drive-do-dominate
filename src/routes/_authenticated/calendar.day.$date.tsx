@@ -2,7 +2,21 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { taskCompletedOn, useStore, todaysTasks, type Task, type TaskStatus } from "@/lib/store";
 import { saveTaskOccurrence } from "@/lib/task-occurrences";
-import { ChevronLeft, ChevronRight, Plus, MoreVertical, Play, Check, RotateCcw, Copy, Move, Archive, Trash2, Edit, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  MoreVertical,
+  Play,
+  Check,
+  RotateCcw,
+  Copy,
+  Move,
+  Archive,
+  Trash2,
+  Edit,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { CompleteTaskDialog } from "@/components/complete-task-dialog";
 
@@ -23,9 +37,9 @@ const shift = (date: string, days: number) => {
 const statusColor: Record<TaskStatus, string> = {
   "nao-iniciada": "bg-muted text-muted-foreground",
   "em-andamento": "bg-info/20 text-info",
-  "concluida": "bg-discipline/20 text-discipline",
-  "adiada": "bg-warning/20 text-warning",
-  "cancelada": "bg-struggle/20 text-struggle",
+  concluida: "bg-discipline/20 text-discipline",
+  adiada: "bg-warning/20 text-warning",
+  cancelada: "bg-struggle/20 text-struggle",
 };
 
 function DayView() {
@@ -35,7 +49,10 @@ function DayView() {
   const { tasks, sessions } = store;
 
   const list = useMemo(
-    () => todaysTasks(tasks, date).slice().sort((a, b) => a.time.localeCompare(b.time)),
+    () =>
+      todaysTasks(tasks, date)
+        .slice()
+        .sort((a, b) => a.time.localeCompare(b.time)),
     [tasks, date],
   );
 
@@ -67,7 +84,9 @@ function DayView() {
     const monthEnd = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
     const monthDates: string[] = [];
     for (let d = base.getDate() + 1; d <= monthEnd; d++) {
-      monthDates.push(`${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+      monthDates.push(
+        `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`,
+      );
     }
     const threeMonths = Array.from({ length: 3 }, (_, i) => {
       const d = new Date(base.getFullYear(), base.getMonth() + i + 1, base.getDate());
@@ -105,23 +124,31 @@ function DayView() {
         />
       )}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={() => navigate({ to: "/calendar/day/$date", params: { date: shift(date, -1) } })}
-          className="size-8 grid place-items-center rounded-full bg-surface border border-border">
+        <button
+          onClick={() => navigate({ to: "/calendar/day/$date", params: { date: shift(date, -1) } })}
+          className="size-8 grid place-items-center rounded-full bg-surface border border-border"
+        >
           <ChevronLeft className="size-4" />
         </button>
         <div className="text-center">
           <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
             {dayObj.toLocaleDateString("pt-BR", { weekday: "long" })}
           </div>
-          <div className={`text-xl font-heading font-black uppercase ${isToday ? "text-discipline" : ""}`}>
+          <div
+            className={`text-xl font-heading font-black uppercase ${isToday ? "text-discipline" : ""}`}
+          >
             {dayObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
           </div>
           {list.length > 0 && (
-            <div className="text-[10px] font-mono text-muted-foreground mt-0.5">{doneCount}/{list.length} concluídas</div>
+            <div className="text-[10px] font-mono text-muted-foreground mt-0.5">
+              {doneCount}/{list.length} concluídas
+            </div>
           )}
         </div>
-        <button onClick={() => navigate({ to: "/calendar/day/$date", params: { date: shift(date, 1) } })}
-          className="size-8 grid place-items-center rounded-full bg-surface border border-border">
+        <button
+          onClick={() => navigate({ to: "/calendar/day/$date", params: { date: shift(date, 1) } })}
+          className="size-8 grid place-items-center rounded-full bg-surface border border-border"
+        >
           <ChevronRight className="size-4" />
         </button>
       </div>
@@ -149,30 +176,57 @@ function DayView() {
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                      <span className="text-[11px] font-mono font-bold text-discipline">{t.time}{t.endTime ? `–${t.endTime}` : ""}</span>
-                      <span className="text-[9px] font-mono uppercase text-muted-foreground">{t.category}</span>
-                      <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${
-                        t.priority === "alta" ? "bg-struggle/20 text-struggle" :
-                        t.priority === "media" ? "bg-warning/20 text-warning" : "bg-muted text-muted-foreground"
-                      }`}>{t.priority}</span>
-                      {(isDone || (t.status && t.status !== "concluida")) && (() => {
-                        const visibleStatus: TaskStatus = isDone ? "concluida" : t.status!;
-                        return (
-                        <span className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[visibleStatus]}`}>
-                          {visibleStatus.replace("-", " ")}
-                        </span>
-                        );
-                      })()}
+                      <span className="text-[11px] font-mono font-bold text-discipline">
+                        {t.time}
+                        {t.endTime ? `–${t.endTime}` : ""}
+                      </span>
+                      <span className="text-[9px] font-mono uppercase text-muted-foreground">
+                        {t.category}
+                      </span>
+                      <span
+                        className={`text-[9px] font-bold uppercase px-1.5 rounded ${
+                          t.priority === "alta"
+                            ? "bg-struggle/20 text-struggle"
+                            : t.priority === "media"
+                              ? "bg-warning/20 text-warning"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {t.priority}
+                      </span>
+                      {(isDone || (t.status && t.status !== "concluida")) &&
+                        (() => {
+                          const visibleStatus: TaskStatus = isDone ? "concluida" : t.status!;
+                          return (
+                            <span
+                              className={`text-[9px] font-bold uppercase px-1.5 rounded ${statusColor[visibleStatus]}`}
+                            >
+                              {visibleStatus.replace("-", " ")}
+                            </span>
+                          );
+                        })()}
                       {!!t.rolloverCount && !isDone && (
-                        <span className="text-[9px] font-bold uppercase px-1.5 rounded bg-struggle/15 text-struggle">↻ {t.rolloverCount}x</span>
+                        <span className="text-[9px] font-bold uppercase px-1.5 rounded bg-struggle/15 text-struggle">
+                          ↻ {t.rolloverCount}x
+                        </span>
                       )}
                     </div>
-                    <h3 className={`text-base font-heading font-bold leading-tight ${isDone ? "line-through opacity-60" : ""}`}>{t.name}</h3>
-                    {t.description && <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>}
+                    <h3
+                      className={`text-base font-heading font-bold leading-tight ${isDone ? "line-through opacity-60" : ""}`}
+                    >
+                      {t.name}
+                    </h3>
+                    {t.description && (
+                      <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
+                    )}
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      {t.estimatedMinutes}min prev.{t.actualMinutes ? ` · ${t.actualMinutes}min real` : ""} · Dif. {t.difficulty}/10{t.alarmMinutesBefore ? ` · alarme ${t.alarmMinutesBefore}min antes` : ""}
+                      {t.estimatedMinutes}min prev.
+                      {t.actualMinutes ? ` · ${t.actualMinutes}min real` : ""} · Dif. {t.difficulty}
+                      /10{t.alarmMinutesBefore ? ` · alarme ${t.alarmMinutesBefore}min antes` : ""}
                     </p>
-                    {t.notes && <p className="text-[11px] italic text-muted-foreground mt-1">"{t.notes}"</p>}
+                    {t.notes && (
+                      <p className="text-[11px] italic text-muted-foreground mt-1">"{t.notes}"</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {isToday && !isDone && (
@@ -200,16 +254,55 @@ function DayView() {
                     date={date}
                     isDone={isDone}
                     onClose={closeMenu}
-                    onEdit={() => { closeMenu(); navigate({ to: "/tasks/$id/edit", params: { id: t.id } }); }}
-                    onComplete={() => { closeMenu(); setCompletingId(t.id); }}
-                    onReopen={() => { store.reopenTaskForDate(t.id, date); closeMenu(); toast("Reaberta somente neste dia."); }}
-                    onPostpone={() => { store.setTaskStatus(t.id, "adiada"); closeMenu(); toast("Adiada."); }}
-                    onCancel={() => { store.setTaskStatus(t.id, "cancelada"); closeMenu(); toast("Cancelada."); }}
-                    onMove={() => { setMoveTaskId(t.id); setMoveDate(date); closeMenu(); }}
-                    onDuplicateSimple={() => { store.duplicateTask(t.id, date); closeMenu(); toast.success("Duplicada."); }}
-                    onDuplicateAdvanced={() => { setDupTaskId(t.id); closeMenu(); }}
-                    onArchive={() => { store.archiveTask(t.id); closeMenu(); toast("Arquivada."); }}
-                    onDelete={() => { if (confirm("Excluir esta missão?")) { store.removeTask(t.id); closeMenu(); toast("Removida."); } }}
+                    onEdit={() => {
+                      closeMenu();
+                      navigate({ to: "/tasks/$id/edit", params: { id: t.id } });
+                    }}
+                    onComplete={() => {
+                      closeMenu();
+                      setCompletingId(t.id);
+                    }}
+                    onReopen={() => {
+                      store.reopenTaskForDate(t.id, date);
+                      closeMenu();
+                      toast("Reaberta somente neste dia.");
+                    }}
+                    onPostpone={() => {
+                      store.setTaskStatus(t.id, "adiada");
+                      closeMenu();
+                      toast("Adiada.");
+                    }}
+                    onCancel={() => {
+                      store.setTaskStatus(t.id, "cancelada");
+                      closeMenu();
+                      toast("Cancelada.");
+                    }}
+                    onMove={() => {
+                      setMoveTaskId(t.id);
+                      setMoveDate(date);
+                      closeMenu();
+                    }}
+                    onDuplicateSimple={() => {
+                      store.duplicateTask(t.id, date);
+                      closeMenu();
+                      toast.success("Duplicada.");
+                    }}
+                    onDuplicateAdvanced={() => {
+                      setDupTaskId(t.id);
+                      closeMenu();
+                    }}
+                    onArchive={() => {
+                      store.archiveTask(t.id);
+                      closeMenu();
+                      toast("Arquivada.");
+                    }}
+                    onDelete={() => {
+                      if (confirm("Excluir esta missão?")) {
+                        store.removeTask(t.id);
+                        closeMenu();
+                        toast("Removida.");
+                      }
+                    }}
                   />
                 )}
               </div>
@@ -270,7 +363,9 @@ function DayView() {
                     className="w-full text-left px-4 py-3 bg-background border border-border rounded-xl hover:border-discipline transition flex items-center justify-between"
                   >
                     <span className="text-sm font-medium">{label}</span>
-                    <span className="text-[10px] font-mono text-muted-foreground">{dates.length}x</span>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      {dates.length}x
+                    </span>
                   </button>
                 ))}
               </div>
@@ -280,7 +375,12 @@ function DayView() {
       )}
 
       <div className="mt-6 text-center">
-        <Link to="/calendar" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">← Voltar ao mês</Link>
+        <Link
+          to="/calendar"
+          className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground"
+        >
+          ← Voltar ao mês
+        </Link>
       </div>
     </div>
   );
@@ -302,27 +402,56 @@ function ActionMenu(props: {
   onArchive: () => void;
   onDelete: () => void;
 }) {
-  const btn = "w-full text-left px-3 py-2 text-xs font-medium flex items-center gap-2 hover:bg-background rounded-lg";
+  const btn =
+    "w-full text-left px-3 py-2 text-xs font-medium flex items-center gap-2 hover:bg-background rounded-lg";
   return (
     <div className="mt-3 pt-3 border-t border-border grid grid-cols-2 gap-1">
       {props.isDone ? (
-        <button onClick={props.onReopen} className={btn}><RotateCcw className="size-3.5" /> Reabrir</button>
+        <button onClick={props.onReopen} className={btn}>
+          <RotateCcw className="size-3.5" /> Reabrir
+        </button>
       ) : (
-        <button onClick={props.onComplete} className={`${btn} text-discipline`}><Check className="size-3.5" /> Concluir</button>
+        <button onClick={props.onComplete} className={`${btn} text-discipline`}>
+          <Check className="size-3.5" /> Concluir
+        </button>
       )}
-      <button onClick={props.onMove} className={btn}><Move className="size-3.5" /> Mover</button>
-      <button onClick={props.onDuplicateSimple} className={btn}><Copy className="size-3.5" /> Duplicar aqui</button>
-      <button onClick={props.onDuplicateAdvanced} className={btn}><Copy className="size-3.5" /> Duplicar para...</button>
-      <button onClick={props.onPostpone} className={`${btn} text-warning`}><RotateCcw className="size-3.5" /> Adiar</button>
-      <button onClick={props.onCancel} className={`${btn} text-struggle`}><X className="size-3.5" /> Cancelar</button>
-      <button onClick={props.onEdit} className={btn}><Edit className="size-3.5" /> Editar</button>
-      <button onClick={props.onArchive} className={btn}><Archive className="size-3.5" /> Arquivar</button>
-      <button onClick={props.onDelete} className={`${btn} text-struggle col-span-2`}><Trash2 className="size-3.5" /> Excluir</button>
+      <button onClick={props.onMove} className={btn}>
+        <Move className="size-3.5" /> Mover
+      </button>
+      <button onClick={props.onDuplicateSimple} className={btn}>
+        <Copy className="size-3.5" /> Duplicar aqui
+      </button>
+      <button onClick={props.onDuplicateAdvanced} className={btn}>
+        <Copy className="size-3.5" /> Duplicar para...
+      </button>
+      <button onClick={props.onPostpone} className={`${btn} text-warning`}>
+        <RotateCcw className="size-3.5" /> Adiar
+      </button>
+      <button onClick={props.onCancel} className={`${btn} text-struggle`}>
+        <X className="size-3.5" /> Cancelar
+      </button>
+      <button onClick={props.onEdit} className={btn}>
+        <Edit className="size-3.5" /> Editar
+      </button>
+      <button onClick={props.onArchive} className={btn}>
+        <Archive className="size-3.5" /> Arquivar
+      </button>
+      <button onClick={props.onDelete} className={`${btn} text-struggle col-span-2`}>
+        <Trash2 className="size-3.5" /> Excluir
+      </button>
     </div>
   );
 }
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Sheet({
+  title,
+  onClose,
+  children,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60" onClick={onClose}>
       <div
@@ -331,7 +460,10 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-black uppercase text-sm">{title}</h3>
-          <button onClick={onClose} className="size-8 grid place-items-center rounded-full bg-background border border-border">
+          <button
+            onClick={onClose}
+            className="size-8 grid place-items-center rounded-full bg-background border border-border"
+          >
             <X className="size-4" />
           </button>
         </div>

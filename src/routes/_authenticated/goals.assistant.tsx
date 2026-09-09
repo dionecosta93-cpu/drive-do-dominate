@@ -8,9 +8,15 @@ export const Route = createFileRoute("/_authenticated/goals/assistant")({
   head: () => ({
     meta: [
       { title: "Assistente Inteligente — Disciplina Absoluta" },
-      { name: "description", content: "Sugestões de prioridade, metas esquecidas e equilíbrio de vida." },
+      {
+        name: "description",
+        content: "Sugestões de prioridade, metas esquecidas e equilíbrio de vida.",
+      },
       { property: "og:title", content: "Assistente Inteligente — Disciplina Absoluta" },
-      { property: "og:description", content: "Sugestões de prioridade, metas esquecidas e equilíbrio de vida." },
+      {
+        property: "og:description",
+        content: "Sugestões de prioridade, metas esquecidas e equilíbrio de vida.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -37,7 +43,9 @@ function Assistant() {
         <ChevronLeft className="size-4" /> Metas
       </Link>
       <h1 className="text-2xl font-heading font-extrabold uppercase mb-1">Assistente</h1>
-      <p className="text-xs text-muted-foreground mb-6">Análise das suas tarefas, metas e histórico de execução.</p>
+      <p className="text-xs text-muted-foreground mb-6">
+        Análise das suas tarefas, metas e histórico de execução.
+      </p>
 
       {suggestions.length === 0 && (
         <p className="text-sm text-muted-foreground">
@@ -50,7 +58,9 @@ function Assistant() {
           <div
             key={i}
             className={`border rounded-2xl p-4 flex gap-3 ${
-              s.kind === "meta-esquecida" ? "bg-struggle/5 border-struggle/20" : "bg-info/5 border-info/20"
+              s.kind === "meta-esquecida"
+                ? "bg-struggle/5 border-struggle/20"
+                : "bg-info/5 border-info/20"
             }`}
           >
             <div className="shrink-0 size-9 rounded-full bg-info/15 grid place-items-center">
@@ -61,11 +71,15 @@ function Assistant() {
                 {kindLabel[s.kind]}
               </p>
               <p className="text-sm font-medium leading-snug">{s.title}</p>
-              <p className="text-xs text-muted-foreground leading-snug mt-1 text-pretty">{s.detail}</p>
+              <p className="text-xs text-muted-foreground leading-snug mt-1 text-pretty">
+                {s.detail}
+              </p>
               <div className="flex gap-2 mt-2">
                 {s.taskId && (
                   <button
-                    onClick={() => navigate({ to: "/focus/$taskId", params: { taskId: s.taskId! } })}
+                    onClick={() =>
+                      navigate({ to: "/focus/$taskId", params: { taskId: s.taskId! } })
+                    }
                     className="inline-flex items-center gap-1 bg-discipline text-black text-[10px] font-bold uppercase px-2 py-1 rounded"
                   >
                     <Play className="size-3" fill="currentColor" /> Iniciar

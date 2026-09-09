@@ -1,17 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useStore, xpToLevel } from "@/lib/store";
 import { buildPerformance } from "@/lib/performance";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, Tooltip, CartesianGrid, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Tooltip,
+  CartesianGrid,
+  Cell,
+} from "recharts";
 import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/stats")({
   component: Stats,
-  head: () => ({ meta: [{ title: "Estatísticas — Kairos" }, { name: "description", content: "Veja sua evolução, tempo produtivo e disciplina em números." }] }),
+  head: () => ({
+    meta: [
+      { title: "Estatísticas — Disciplina Absoluta" },
+      {
+        name: "description",
+        content: "Veja sua evolução, tempo produtivo e disciplina em números.",
+      },
+    ],
+  }),
 });
 
 function Stats() {
   const { sessions, streak, longestStreak, xp } = useStore();
-
 
   const totalMinutes = sessions.reduce((a, b) => a + b.spentSeconds / 60, 0);
   const totalEstimated = sessions.reduce((a, b) => a + b.estimatedMinutes, 0);
@@ -22,7 +40,8 @@ function Stats() {
     const map: Record<string, number> = {};
     const now = new Date();
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(now); d.setDate(now.getDate() - i);
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
       const key = d.toLocaleDateString("pt-BR", { weekday: "short" });
       map[key] = 0;
     }
@@ -39,7 +58,8 @@ function Stats() {
 
   const byCat = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const s of sessions) map[s.category] = (map[s.category] ?? 0) + Math.round(s.spentSeconds / 60);
+    for (const s of sessions)
+      map[s.category] = (map[s.category] ?? 0) + Math.round(s.spentSeconds / 60);
     return Object.entries(map).map(([category, minutes]) => ({ category, minutes }));
   }, [sessions]);
 
@@ -66,8 +86,16 @@ function Stats() {
       <h1 className="text-2xl font-heading font-extrabold uppercase mb-6">Estatísticas</h1>
 
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <Card label="Horas produtivas" value={`${(totalMinutes / 60).toFixed(1)}h`} color="text-discipline" />
-        <Card label="Eficiência média" value={`${efficiency}%`} color={efficiency >= 100 ? "text-discipline" : "text-warning"} />
+        <Card
+          label="Horas produtivas"
+          value={`${(totalMinutes / 60).toFixed(1)}h`}
+          color="text-discipline"
+        />
+        <Card
+          label="Eficiência média"
+          value={`${efficiency}%`}
+          color={efficiency >= 100 ? "text-discipline" : "text-warning"}
+        />
         <Card label="Sequência atual" value={`${streak} dias`} />
         <Card label="Maior sequência" value={`${longestStreak} dias`} color="text-warning" />
         <Card label="Nível" value={String(level.level)} color="text-discipline" />
@@ -83,7 +111,9 @@ function Stats() {
                 key={r}
                 onClick={() => setRange(r)}
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase border ${
-                  range === r ? "bg-discipline text-black border-discipline" : "border-border text-muted-foreground"
+                  range === r
+                    ? "bg-discipline text-black border-discipline"
+                    : "border-border text-muted-foreground"
                 }`}
               >
                 {r}d
@@ -95,7 +125,12 @@ function Stats() {
         <ResponsiveContainer width="100%" height={190}>
           <BarChart data={perf.days}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
-            <XAxis dataKey="label" stroke="#71717a" fontSize={9} interval={range === 7 ? 0 : "preserveStartEnd"} />
+            <XAxis
+              dataKey="label"
+              stroke="#71717a"
+              fontSize={9}
+              interval={range === 7 ? 0 : "preserveStartEnd"}
+            />
             <YAxis stroke="#71717a" fontSize={10} domain={[0, 100]} unit="%" />
             <Tooltip
               contentStyle={{ background: "#121212", border: "1px solid #262626", borderRadius: 8 }}
@@ -116,8 +151,16 @@ function Stats() {
         <div className="grid grid-cols-2 gap-3 mt-4">
           <Stat label="📊 Média de desempenho" value={`${perf.average}%`} color="text-discipline" />
           <Stat label="📅 Dias analisados" value={String(perf.analyzedDays)} />
-          <Stat label="🔥 Melhor dia" value={perf.best ? `${fmtDay(perf.best.date)} · ${perf.best.pct}%` : "—"} color="text-discipline" />
-          <Stat label="📉 Pior dia" value={perf.worst ? `${fmtDay(perf.worst.date)} · ${perf.worst.pct}%` : "—"} color="text-struggle" />
+          <Stat
+            label="🔥 Melhor dia"
+            value={perf.best ? `${fmtDay(perf.best.date)} · ${perf.best.pct}%` : "—"}
+            color="text-discipline"
+          />
+          <Stat
+            label="📉 Pior dia"
+            value={perf.worst ? `${fmtDay(perf.worst.date)} · ${perf.worst.pct}%` : "—"}
+            color="text-struggle"
+          />
           <Stat label="✅ Concluídas" value={String(perf.totalDone)} color="text-discipline" />
           <Stat label="⚠️ Dispensadas" value={String(perf.totalDismissed)} color="text-struggle" />
           <Stat label="⏳ Pendentes" value={String(perf.totalPending)} color="text-warning" />
@@ -129,7 +172,9 @@ function Stats() {
           <div className="space-y-2">
             {perf.weeks.map((w) => (
               <div key={w.label} className="flex items-center gap-3">
-                <span className="w-20 shrink-0 text-[10px] font-mono uppercase text-muted-foreground">{w.label}</span>
+                <span className="w-20 shrink-0 text-[10px] font-mono uppercase text-muted-foreground">
+                  {w.label}
+                </span>
                 <div className="flex-1 h-2.5 rounded-full bg-border overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
@@ -141,11 +186,14 @@ function Stats() {
             ))}
           </div>
           <p className="mt-3 text-xs font-bold">
-            {perf.trend === "up" ? "📈 Melhorando" : perf.trend === "down" ? "📉 Caindo" : "➡️ Estável"}
+            {perf.trend === "up"
+              ? "📈 Melhorando"
+              : perf.trend === "down"
+                ? "📉 Caindo"
+                : "➡️ Estável"}
           </p>
         </Section>
       )}
-
 
       <Section title="Últimos 7 dias · minutos">
         <ResponsiveContainer width="100%" height={180}>
@@ -153,7 +201,9 @@ function Stats() {
             <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
             <XAxis dataKey="day" stroke="#71717a" fontSize={10} />
             <YAxis stroke="#71717a" fontSize={10} />
-            <Tooltip contentStyle={{ background: "#121212", border: "1px solid #262626", borderRadius: 8 }} />
+            <Tooltip
+              contentStyle={{ background: "#121212", border: "1px solid #262626", borderRadius: 8 }}
+            />
             <Bar dataKey="minutes" fill="#22c55e" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -166,7 +216,13 @@ function Stats() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
               <XAxis type="number" stroke="#71717a" fontSize={10} />
               <YAxis dataKey="category" type="category" stroke="#71717a" fontSize={10} width={70} />
-              <Tooltip contentStyle={{ background: "#121212", border: "1px solid #262626", borderRadius: 8 }} />
+              <Tooltip
+                contentStyle={{
+                  background: "#121212",
+                  border: "1px solid #262626",
+                  borderRadius: 8,
+                }}
+              />
               <Bar dataKey="minutes" fill="#60a5fa" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -180,7 +236,13 @@ function Stats() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
               <XAxis dataKey="i" stroke="#71717a" fontSize={10} />
               <YAxis stroke="#71717a" fontSize={10} />
-              <Tooltip contentStyle={{ background: "#121212", border: "1px solid #262626", borderRadius: 8 }} />
+              <Tooltip
+                contentStyle={{
+                  background: "#121212",
+                  border: "1px solid #262626",
+                  borderRadius: 8,
+                }}
+              />
               <Line type="monotone" dataKey="xp" stroke="#22c55e" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -199,7 +261,9 @@ function Stats() {
 function Card({ label, value, color = "" }: { label: string; value: string; color?: string }) {
   return (
     <div className="bg-surface border border-border rounded-2xl p-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+        {label}
+      </p>
       <p className={`text-2xl font-heading font-black ${color}`}>{value}</p>
     </div>
   );
@@ -208,7 +272,9 @@ function Card({ label, value, color = "" }: { label: string; value: string; colo
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-surface border border-border rounded-2xl p-4 mb-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">{title}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+        {title}
+      </p>
       {children}
     </div>
   );
@@ -217,7 +283,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Stat({ label, value, color = "" }: { label: string; value: string; color?: string }) {
   return (
     <div className="rounded-xl border border-border bg-background/40 p-3">
-      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
+      <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+        {label}
+      </p>
       <p className={`text-sm font-heading font-black ${color}`}>{value}</p>
     </div>
   );

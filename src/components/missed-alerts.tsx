@@ -19,8 +19,10 @@ export function MissedTasksAlerts() {
   const [rescheduling, setRescheduling] = useState<string | null>(null);
   const [completing, setCompleting] = useState<string | null>(null);
 
-
-  const list = useMemo(() => missedTasks(tasks, sessions, dismissed).slice(0, 5), [tasks, sessions, dismissed]);
+  const list = useMemo(
+    () => missedTasks(tasks, sessions, dismissed).slice(0, 5),
+    [tasks, sessions, dismissed],
+  );
   if (list.length === 0) return null;
 
   const tomorrow = () => {
@@ -105,7 +107,6 @@ export function MissedTasksAlerts() {
             />
           )}
 
-
           {rescheduling === m.key && (
             <div className="mt-3 flex flex-wrap gap-2">
               {[
@@ -187,8 +188,13 @@ export function DailySummaryCard() {
   );
 
   return (
-    <section className="mb-6 rounded-2xl border border-border bg-surface p-4 animate-rise" style={{ animationDelay: "320ms" }}>
-      <p className="text-[11px] font-bold uppercase tracking-widest text-discipline mb-3">Seu dia na Forja</p>
+    <section
+      className="mb-6 rounded-2xl border border-border bg-surface p-4 animate-rise"
+      style={{ animationDelay: "320ms" }}
+    >
+      <p className="text-[11px] font-bold uppercase tracking-widest text-discipline mb-3">
+        Seu dia na Forja
+      </p>
       <div className="grid grid-cols-2 gap-2">
         {(
           [
@@ -199,7 +205,9 @@ export function DailySummaryCard() {
           ] as const
         ).map(([l, v]) => (
           <div key={l} className="bg-background border border-border rounded-xl p-3">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{l}</p>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+              {l}
+            </p>
             <p className="font-heading font-black text-lg tabular-nums">{v}</p>
           </div>
         ))}

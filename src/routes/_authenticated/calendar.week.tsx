@@ -42,20 +42,33 @@ function WeekView() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <button onClick={() => shift(-1)} className="size-8 grid place-items-center rounded-full bg-surface border border-border"><ChevronLeft className="size-4" /></button>
+        <button
+          onClick={() => shift(-1)}
+          className="size-8 grid place-items-center rounded-full bg-surface border border-border"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
         <div className="text-center">
           <div className="text-sm font-heading font-black uppercase">
-            {days[0].getDate()}/{days[0].getMonth() + 1} — {days[6].getDate()}/{days[6].getMonth() + 1}
+            {days[0].getDate()}/{days[0].getMonth() + 1} — {days[6].getDate()}/
+            {days[6].getMonth() + 1}
           </div>
           <div className="text-[10px] font-mono text-muted-foreground">Semana</div>
         </div>
-        <button onClick={() => shift(1)} className="size-8 grid place-items-center rounded-full bg-surface border border-border"><ChevronRight className="size-4" /></button>
+        <button
+          onClick={() => shift(1)}
+          className="size-8 grid place-items-center rounded-full bg-surface border border-border"
+        >
+          <ChevronRight className="size-4" />
+        </button>
       </div>
 
       <div className="space-y-3">
         {days.map((d) => {
           const key = dateKey(d);
-          const list = todaysTasks(tasks, key).slice().sort((a, b) => a.time.localeCompare(b.time));
+          const list = todaysTasks(tasks, key)
+            .slice()
+            .sort((a, b) => a.time.localeCompare(b.time));
           const stats = dayStats(tasks, sessions, key);
           const isToday = key === todayStr;
           return (
@@ -69,13 +82,21 @@ function WeekView() {
               className={`bg-surface border rounded-2xl p-3 ${isToday ? "border-discipline/50" : "border-border"}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <Link to="/calendar/day/$date" params={{ date: key }} className="flex items-center gap-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? "text-discipline" : "text-muted-foreground"}`}>
+                <Link
+                  to="/calendar/day/$date"
+                  params={{ date: key }}
+                  className="flex items-center gap-2"
+                >
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? "text-discipline" : "text-muted-foreground"}`}
+                  >
                     {dayNames[d.getDay()]}
                   </span>
                   <span className="text-lg font-heading font-black">{d.getDate()}</span>
                   {stats.total > 0 && (
-                    <span className="text-[10px] font-mono text-muted-foreground">{stats.done}/{stats.total}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      {stats.done}/{stats.total}
+                    </span>
                   )}
                 </Link>
                 <button
@@ -97,9 +118,13 @@ function WeekView() {
                       onClick={() => navigate({ to: "/calendar/day/$date", params: { date: key } })}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-background border border-border text-xs cursor-grab active:cursor-grabbing"
                     >
-                      <span className="font-mono font-bold text-discipline text-[10px]">{t.time}</span>
+                      <span className="font-mono font-bold text-discipline text-[10px]">
+                        {t.time}
+                      </span>
                       <span className="truncate flex-1">{t.name}</span>
-                      {taskCompletedOn(t.id, sessions, key) && <span className="text-[9px] font-bold text-discipline">✓</span>}
+                      {taskCompletedOn(t.id, sessions, key) && (
+                        <span className="text-[9px] font-bold text-discipline">✓</span>
+                      )}
                     </div>
                   ))}
                 </div>

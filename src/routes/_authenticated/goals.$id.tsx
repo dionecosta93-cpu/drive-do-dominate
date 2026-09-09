@@ -3,16 +3,28 @@ import { useState } from "react";
 import { ChevronLeft, Plus, Trash2, Check, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { GoalForm } from "@/components/goal-form";
-import { goalCategoryLabel, goalProgress, goalSessions, goalStatusLabel, useStore } from "@/lib/store";
+import {
+  goalCategoryLabel,
+  goalProgress,
+  goalSessions,
+  goalStatusLabel,
+  useStore,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/goals/$id")({
   component: GoalDetail,
   head: () => ({
     meta: [
       { title: "Meta — Disciplina Absoluta" },
-      { name: "description", content: "Objetivos, tarefas vinculadas e progresso desta meta de vida." },
+      {
+        name: "description",
+        content: "Objetivos, tarefas vinculadas e progresso desta meta de vida.",
+      },
       { property: "og:title", content: "Meta — Disciplina Absoluta" },
-      { property: "og:description", content: "Objetivos, tarefas vinculadas e progresso desta meta de vida." },
+      {
+        property: "og:description",
+        content: "Objetivos, tarefas vinculadas e progresso desta meta de vida.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -68,7 +80,9 @@ function GoalDetail() {
       ) : (
         <>
           <div className="flex items-start justify-between gap-3 mb-2">
-            <h1 className="text-2xl font-heading font-extrabold uppercase leading-tight">{goal.name}</h1>
+            <h1 className="text-2xl font-heading font-extrabold uppercase leading-tight">
+              {goal.name}
+            </h1>
             <button
               onClick={() => setEditing(true)}
               className="size-9 shrink-0 grid place-items-center rounded-lg border border-border text-muted-foreground hover:text-discipline hover:border-discipline/40 transition"
@@ -86,23 +100,33 @@ function GoalDetail() {
               {goalStatusLabel[goal.status]}
             </span>
             {goal.targetDate && (
-              <span className="text-[9px] font-mono text-muted-foreground">até {goal.targetDate}</span>
+              <span className="text-[9px] font-mono text-muted-foreground">
+                até {goal.targetDate}
+              </span>
             )}
           </div>
 
-          {goal.description && <p className="text-sm text-muted-foreground mb-4 text-pretty">{goal.description}</p>}
+          {goal.description && (
+            <p className="text-sm text-muted-foreground mb-4 text-pretty">{goal.description}</p>
+          )}
 
           {goal.motivation && (
             <div className="bg-discipline/5 border border-discipline/20 rounded-2xl p-4 mb-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-1">Motivação</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-discipline mb-1">
+                Motivação
+              </p>
               <p className="text-sm text-pretty">{goal.motivation}</p>
             </div>
           )}
 
           <div className="mb-6">
             <div className="flex justify-between items-end mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Progresso</span>
-              <span className="font-heading font-black text-xl text-discipline tabular-nums">{p.pct}%</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                Progresso
+              </span>
+              <span className="font-heading font-black text-xl text-discipline tabular-nums">
+                {p.pct}%
+              </span>
             </div>
             <div className="h-3 w-full bg-surface rounded-full p-0.5">
               <div
@@ -117,7 +141,9 @@ function GoalDetail() {
 
           {/* Objetivos */}
           <section className="mb-6">
-            <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Objetivos</h2>
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+              Objetivos
+            </h2>
             <div className="flex gap-2 mb-3">
               <input
                 value={objName}
@@ -137,25 +163,38 @@ function GoalDetail() {
               </button>
             </div>
             {goal.objectives.length === 0 && (
-              <p className="text-xs text-muted-foreground">Nenhum objetivo ainda. Quebre a meta em passos concretos.</p>
+              <p className="text-xs text-muted-foreground">
+                Nenhum objetivo ainda. Quebre a meta em passos concretos.
+              </p>
             )}
             <div className="space-y-2">
               {goal.objectives.map((o) => {
                 const objTasks = tasks.filter((t) => t.objectiveId === o.id);
                 return (
-                  <div key={o.id} className="bg-surface border border-border rounded-xl p-3 flex items-center gap-3">
+                  <div
+                    key={o.id}
+                    className="bg-surface border border-border rounded-xl p-3 flex items-center gap-3"
+                  >
                     <button
                       onClick={() => toggleObjective(goal.id, o.id)}
                       className={`size-6 shrink-0 rounded-md border grid place-items-center ${
-                        o.done ? "bg-discipline border-discipline text-black" : "border-border text-transparent"
+                        o.done
+                          ? "bg-discipline border-discipline text-black"
+                          : "border-border text-transparent"
                       }`}
                       aria-label="Concluir objetivo"
                     >
                       <Check className="size-4" />
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${o.done ? "line-through text-muted-foreground" : ""}`}>{o.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{objTasks.length} tarefas ligadas</p>
+                      <p
+                        className={`text-sm font-medium ${o.done ? "line-through text-muted-foreground" : ""}`}
+                      >
+                        {o.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {objTasks.length} tarefas ligadas
+                      </p>
                     </div>
                     <button
                       onClick={() => removeObjective(goal.id, o.id)}
@@ -173,8 +212,13 @@ function GoalDetail() {
           {/* Tarefas vinculadas */}
           <section className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Tarefas vinculadas</h2>
-              <Link to="/tasks/new" className="text-discipline text-xs font-bold flex items-center gap-1">
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                Tarefas vinculadas
+              </h2>
+              <Link
+                to="/tasks/new"
+                className="text-discipline text-xs font-bold flex items-center gap-1"
+              >
                 <Plus className="size-3" /> Nova
               </Link>
             </div>

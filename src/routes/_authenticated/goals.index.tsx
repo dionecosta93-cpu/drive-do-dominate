@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_authenticated/goals/")({
   head: () => ({
     meta: [
       { title: "Metas de Vida — Disciplina Absoluta" },
-      { name: "description", content: "Defina metas de longo prazo e conecte cada tarefa ao seu propósito." },
+      {
+        name: "description",
+        content: "Defina metas de longo prazo e conecte cada tarefa ao seu propósito.",
+      },
       { property: "og:title", content: "Metas de Vida — Disciplina Absoluta" },
-      { property: "og:description", content: "Defina metas de longo prazo e conecte cada tarefa ao seu propósito." },
+      {
+        property: "og:description",
+        content: "Defina metas de longo prazo e conecte cada tarefa ao seu propósito.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -35,11 +41,17 @@ function GoalsList() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <Link to="/goals/impact" className="bg-surface border border-border rounded-2xl p-4 flex items-center gap-2">
+        <Link
+          to="/goals/impact"
+          className="bg-surface border border-border rounded-2xl p-4 flex items-center gap-2"
+        >
           <BarChart3 className="size-4 text-discipline" />
           <span className="text-[11px] font-bold uppercase tracking-widest">Impacto</span>
         </Link>
-        <Link to="/goals/assistant" className="bg-surface border border-border rounded-2xl p-4 flex items-center gap-2">
+        <Link
+          to="/goals/assistant"
+          className="bg-surface border border-border rounded-2xl p-4 flex items-center gap-2"
+        >
           <Sparkles className="size-4 text-info" />
           <span className="text-[11px] font-bold uppercase tracking-widest">Assistente</span>
         </Link>
@@ -51,7 +63,10 @@ function GoalsList() {
           <p className="text-sm text-muted-foreground mb-4">
             Sem metas, tarefas viram rotina sem propósito. Crie sua primeira meta de vida.
           </p>
-          <Link to="/goals/new" className="inline-flex items-center gap-2 bg-discipline text-black font-bold text-sm px-4 py-2 rounded-lg">
+          <Link
+            to="/goals/new"
+            className="inline-flex items-center gap-2 bg-discipline text-black font-bold text-sm px-4 py-2 rounded-lg"
+          >
             Criar meta
           </Link>
         </div>
@@ -96,7 +111,9 @@ function GoalsList() {
               </div>
               <h2 className="font-heading font-bold text-base leading-tight">{g.name}</h2>
               {g.targetDate && (
-                <p className="text-[11px] text-muted-foreground mt-0.5">Prevista para {g.targetDate}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Prevista para {g.targetDate}
+                </p>
               )}
               <div className="mt-3 flex items-center gap-3">
                 <div className="h-2 flex-1 bg-background rounded-full overflow-hidden">
@@ -105,10 +122,13 @@ function GoalsList() {
                     style={{ width: `${Math.max(p.pct, 2)}%` }}
                   />
                 </div>
-                <span className="text-xs font-heading font-black text-discipline tabular-nums">{p.pct}%</span>
+                <span className="text-xs font-heading font-black text-discipline tabular-nums">
+                  {p.pct}%
+                </span>
               </div>
               <p className="text-[10px] text-muted-foreground mt-2">
-                {p.objectivesDone}/{p.objectivesTotal} objetivos · {p.linkedTasks} tarefas vinculadas · {p.completions} conclusões
+                {p.objectivesDone}/{p.objectivesTotal} objetivos · {p.linkedTasks} tarefas
+                vinculadas · {p.completions} conclusões
               </p>
             </Link>
           );

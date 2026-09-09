@@ -31,8 +31,14 @@ export const UNITS = ["un", "pacote", "kg", "g", "litro", "ml", "caixa", "dúzia
 
 /** Palpite de categoria a partir do nome do produto (usado pela IA e pela lista rápida). */
 const GUESS: Array<[string, RegExp]> = [
-  ["limpeza", /detergente|sabão|amaciante|desinfet|água sanit|esponja|vassoura|alvejante|multiuso/i],
-  ["higiene", /papel higi|sabonete|shampoo|condicionador|pasta de dente|creme dental|desodorante|absorvente|fralda|escova de dente/i],
+  [
+    "limpeza",
+    /detergente|sabão|amaciante|desinfet|água sanit|esponja|vassoura|alvejante|multiuso/i,
+  ],
+  [
+    "higiene",
+    /papel higi|sabonete|shampoo|condicionador|pasta de dente|creme dental|desodorante|absorvente|fralda|escova de dente/i,
+  ],
   ["bebidas", /refrigerante|cerveja|suco|água|vinho|energético|refresco|coca|guaraná/i],
   ["farmacia", /remédio|dipirona|paracetamol|ibuprofeno|vitamina|band-?aid|pomada|antial|xarope/i],
   ["eletronicos", /pilha|cabo|carregador|fone|lâmpada led|mouse|teclado/i],
@@ -85,11 +91,29 @@ export const itemLabel = (i: ShoppingItem) =>
  * Interpreta texto livre em itens ("2 pacotes de arroz, 3 litros de leite, detergente").
  * Usado na lista rápida por voz/texto.
  */
-export function parseItemsText(text: string): Array<{ name: string; quantity: number; unit: string; category: string }> {
+export function parseItemsText(
+  text: string,
+): Array<{ name: string; quantity: number; unit: string; category: string }> {
   const unitWords: Record<string, string> = {
-    pacote: "pacote", pacotes: "pacote", kg: "kg", quilo: "kg", quilos: "kg", grama: "g", gramas: "g",
-    litro: "litro", litros: "litro", ml: "ml", caixa: "caixa", caixas: "caixa", duzia: "dúzia",
-    dúzia: "dúzia", dúzias: "dúzia", fardo: "fardo", fardos: "fardo", unidade: "un", unidades: "un",
+    pacote: "pacote",
+    pacotes: "pacote",
+    kg: "kg",
+    quilo: "kg",
+    quilos: "kg",
+    grama: "g",
+    gramas: "g",
+    litro: "litro",
+    litros: "litro",
+    ml: "ml",
+    caixa: "caixa",
+    caixas: "caixa",
+    duzia: "dúzia",
+    dúzia: "dúzia",
+    dúzias: "dúzia",
+    fardo: "fardo",
+    fardos: "fardo",
+    unidade: "un",
+    unidades: "un",
   };
   return text
     .split(/,| e | \+ |;|\n/gi)

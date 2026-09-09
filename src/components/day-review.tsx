@@ -44,17 +44,24 @@ export function DayReview() {
   };
 
   return (
-    <section className="mb-6 rounded-2xl border border-border bg-surface p-4 animate-rise" style={{ animationDelay: "100ms" }}>
+    <section
+      className="mb-6 rounded-2xl border border-border bg-surface p-4 animate-rise"
+      style={{ animationDelay: "100ms" }}
+    >
       <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-discipline mb-1">
         <MoonStar className="size-4" /> Revisão do dia
       </h2>
-      <p className="text-xs text-muted-foreground mb-3">Você realizou alguma dessas tarefas hoje?</p>
+      <p className="text-xs text-muted-foreground mb-3">
+        Você realizou alguma dessas tarefas hoje?
+      </p>
 
       <div className="space-y-3">
         {pending.map((t) => (
           <div key={t.id} className="rounded-xl border border-border bg-background p-3">
             <p className="text-sm font-heading font-bold truncate">{t.name}</p>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">planejada {t.time}</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              planejada {t.time}
+            </p>
             <div className="grid grid-cols-3 gap-2 mt-2">
               <button
                 onClick={() => complete(t.id, t.time)}

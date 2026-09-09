@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { guardApiRequest } from "@/lib/api-guard";
 
 const ACTION_TYPES = [
   "criar_tarefa",
@@ -118,13 +119,14 @@ REGRA CRÍTICA DE DIAS DA SEMANA (nunca erre isso):
 Só use "id" que exista no contexto. Antes de excluir algo, confirme no "reply" o que será removido.
 Responda em português, curto e prático. Formate valores como R$ 0,00.`;
 
-
 type Msg = { role: "user" | "assistant"; content: string };
 
 export const Route = createFileRoute("/api/assistant")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const blocked = guardApiRequest(request);
+        if (blocked) return blocked;
         const key = process.env["LOVABLE_API_KEY"];
         if (!key) return Response.json({ error: "missing_key" }, { status: 500 });
 
@@ -169,7 +171,9 @@ export const Route = createFileRoute("/api/assistant")({
             stream: true,
             store: false,
             reasoning: { effort: "low" },
-            text: { format: { type: "json_schema", name: "resposta", strict: true, schema: SCHEMA } },
+            text: {
+              format: { type: "json_schema", name: "resposta", strict: true, schema: SCHEMA },
+            },
           }),
         });
 

@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_authenticated/reading/stats")({
   head: () => ({
     meta: [
       { title: "Estatísticas de leitura — Disciplina Absoluta" },
-      { name: "description", content: "Páginas lidas, horas de leitura, streak e categorias mais lidas." },
+      {
+        name: "description",
+        content: "Páginas lidas, horas de leitura, streak e categorias mais lidas.",
+      },
       { property: "og:title", content: "Estatísticas de leitura — Disciplina Absoluta" },
-      { property: "og:description", content: "Páginas lidas, horas de leitura, streak e categorias mais lidas." },
+      {
+        property: "og:description",
+        content: "Páginas lidas, horas de leitura, streak e categorias mais lidas.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -19,7 +25,9 @@ export const Route = createFileRoute("/_authenticated/reading/stats")({
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="bg-surface border border-border rounded-2xl p-4">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
       <p className="font-heading font-black text-2xl text-discipline tabular-nums mt-1">{value}</p>
     </div>
   );
@@ -62,17 +70,27 @@ function ReadingStats() {
       </div>
 
       <div className="bg-surface border border-border rounded-2xl p-4 mb-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Sequência lendo</p>
-        <p className="font-heading font-black text-3xl text-discipline tabular-nums">{st.streak} dias</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Sequência lendo
+        </p>
+        <p className="font-heading font-black text-3xl text-discipline tabular-nums">
+          {st.streak} dias
+        </p>
       </div>
 
-
       <section className="mb-4">
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Categorias mais lidas</h2>
-        {st.topCategories.length === 0 && <p className="text-xs text-muted-foreground">Sem dados ainda.</p>}
+        <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+          Categorias mais lidas
+        </h2>
+        {st.topCategories.length === 0 && (
+          <p className="text-xs text-muted-foreground">Sem dados ainda.</p>
+        )}
         <div className="space-y-2">
           {st.topCategories.slice(0, 5).map(([c, n]) => (
-            <div key={c} className="bg-surface border border-border rounded-xl p-3 flex justify-between text-sm">
+            <div
+              key={c}
+              className="bg-surface border border-border rounded-xl p-3 flex justify-between text-sm"
+            >
               <span>{c}</span>
               <span className="text-muted-foreground tabular-nums">{n}</span>
             </div>
@@ -81,7 +99,9 @@ function ReadingStats() {
       </section>
 
       <section>
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Autor mais lido</h2>
+        <h2 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+          Autor mais lido
+        </h2>
         <p className="text-sm">{st.topAuthors[0]?.[0] ?? "Sem dados ainda."}</p>
       </section>
     </div>

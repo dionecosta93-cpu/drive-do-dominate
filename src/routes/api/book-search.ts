@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { guardApiRequest } from "@/lib/api-guard";
 
 const SCHEMA = {
   type: "object",
@@ -82,6 +83,8 @@ export const Route = createFileRoute("/api/book-search")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const blocked = guardApiRequest(request);
+        if (blocked) return blocked;
         const key = process.env["LOVABLE_API_KEY"];
         if (!key) return Response.json({ error: "missing_key" }, { status: 500 });
 
@@ -134,8 +137,13 @@ export const Route = createFileRoute("/api/book-search")({
             const raw = line.slice(5).trim();
             if (!raw || raw === "[DONE]") continue;
             try {
-              const evt = JSON.parse(raw) as { type?: string; delta?: string; response?: { output_text?: string } };
-              if (evt.type === "response.output_text.delta" && typeof evt.delta === "string") text += evt.delta;
+              const evt = JSON.parse(raw) as {
+                type?: string;
+                delta?: string;
+                response?: { output_text?: string };
+              };
+              if (evt.type === "response.output_text.delta" && typeof evt.delta === "string")
+                text += evt.delta;
               else if (evt.type === "response.completed" && evt.response?.output_text && !text)
                 text = evt.response.output_text;
             } catch {

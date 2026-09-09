@@ -11,9 +11,16 @@ export const Route = createFileRoute("/_authenticated/shopping/")({
   head: () => ({
     meta: [
       { title: "Lista de Compras — Disciplina Absoluta" },
-      { name: "description", content: "Crie listas de compras, marque itens comprados e registre os gastos direto no financeiro." },
+      {
+        name: "description",
+        content:
+          "Crie listas de compras, marque itens comprados e registre os gastos direto no financeiro.",
+      },
       { property: "og:title", content: "Lista de Compras — Disciplina Absoluta" },
-      { property: "og:description", content: "Listas inteligentes de compras integradas ao financeiro e ao assistente." },
+      {
+        property: "og:description",
+        content: "Listas inteligentes de compras integradas ao financeiro e ao assistente.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -58,7 +65,11 @@ function ShoppingHome() {
   }, [transactions]);
 
   const create = () => {
-    const list = addShoppingList({ name: name.trim() || "Compras", financeCategory: category, date });
+    const list = addShoppingList({
+      name: name.trim() || "Compras",
+      financeCategory: category,
+      date,
+    });
     setName("");
     setOpen(false);
     toast.success("Lista criada.");
@@ -71,7 +82,9 @@ function ShoppingHome() {
         <ShoppingCart className="size-6 text-discipline" />
         <div>
           <h1 className="text-2xl font-black uppercase tracking-tight">Lista de Compras</h1>
-          <p className="text-xs text-muted-foreground">Compre, marque e o gasto vai direto pro financeiro.</p>
+          <p className="text-xs text-muted-foreground">
+            Compre, marque e o gasto vai direto pro financeiro.
+          </p>
         </div>
       </header>
 
@@ -118,10 +131,16 @@ function ShoppingHome() {
                 />
               </div>
               <div className="flex gap-2">
-                <button onClick={create} className="flex-1 rounded-md bg-discipline py-2 text-sm font-bold text-background">
+                <button
+                  onClick={create}
+                  className="flex-1 rounded-md bg-discipline py-2 text-sm font-bold text-background"
+                >
                   Criar lista
                 </button>
-                <button onClick={() => setOpen(false)} className="rounded-md border border-input px-3 py-2 text-sm">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="rounded-md border border-input px-3 py-2 text-sm"
+                >
                   Cancelar
                 </button>
               </div>
@@ -138,7 +157,8 @@ function ShoppingHome() {
           <div className="mt-4 space-y-3">
             {active.length === 0 && (
               <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                Nenhuma lista ativa. Crie uma ou peça ao assistente: “cria uma lista com arroz, feijão e leite”.
+                Nenhuma lista ativa. Crie uma ou peça ao assistente: “cria uma lista com arroz,
+                feijão e leite”.
               </p>
             )}
             {active.map((l) => {
@@ -153,10 +173,14 @@ function ShoppingHome() {
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Itens {t.done}/{t.total} · Estimado {brl(t.estimated)} · Comprado {brl(t.paid)}
+                      Itens {t.done}/{t.total} · Estimado {brl(t.estimated)} · Comprado{" "}
+                      {brl(t.paid)}
                     </div>
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full bg-discipline transition-all" style={{ width: `${t.pct}%` }} />
+                      <div
+                        className="h-full bg-discipline transition-all"
+                        style={{ width: `${t.pct}%` }}
+                      />
                     </div>
                   </Link>
                   <div className="mt-2 flex gap-2">
@@ -195,7 +219,9 @@ function ShoppingHome() {
           )}
           {history.map((l) => {
             const t = listTotals(l);
-            const cats = [...new Set(l.items.map((i) => shoppingCategoryLabel[i.category] ?? i.category))];
+            const cats = [
+              ...new Set(l.items.map((i) => shoppingCategoryLabel[i.category] ?? i.category)),
+            ];
             return (
               <Link
                 key={l.id}
@@ -236,7 +262,10 @@ function ShoppingHome() {
                 {row.months.map(([m, v]) => (
                   <div key={m} className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
-                      {new Date(`${m}-01T12:00:00`).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+                      {new Date(`${m}-01T12:00:00`).toLocaleDateString("pt-BR", {
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </span>
                     <span className="font-mono">{brl(v)}</span>
                   </div>
@@ -244,7 +273,10 @@ function ShoppingHome() {
               </div>
             </div>
           ))}
-          <Link to="/finance" className="block rounded-xl border border-border p-3 text-center text-xs font-bold uppercase">
+          <Link
+            to="/finance"
+            className="block rounded-xl border border-border p-3 text-center text-xs font-bold uppercase"
+          >
             Ver financeiro completo
           </Link>
         </div>

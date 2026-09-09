@@ -12,7 +12,13 @@ const MIME_CANDIDATES = [
 ];
 
 const extFor = (mime: string) =>
-  mime.includes("webm") ? "webm" : mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : "wav";
+  mime.includes("webm")
+    ? "webm"
+    : mime.includes("mp4")
+      ? "m4a"
+      : mime.includes("ogg")
+        ? "ogg"
+        : "wav";
 
 /**
  * Records microphone audio. Uses MediaRecorder when available (Android WebView,
@@ -53,7 +59,9 @@ export class WavRecorder {
       return;
     }
 
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AC =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     this.ctx = new AC();
     if (this.ctx.state === "suspended") await this.ctx.resume();
     this.source = this.ctx.createMediaStreamSource(this.stream);

@@ -4,7 +4,16 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/motivation")({
   component: Motivation,
-  head: () => ({ meta: [{ title: "Motivação — Kairos" }, { name: "description", content: "Biblioteca de frases separadas por Disciplina, Negócios, Treino, Estudo, Vida e Persistência." }] }),
+  head: () => ({
+    meta: [
+      { title: "Motivação — Disciplina Absoluta" },
+      {
+        name: "description",
+        content:
+          "Biblioteca de frases separadas por Disciplina, Negócios, Treino, Estudo, Vida e Persistência.",
+      },
+    ],
+  }),
 });
 
 function Motivation() {

@@ -78,7 +78,9 @@ export function GoalForm({
               key={c}
               onClick={() => setCategory(c)}
               className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
-                category === c ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
+                category === c
+                  ? "bg-discipline/20 border-discipline text-discipline"
+                  : "bg-surface border-border text-muted-foreground"
               }`}
             >
               {goalCategoryLabel[c]}
@@ -136,7 +138,9 @@ export function GoalForm({
               key={s}
               onClick={() => setStatus(s)}
               className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
-                status === s ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
+                status === s
+                  ? "bg-discipline/20 border-discipline text-discipline"
+                  : "bg-surface border-border text-muted-foreground"
               }`}
             >
               {goalStatusLabel[s]}
@@ -149,7 +153,9 @@ export function GoalForm({
         <button
           onClick={() => setUseManual((v) => !v)}
           className={`w-full py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
-            useManual ? "bg-discipline/20 border-discipline text-discipline" : "bg-surface border-border text-muted-foreground"
+            useManual
+              ? "bg-discipline/20 border-discipline text-discipline"
+              : "bg-surface border-border text-muted-foreground"
           }`}
         >
           {useManual ? `Manual: ${manualProgress}%` : "Automático (objetivos + tarefas concluídas)"}
@@ -204,7 +210,9 @@ export function GoalForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-2">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-2">
+        {label}
+      </span>
       {children}
     </label>
   );

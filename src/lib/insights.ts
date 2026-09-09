@@ -21,7 +21,9 @@ export function generateInsight(sessions: CompletedSession[], tasks: Task[]): st
 
   // procrastinated tasks (never completed)
   const completedIds = new Set(sessions.map((s) => s.taskId));
-  const stale = tasks.filter((t) => !completedIds.has(t.id) && Date.now() - t.createdAt > 3 * 86400000);
+  const stale = tasks.filter(
+    (t) => !completedIds.has(t.id) && Date.now() - t.createdAt > 3 * 86400000,
+  );
 
   if (stale.length > 0) {
     return `Você tem ${stale.length} tarefa${stale.length > 1 ? "s" : ""} pendente${stale.length > 1 ? "s" : ""} há mais de 3 dias. Comece pela mais difícil hoje.`;

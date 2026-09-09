@@ -1,6 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, Pencil, Trash2, Play, Square, Star, Clock, Archive, RotateCcw, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  Pencil,
+  Trash2,
+  Play,
+  Square,
+  Star,
+  Clock,
+  Archive,
+  RotateCcw,
+  Plus,
+} from "lucide-react";
 import { toast } from "sonner";
 import { BookForm } from "@/components/book-form";
 import { bookStats, bookStatusLabel, dateKey, useStore, type BookStatus } from "@/lib/store";
@@ -10,9 +21,15 @@ export const Route = createFileRoute("/_authenticated/reading/$id")({
   head: () => ({
     meta: [
       { title: "Livro — Disciplina Absoluta" },
-      { name: "description", content: "Progresso de leitura, sessões, aprendizados e citações do livro." },
+      {
+        name: "description",
+        content: "Progresso de leitura, sessões, aprendizados e citações do livro.",
+      },
       { property: "og:title", content: "Livro — Disciplina Absoluta" },
-      { property: "og:description", content: "Progresso de leitura, sessões, aprendizados e citações do livro." },
+      {
+        property: "og:description",
+        content: "Progresso de leitura, sessões, aprendizados e citações do livro.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -57,7 +74,10 @@ function BookDetail() {
 
   useEffect(() => {
     if (startedAt === null) return;
-    timer.current = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000);
+    timer.current = setInterval(
+      () => setElapsed(Math.floor((Date.now() - startedAt) / 1000)),
+      1000,
+    );
     return () => {
       if (timer.current) clearInterval(timer.current);
     };
@@ -83,9 +103,11 @@ function BookDetail() {
     toast.success(`Sessão salva: ${mins} min de leitura.`);
   };
 
-  const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const fmt = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  const field = "w-full bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-discipline";
+  const field =
+    "w-full bg-surface border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-discipline";
   const sectionTitle = "text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-2";
 
   if (editing) {
@@ -114,29 +136,54 @@ function BookDetail() {
 
       <div className="flex gap-4 mb-5">
         <div className="w-24 h-36 shrink-0 rounded-xl overflow-hidden border border-border bg-surface">
-          {book.cover && <img src={book.cover} alt={`Capa de ${book.title}`} className="w-full h-full object-cover" />}
+          {book.cover && (
+            <img
+              src={book.cover}
+              alt={`Capa de ${book.title}`}
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-heading font-extrabold uppercase leading-tight">{book.title}</h1>
+          <h1 className="text-xl font-heading font-extrabold uppercase leading-tight">
+            {book.title}
+          </h1>
           {book.subtitle && <p className="text-xs text-muted-foreground italic">{book.subtitle}</p>}
           <p className="text-sm text-muted-foreground">{book.author}</p>
           <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
-            {[book.category, book.genre, book.publisher, book.publishedYear].filter(Boolean).join(" · ")}
+            {[book.category, book.genre, book.publisher, book.publishedYear]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-info/20 text-info">
               {bookStatusLabel[book.status]}
             </span>
             {book.archived && (
-              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Arquivado</span>
+              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                Arquivado
+              </span>
             )}
-            {book.rating ? <span className="text-xs text-warning">{"★".repeat(book.rating)}</span> : null}
+            {book.rating ? (
+              <span className="text-xs text-warning">{"★".repeat(book.rating)}</span>
+            ) : null}
           </div>
           <div className="flex gap-2 mt-3">
-            <button onClick={() => toggleFav(book.id)} className="size-9 grid place-items-center rounded-lg border border-border" aria-label="Favoritar">
-              <Star className={`size-4 ${book.favorite ? "text-warning" : "text-muted-foreground"}`} fill={book.favorite ? "currentColor" : "none"} />
+            <button
+              onClick={() => toggleFav(book.id)}
+              className="size-9 grid place-items-center rounded-lg border border-border"
+              aria-label="Favoritar"
+            >
+              <Star
+                className={`size-4 ${book.favorite ? "text-warning" : "text-muted-foreground"}`}
+                fill={book.favorite ? "currentColor" : "none"}
+              />
             </button>
-            <button onClick={() => setEditing(true)} className="size-9 grid place-items-center rounded-lg border border-border text-muted-foreground" aria-label="Editar livro">
+            <button
+              onClick={() => setEditing(true)}
+              className="size-9 grid place-items-center rounded-lg border border-border text-muted-foreground"
+              aria-label="Editar livro"
+            >
               <Pencil className="size-4" />
             </button>
             <button
@@ -180,7 +227,10 @@ function BookDetail() {
       {book.tags.length > 0 && (
         <div className="flex gap-1.5 flex-wrap mb-5">
           {book.tags.map((t) => (
-            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-surface border border-border text-muted-foreground">
+            <span
+              key={t}
+              className="text-[10px] px-2 py-0.5 rounded-full bg-surface border border-border text-muted-foreground"
+            >
               #{t}
             </span>
           ))}
@@ -199,7 +249,9 @@ function BookDetail() {
                 toast.success(`Status: ${bookStatusLabel[s]}`);
               }}
               className={`py-2 rounded-xl text-[9px] font-bold uppercase tracking-wider border transition ${
-                book.status === s ? "bg-discipline text-black border-discipline" : "bg-surface border-border text-muted-foreground"
+                book.status === s
+                  ? "bg-discipline text-black border-discipline"
+                  : "bg-surface border-border text-muted-foreground"
               }`}
             >
               {bookStatusLabel[s]}
@@ -212,10 +264,15 @@ function BookDetail() {
       <section className="mb-6">
         <div className="flex justify-between items-end mb-2">
           <span className={sectionTitle}>Progresso</span>
-          <span className="font-heading font-black text-xl text-discipline tabular-nums">{st.pct}%</span>
+          <span className="font-heading font-black text-xl text-discipline tabular-nums">
+            {st.pct}%
+          </span>
         </div>
         <div className="h-3 w-full bg-surface rounded-full p-0.5">
-          <div className="h-full bg-gradient-to-r from-struggle via-warning to-discipline rounded-full transition-all duration-700" style={{ width: `${Math.max(st.pct, 3)}%` }} />
+          <div
+            className="h-full bg-gradient-to-r from-struggle via-warning to-discipline rounded-full transition-all duration-700"
+            style={{ width: `${Math.max(st.pct, 3)}%` }}
+          />
         </div>
         <p className="text-[10px] text-muted-foreground mt-2">
           Página {book.currentPage} de {book.totalPages || "?"} · {st.remainingPages} restantes
@@ -223,12 +280,38 @@ function BookDetail() {
         </p>
 
         <div className="mt-3 bg-surface border border-border rounded-2xl p-4 space-y-3">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-discipline">Atualizar progresso</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-discipline">
+            Atualizar progresso
+          </p>
           <div className="grid grid-cols-2 gap-2">
-            <input value={page} onChange={(e) => setPage(e.target.value)} inputMode="numeric" placeholder="Página atual" className={field} />
-            <input value={chapter} onChange={(e) => setChapter(e.target.value)} inputMode="numeric" placeholder="Capítulo" className={field} />
-            <input value={pagesToday} onChange={(e) => setPagesToday(e.target.value)} inputMode="numeric" placeholder="Páginas lidas hoje" className={field} />
-            <input value={minutes} onChange={(e) => setMinutes(e.target.value)} inputMode="numeric" placeholder="Minutos lidos" className={field} />
+            <input
+              value={page}
+              onChange={(e) => setPage(e.target.value)}
+              inputMode="numeric"
+              placeholder="Página atual"
+              className={field}
+            />
+            <input
+              value={chapter}
+              onChange={(e) => setChapter(e.target.value)}
+              inputMode="numeric"
+              placeholder="Capítulo"
+              className={field}
+            />
+            <input
+              value={pagesToday}
+              onChange={(e) => setPagesToday(e.target.value)}
+              inputMode="numeric"
+              placeholder="Páginas lidas hoje"
+              className={field}
+            />
+            <input
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              inputMode="numeric"
+              placeholder="Minutos lidos"
+              className={field}
+            />
           </div>
           <button
             onClick={() => {
@@ -268,7 +351,9 @@ function BookDetail() {
             ] as const
           ).map(([l, v]) => (
             <div key={l} className="bg-surface border border-border rounded-xl p-3">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{l}</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                {l}
+              </p>
               <p className="font-heading font-black text-lg text-discipline tabular-nums">{v}</p>
             </div>
           ))}
@@ -283,11 +368,17 @@ function BookDetail() {
             <p className="font-heading font-black text-2xl tabular-nums">{fmt(elapsed)}</p>
           </div>
           {startedAt === null ? (
-            <button onClick={() => setStartedAt(Date.now())} className="flex items-center gap-2 bg-discipline text-black font-bold text-xs uppercase px-4 py-3 rounded-xl">
+            <button
+              onClick={() => setStartedAt(Date.now())}
+              className="flex items-center gap-2 bg-discipline text-black font-bold text-xs uppercase px-4 py-3 rounded-xl"
+            >
               <Play className="size-4" /> Iniciar leitura
             </button>
           ) : (
-            <button onClick={stopSession} className="flex items-center gap-2 bg-struggle text-white font-bold text-xs uppercase px-4 py-3 rounded-xl">
+            <button
+              onClick={stopSession}
+              className="flex items-center gap-2 bg-struggle text-white font-bold text-xs uppercase px-4 py-3 rounded-xl"
+            >
               <Square className="size-4" /> Encerrar
             </button>
           )}
@@ -322,24 +413,32 @@ function BookDetail() {
             <Plus className="size-4" />
           </button>
         </div>
-        {notes.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma anotação ainda.</p>}
+        {notes.length === 0 && (
+          <p className="text-xs text-muted-foreground">Nenhuma anotação ainda.</p>
+        )}
         <div className="space-y-2">
-          {[...notes].sort((a, b) => b.at - a.at).map((n) => (
-            <div key={n.id} className="bg-surface border border-border rounded-xl p-3">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[10px] font-mono text-muted-foreground">{n.date}</span>
-                <button onClick={() => removeNote(n.id)} className="text-muted-foreground hover:text-struggle" aria-label="Excluir anotação">
-                  <Trash2 className="size-3.5" />
-                </button>
+          {[...notes]
+            .sort((a, b) => b.at - a.at)
+            .map((n) => (
+              <div key={n.id} className="bg-surface border border-border rounded-xl p-3">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-[10px] font-mono text-muted-foreground">{n.date}</span>
+                  <button
+                    onClick={() => removeNote(n.id)}
+                    className="text-muted-foreground hover:text-struggle"
+                    aria-label="Excluir anotação"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+                <textarea
+                  rows={2}
+                  defaultValue={n.text}
+                  onBlur={(e) => updateNote(n.id, e.target.value)}
+                  className="w-full bg-transparent text-sm focus:outline-none resize-none"
+                />
               </div>
-              <textarea
-                rows={2}
-                defaultValue={n.text}
-                onBlur={(e) => updateNote(n.id, e.target.value)}
-                className="w-full bg-transparent text-sm focus:outline-none resize-none"
-              />
-            </div>
-          ))}
+            ))}
         </div>
       </section>
 
@@ -357,7 +456,9 @@ function BookDetail() {
           ] as const
         ).map(([key, title]) => (
           <div key={key}>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">{title}</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+              {title}
+            </label>
             <textarea
               rows={3}
               defaultValue={book[key] ?? ""}
@@ -385,7 +486,9 @@ function BookDetail() {
                 <input
                   type="date"
                   defaultValue={l.date}
-                  onBlur={(e) => e.target.value && updateLog(book.id, l.id, { date: e.target.value })}
+                  onBlur={(e) =>
+                    e.target.value && updateLog(book.id, l.id, { date: e.target.value })
+                  }
                   className="bg-background border border-border rounded-lg px-2 py-1.5 text-[11px]"
                 />
                 <input

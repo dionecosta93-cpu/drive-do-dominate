@@ -9,9 +9,15 @@ export const Route = createFileRoute("/_authenticated/goals/new")({
   head: () => ({
     meta: [
       { title: "Nova meta de vida — Disciplina Absoluta" },
-      { name: "description", content: "Crie uma meta de longo prazo com prazo, motivação e progresso." },
+      {
+        name: "description",
+        content: "Crie uma meta de longo prazo com prazo, motivação e progresso.",
+      },
       { property: "og:title", content: "Nova meta de vida — Disciplina Absoluta" },
-      { property: "og:description", content: "Crie uma meta de longo prazo com prazo, motivação e progresso." },
+      {
+        property: "og:description",
+        content: "Crie uma meta de longo prazo com prazo, motivação e progresso.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -24,7 +30,10 @@ function NewGoal() {
 
   return (
     <div className="px-5 pt-6 pb-24 animate-rise">
-      <button onClick={() => history.back()} className="flex items-center gap-1 text-muted-foreground text-xs mb-4">
+      <button
+        onClick={() => history.back()}
+        className="flex items-center gap-1 text-muted-foreground text-xs mb-4"
+      >
         <ChevronLeft className="size-4" /> Voltar
       </button>
       <h1 className="text-2xl font-heading font-extrabold uppercase mb-6">Nova Meta</h1>

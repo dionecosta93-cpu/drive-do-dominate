@@ -29,9 +29,12 @@ const parse = (a: AssistantAction): Record<string, unknown> => {
   }
 };
 
-const str = (o: Record<string, unknown>, k: string) => (typeof o[k] === "string" ? (o[k] as string) : undefined);
-const num = (o: Record<string, unknown>, k: string) => (typeof o[k] === "number" ? (o[k] as number) : undefined);
-const bool = (o: Record<string, unknown>, k: string) => (typeof o[k] === "boolean" ? (o[k] as boolean) : undefined);
+const str = (o: Record<string, unknown>, k: string) =>
+  typeof o[k] === "string" ? (o[k] as string) : undefined;
+const num = (o: Record<string, unknown>, k: string) =>
+  typeof o[k] === "number" ? (o[k] as number) : undefined;
+const bool = (o: Record<string, unknown>, k: string) =>
+  typeof o[k] === "boolean" ? (o[k] as boolean) : undefined;
 
 const WEEKDAY_NAMES = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 
@@ -58,7 +61,9 @@ function findBook(p: Record<string, unknown>): Book | undefined {
   if (!title) return undefined;
   return (
     s.books.find((b) => b.title.toLowerCase() === title) ??
-    s.books.find((b) => b.title.toLowerCase().includes(title) || title.includes(b.title.toLowerCase()))
+    s.books.find(
+      (b) => b.title.toLowerCase().includes(title) || title.includes(b.title.toLowerCase()),
+    )
   );
 }
 
@@ -77,7 +82,9 @@ function findList(p: Record<string, unknown>): ShoppingList | undefined {
       s.shoppingLists.find((l) => l.name.toLowerCase().includes(name));
     if (byName) return byName;
   }
-  const active = s.activeShoppingListId ? s.shoppingLists.find((l) => l.id === s.activeShoppingListId) : undefined;
+  const active = s.activeShoppingListId
+    ? s.shoppingLists.find((l) => l.id === s.activeShoppingListId)
+    : undefined;
   return active ?? s.shoppingLists.find((l) => !l.done) ?? s.shoppingLists[0];
 }
 
@@ -92,7 +99,9 @@ function findItem(list: ShoppingList, p: Record<string, unknown>): ShoppingItem 
   if (!name) return undefined;
   return (
     list.items.find((i) => i.name.toLowerCase() === name) ??
-    list.items.find((i) => i.name.toLowerCase().includes(name) || name.includes(i.name.toLowerCase()))
+    list.items.find(
+      (i) => i.name.toLowerCase().includes(name) || name.includes(i.name.toLowerCase()),
+    )
   );
 }
 
@@ -107,7 +116,9 @@ export function applyAssistantAction(action: AssistantAction): string {
       if (!name) return "Ação inválida: tarefa sem nome.";
       const est = num(p, "estimatedMinutes") ?? 30;
       const rawDays = Array.isArray(p["weekdays"])
-        ? (p["weekdays"] as unknown[]).filter((d): d is number => typeof d === "number" && d >= 0 && d <= 6)
+        ? (p["weekdays"] as unknown[]).filter(
+            (d): d is number => typeof d === "number" && d >= 0 && d <= 6,
+          )
         : undefined;
       const weekdays = rawDays && rawDays.length ? Array.from(new Set(rawDays)).sort() : undefined;
 
@@ -159,7 +170,9 @@ export function applyAssistantAction(action: AssistantAction): string {
     case "lembrete_tarefa": {
       const id = str(p, "id");
       const name = str(p, "name");
-      const task = s.tasks.find((t) => t.id === id) ?? s.tasks.find((t) => t.name.toLowerCase() === (name ?? "").toLowerCase());
+      const task =
+        s.tasks.find((t) => t.id === id) ??
+        s.tasks.find((t) => t.name.toLowerCase() === (name ?? "").toLowerCase());
       if (!task) return "Tarefa não encontrada.";
       const raw = p["minutesBefore"];
       const minutes = typeof raw === "number" ? raw : null;
@@ -177,7 +190,9 @@ export function applyAssistantAction(action: AssistantAction): string {
     case "duplicar_tarefa": {
       const id = str(p, "id");
       if (!id || !s.tasks.some((t) => t.id === id)) return "Tarefa não encontrada.";
-      const dates = Array.isArray(p["dates"]) ? (p["dates"] as string[]).filter((d) => typeof d === "string") : [];
+      const dates = Array.isArray(p["dates"])
+        ? (p["dates"] as string[]).filter((d) => typeof d === "string")
+        : [];
       if (dates.length) {
         s.duplicateTaskToDates(id, dates);
         return `Tarefa duplicada em ${dates.length} data(s).`;
@@ -228,7 +243,7 @@ export function applyAssistantAction(action: AssistantAction): string {
       const extra = [str(p, "paymentMethod"), str(p, "notes")].filter(Boolean).join(" · ");
       const desc = [str(p, "description"), extra].filter(Boolean).join(" — ");
       const tx = s.addTransaction({
-        kind: ((str(p, "kind") as TransactionKind) ?? "despesa"),
+        kind: (str(p, "kind") as TransactionKind) ?? "despesa",
         amount,
         category: str(p, "category") ?? "outros",
         description: desc || undefined,
@@ -456,7 +471,15 @@ export function applyAssistantAction(action: AssistantAction): string {
       if (!list || !item) return "Item não encontrado.";
       const patch = { ...((p["patch"] ?? p) as Record<string, unknown>) };
       const clean: Record<string, unknown> = {};
-      for (const k of ["name", "quantity", "unit", "estimatedPrice", "paidPrice", "category", "notes"]) {
+      for (const k of [
+        "name",
+        "quantity",
+        "unit",
+        "estimatedPrice",
+        "paidPrice",
+        "category",
+        "notes",
+      ]) {
         if (patch[k] !== undefined) clean[k] = patch[k];
       }
       s.updateShoppingItem(list.id, item.id, clean as never);
@@ -528,7 +551,8 @@ export function buildAssistantContext(): string {
     if (t.kind === "receita") agg.receitas += t.amount;
     else agg.despesas += t.amount;
     byMonth.set(m, agg);
-    if (t.kind === "despesa") byCategory.set(t.category, (byCategory.get(t.category) ?? 0) + t.amount);
+    if (t.kind === "despesa")
+      byCategory.set(t.category, (byCategory.get(t.category) ?? 0) + t.amount);
   }
   const months = [...byMonth.entries()]
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))
@@ -565,8 +589,16 @@ export function buildAssistantContext(): string {
       arquivada: !!t.archived,
       concluida_em: t.lastCompletedDate ?? null,
     })),
-    concluidas_recentes: s.sessions.slice(-30).map((x) => ({ tarefa: x.taskName, data: x.scheduledDate ?? null })),
-    habitos: s.challenges.map((c) => ({ id: c.id, nome: c.name, tipo: c.kind, feito: !!c.done, prazo: c.deadline ?? null })),
+    concluidas_recentes: s.sessions
+      .slice(-30)
+      .map((x) => ({ tarefa: x.taskName, data: x.scheduledDate ?? null })),
+    habitos: s.challenges.map((c) => ({
+      id: c.id,
+      nome: c.name,
+      tipo: c.kind,
+      feito: !!c.done,
+      prazo: c.deadline ?? null,
+    })),
     metas: s.lifeGoals.map((g) => ({
       id: g.id,
       nome: g.name,
@@ -589,7 +621,9 @@ export function buildAssistantContext(): string {
         fim: b.endDate ?? null,
         nota: b.rating ?? null,
       })),
-      sessoes_recentes: s.readingSessions.slice(-20).map((x) => ({ livroId: x.bookId, data: x.date, minutos: x.minutes })),
+      sessoes_recentes: s.readingSessions
+        .slice(-20)
+        .map((x) => ({ livroId: x.bookId, data: x.date, minutos: x.minutes })),
     },
     financas: {
       mes_atual: {
