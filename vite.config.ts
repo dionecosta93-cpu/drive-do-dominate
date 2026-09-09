@@ -1,20 +1,61 @@
-// @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - TanStack devtools (dev-only, first), tanstackStart, viteReact, tailwindcss, tsConfigPaths,
-//     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
-//     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig, loadEnv } from "vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import tsConfigPaths from "vite-tsconfig-paths";
+import { nitro } from "nitro/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig({
-  tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
-  },
-  vite: {
+// Config standalone (independente da Lovable). Preset do Nitro: node-server —
+// o build gera um servidor Node em .output/server/index.mjs, publicável em
+// qualquer host Node (Render, Railway, Fly, VPS...). Ajuste `NITRO_PRESET`
+// se for publicar em outro alvo (ex.: `cloudflare-module`, `vercel`).
+
+export default defineConfig(({ mode }) => {
+  // Injeta VITE_* também em contextos SSR/edge (não só no cliente).
+  const env = loadEnv(mode, process.cwd(), "VITE_");
+  const define: Record<string, string> = {};
+  for (const [k, v] of Object.entries(env)) define[`import.meta.env.${k}`] = JSON.stringify(v);
+
+  return {
+    define,
+    server: { host: "::", port: 8080 },
+    preview: { host: "::", port: 8080 },
+    css: { transformer: "lightningcss" },
+    resolve: {
+      alias: { "@": `${process.cwd()}/src` },
+      dedupe: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "@tanstack/react-query",
+        "@tanstack/query-core",
+      ],
+    },
+    optimizeDeps: {
+      include: [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+      ],
+    },
     plugins: [
+      tsConfigPaths({ projects: ["./tsconfig.json"] }),
+      tailwindcss(),
+      tanstackStart({
+        // Redireciona a entrada de servidor do TanStack Start para src/server.ts
+        // (nosso wrapper de erro SSR). O nitro/vite builda a partir disso.
+        server: { entry: "server" },
+        importProtection: {
+          behavior: "error",
+          client: { files: ["**/server/**"], specifiers: ["server-only"] },
+        },
+      }),
+      nitro({ preset: process.env.NITRO_PRESET || "node-server" }),
+      viteReact(),
       VitePWA({
         // O registro é feito apenas pelo wrapper guardado (src/lib/pwa.ts).
         injectRegister: null,
@@ -22,7 +63,7 @@ export default defineConfig({
         devOptions: { enabled: false },
         filename: "sw.js",
         outDir: "dist/client",
-        manifest: false, // manifest estático em public/manifest.webmanifest
+        manifest: false, // manifesto estático em public/manifest.webmanifest
         workbox: {
           globDirectory: "dist/client",
           globPatterns: ["**/*.{js,css,woff2,png,svg,ico,webmanifest}"],
@@ -55,5 +96,5 @@ export default defineConfig({
         },
       }),
     ],
-  },
+  };
 });

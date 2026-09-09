@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-ro
 import { useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { reportLovableError } from "@/lib/lovable-error-reporting";
+import { reportError } from "@/lib/error-reporting";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -35,7 +35,7 @@ function AuthedRouteError({ error, reset }: { error: Error; reset: () => void })
   const router = useRouter();
   useEffect(() => {
     console.error(error);
-    reportLovableError(error, { boundary: "authenticated_route_error_component" });
+    reportError(error, { boundary: "authenticated_route_error_component" });
   }, [error]);
 
   return (

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
+import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
 export const Route = createFileRoute("/api/transcribe")({
   server: {
@@ -7,8 +8,8 @@ export const Route = createFileRoute("/api/transcribe")({
       POST: async ({ request }) => {
         const blocked = guardApiRequest(request);
         if (blocked) return blocked;
-        const key = process.env["LOVABLE_API_KEY"];
-        if (!key) return Response.json({ error: "missing_key" }, { status: 500 });
+        const ai = getAiGateway();
+        if (!ai) return aiDisabledResponse();
 
         let file: File | null = null;
         try {
@@ -28,9 +29,9 @@ export const Route = createFileRoute("/api/transcribe")({
         upstream.append("language", "pt");
         upstream.append("file", file, file.name || "recording.webm");
 
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+        const res = await fetch(`${ai.base}/v1/audio/transcriptions`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${key}` },
+          headers: ai.authHeaders,
           body: upstream,
         });
 

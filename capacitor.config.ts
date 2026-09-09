@@ -16,7 +16,10 @@ const config: CapacitorConfig = {
     allowMixedContent: false,
   },
   server: {
-    url: "https://drive-do-dominate.lovable.app",
+    // URL pública onde o app web está publicado. O WebView Android carrega daqui
+    // (o app usa rotas de servidor + Supabase, então não são arquivos estáticos).
+    // Troque para o seu domínio após publicar o build `node .output/server/index.mjs`.
+    url: process.env.APP_PUBLIC_URL || "https://drive-do-dominate.lovable.app",
     cleartext: false,
     androidScheme: "https",
   },

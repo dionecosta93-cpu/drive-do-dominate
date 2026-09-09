@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { Flame, MailCheck } from "lucide-react";
 import { track } from "@/lib/track";
@@ -137,13 +136,17 @@ function AuthPage() {
     if (loading) return;
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      // OAuth nativo do Supabase (sem intermediário). Requer o provedor Google
+      // configurado no painel do Supabase e a URL de retorno na allowlist.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin },
       });
-      if (result.error) throw result.error;
+      if (error) throw error;
       track("login", { method: "google" });
+      // O Supabase redireciona o navegador; nada mais a fazer aqui.
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Falha no login Google");
+      toast.error(authErrorMessage(err));
     } finally {
       setLoading(false);
     }

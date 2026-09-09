@@ -37,13 +37,14 @@ Nenhum. O app builda, roda e todas as funcionalidades existentes seguem operando
   Se o seu ingest espera outro formato/rota/autenticação (ex.: header `x-ingest-key`),
   me diga o contrato e eu adapto `track.ts`.
 
-### 3. IA (assistente, voz, busca de livros)
+### 3. IA (assistente, voz, busca de livros) — DESLIGADA de propósito
 
-- **Onde:** rotas `src/routes/api/*.ts`, variável `LOVABLE_API_KEY` (server-side).
-- **Situação:** hoje usa o gateway de IA da Lovable. Funciona no deploy da Lovable.
-  Rodando 100% fora da Lovable, o `LOVABLE_API_KEY` precisa existir no ambiente de deploy,
-  ou essas 4 rotas devem apontar para outro provedor (ex.: OpenAI direto).
-- **Formato esperado:** decisão de produto + chave do provedor escolhido (server-side).
+- **Onde:** rotas `src/routes/api/*.ts` + `src/lib/ai-gateway.ts`.
+- **Situação:** decoplada da Lovable e **desligada** — sem `AI_API_KEY` no ambiente, as 4
+  rotas respondem `503` e a UI mostra "em breve". Nada quebra.
+- **Para reativar (quando quiser):** defina no ambiente do servidor
+  `AI_API_KEY=...` e, se não for um gateway compatível com OpenAI, também
+  `AI_GATEWAY_URL=...`. Nenhuma mudança de código necessária.
 
 ### 4. Pagamentos (planos PRO/PREMIUM)
 
@@ -61,11 +62,23 @@ Nenhum. O app builda, roda e todas as funcionalidades existentes seguem operando
 - **Se você realmente quer Expo/RN:** confirme explicitamente que aceita um rewrite e o
   descarte da arquitetura web atual — aí planejamos a migração como projeto à parte.
 
-### 6. Independência do Lovable
+### 6. Independência do Lovable — CONCLUÍDO
 
-- **Restam dependências de runtime da Lovable:** `@lovable.dev/cloud-auth-js` (login Google
-  em `src/integrations/lovable`), `@lovable.dev/vite-tanstack-config` (config do Vite),
-  gateway de IA (`ai.gateway.lovable.dev`), `reportLovableError`.
-- **Situação:** removê-las agora quebraria login Google, build e IA. São substituíveis
-  (OAuth direto do Supabase, config Vite manual, provedor de IA próprio), mas é trabalho
-  dedicado e arriscado — fora do escopo "faça só o que falta". Registrado para decisão futura.
+- Removidos: `@lovable.dev/cloud-auth-js`, `@lovable.dev/vite-tanstack-config`,
+  `src/integrations/lovable/`, `.lovable/`, hardcode do `ai.gateway.lovable.dev`,
+  `reportLovableError` (→ `src/lib/error-reporting.ts` neutro).
+- `vite.config.ts` reescrito com plugins padrão; Nitro preset `node-server`
+  (build → `.output/server/index.mjs`, roda com `node`).
+- Login Google agora é OAuth **nativo do Supabase** (`supabase.auth.signInWithOAuth`).
+- **Pendência real:** no painel do Supabase, garanta que o provedor Google tem
+  Client ID/Secret e que as **Redirect URLs** incluem a origem local
+  (`http://localhost:8080`) e a URL de produção. Sem isso, o botão Google falha.
+- `capacitor.config.ts` → `server.url` lê `APP_PUBLIC_URL` (fallback: a URL antiga
+  `drive-do-dominate.lovable.app`). Aponte para o seu domínio ao publicar.
+
+### 7. Onde hospedar o app (deploy)
+
+- **Onde:** build gera servidor Node em `.output/`.
+- **Ação sua:** escolher um host Node (Render, Railway, Fly, VPS, Vercel com
+  `NITRO_PRESET=vercel`, Cloudflare com `NITRO_PRESET=cloudflare-module`) e publicar.
+  Definir as variáveis de ambiente do `.env.example` lá.

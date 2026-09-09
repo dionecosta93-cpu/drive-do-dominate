@@ -394,25 +394,32 @@ Objetivo principal
 
 O aplicativo deve transformar a conclusão de tarefas em uma experiência recompensadora. Deve utilizar princípios da psicologia comportamental, como reforço positivo imediato, formação de hábitos, gamificação, visualização do progresso e redução da resistência para iniciar tarefas. O foco é ajudar o usuário a agir, manter a consistência e construir disciplina ao longo do tempo, em vez de depender apenas de motivação momentânea.
 
-This project was built with [Lovable](https://lovable.dev).
+## Stack
 
-**Live app**: https://drive-do-dominate.lovable.app
+Projeto **independente** (não depende mais da Lovable). TanStack Start (SSR via Nitro) +
+React 19 + Vite + Tailwind v4 + Supabase; empacotado para Android com Capacitor.
+Arquitetura e comandos detalhados em [`CLAUDE.md`](./CLAUDE.md); pendências em
+[`PENDING_INFO.md`](./PENDING_INFO.md).
 
-## Build with Lovable
+## Desenvolvimento
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/78678352-62c3-41a1-82e8-97a44d1170f9).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Requer Node.js 20+ e npm.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+git clone https://github.com/dionecosta93-cpu/drive-do-dominate.git
+cd drive-do-dominate
+cp .env.example .env   # preencha os valores do Supabase
 npm i
-npm run dev
+npm run dev            # http://localhost:8080
 ```
+
+## Build e deploy
+
+```sh
+npm run build          # gera .output/ (servidor Node — preset nitro "node-server")
+node .output/server/index.mjs   # roda o servidor de produção
+```
+
+Publicável em qualquer host Node (Render, Railway, Fly, VPS...). Para outro alvo,
+defina `NITRO_PRESET` (ex.: `cloudflare-module`, `vercel`) antes do build.
+Android: veja [`ANDROID.md`](./ANDROID.md).

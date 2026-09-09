@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
+import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
 export const Route = createFileRoute("/api/tts")({
   server: {
@@ -7,13 +8,8 @@ export const Route = createFileRoute("/api/tts")({
       POST: async ({ request }) => {
         const blocked = guardApiRequest(request);
         if (blocked) return blocked;
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) {
-          return new Response(JSON.stringify({ error: "missing_key" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
+        const ai = getAiGateway();
+        if (!ai) return aiDisabledResponse();
         let text = "";
         try {
           const body = (await request.json()) as { text?: string };
@@ -31,10 +27,10 @@ export const Route = createFileRoute("/api/tts")({
           });
         }
 
-        const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
+        const upstream = await fetch(`${ai.base}/v1/audio/speech`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${key}`,
+            ...ai.authHeaders,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

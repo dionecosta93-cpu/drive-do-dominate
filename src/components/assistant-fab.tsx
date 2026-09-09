@@ -48,6 +48,7 @@ export function AssistantFab() {
       });
       if (!res.ok) {
         const detail = await res.json().catch(() => ({}));
+        if (res.status === 503) throw new Error("O assistente de IA ainda não foi ativado.");
         if (res.status === 429) throw new Error("Muitas solicitações. Tente em instantes.");
         if (res.status === 402) throw new Error("Créditos de IA esgotados.");
         throw new Error((detail as { error?: string }).error ?? "Falha na IA");

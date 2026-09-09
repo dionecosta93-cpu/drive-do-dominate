@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
+import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
 const SCHEMA = {
   type: "object",
@@ -85,8 +86,8 @@ export const Route = createFileRoute("/api/book-search")({
       POST: async ({ request }) => {
         const blocked = guardApiRequest(request);
         if (blocked) return blocked;
-        const key = process.env["LOVABLE_API_KEY"];
-        if (!key) return Response.json({ error: "missing_key" }, { status: 500 });
+        const ai = getAiGateway();
+        if (!ai) return aiDisabledResponse();
 
         let query = "";
         try {
@@ -97,12 +98,11 @@ export const Route = createFileRoute("/api/book-search")({
         }
         if (!query) return Response.json({ error: "empty" }, { status: 400 });
 
-        const upstream = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+        const upstream = await fetch(`${ai.base}/v1/responses`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Lovable-API-Key": key,
-            "X-Lovable-AIG-SDK": "fetch",
+            ...ai.authHeaders,
           },
           body: JSON.stringify({
             model: "openai/gpt-5.6-sol",

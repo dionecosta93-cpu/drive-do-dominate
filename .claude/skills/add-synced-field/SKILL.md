@@ -37,5 +37,6 @@ Um campo novo **não sincroniza sozinho** — ele precisa estar na lista `SYNC_K
      `user_data.data` recebeu a chave.
 
 ## Anti-padrões
+
 - Não criar tabela relacional nova só para isso — o modelo é blob por usuário.
 - Não gravar `NaN`/`undefined` em campos numéricos vindos de inputs.

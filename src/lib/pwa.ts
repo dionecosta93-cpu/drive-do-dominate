@@ -1,6 +1,6 @@
 /**
  * Registro do service worker — único ponto de registro do app.
- * Nunca registra em dev, dentro de iframe ou nos previews da Lovable.
+ * Nunca registra em dev, dentro de iframe ou em hosts de preview.
  * `?sw=off` desliga e limpa o registro.
  */
 const SW_URL = "/sw.js";
@@ -11,9 +11,6 @@ function shouldRegister(): boolean {
   if (window.self !== window.top) return false;
   const host = window.location.hostname;
   if (host.startsWith("id-preview--") || host.startsWith("preview--")) return false;
-  if (host === "lovableproject.com" || host.endsWith(".lovableproject.com")) return false;
-  if (host === "lovableproject-dev.com" || host.endsWith(".lovableproject-dev.com")) return false;
-  if (host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev")) return false;
   if (new URL(window.location.href).searchParams.get("sw") === "off") return false;
   return true;
 }
