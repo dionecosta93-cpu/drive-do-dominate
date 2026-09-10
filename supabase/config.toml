@@ -1,1 +1,46 @@
 project_id = "jpghzjjpqiirsaznxdyo"
+
+# ---------------------------------------------------------------------------
+# Configuração de Auth / SMTP (Infra as Code).
+#
+# ESTE ARQUIVO SOZINHO NÃO ALTERA O PROJETO HOSPEDADO.
+#   - `supabase start`           -> aplica ao stack LOCAL de desenvolvimento.
+#   - `supabase link` + push     -> aplica ao projeto hospedado (precisa de
+#     SUPABASE_ACCESS_TOKEN / login na Supabase CLI):
+#       npx supabase login
+#       npx supabase link --project-ref jpghzjjpqiirsaznxdyo
+#       npx supabase config push
+#
+# Segredos NÃO ficam aqui: são lidos de variáveis de ambiente via env(...).
+# Defina-os em `.env` (git-ignorado) — nomes em `.env.example`.
+# ---------------------------------------------------------------------------
+
+[auth]
+# URL base do app (para onde os links de e-mail voltam).
+site_url = "env(SUPABASE_AUTH_SITE_URL)"
+# Allowlist de retorno (confirmação de e-mail, OAuth, redefinição de senha).
+additional_redirect_urls = [
+  "http://localhost:8080",
+  "http://localhost:8080/reset-password",
+  "env(SUPABASE_AUTH_EXTRA_REDIRECT_URL)",
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+# Mantém o comportamento atual do projeto: confirmação de e-mail obrigatória.
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+secure_password_change = true
+# Anti-abuso de senha vazada continua ligado no projeto hospedado (painel).
+
+# SMTP — preencha as variáveis de ambiente e faça `supabase config push`.
+# Enquanto `enabled = false`, o projeto usa o mailer interno da Supabase
+# (fortemente limitado; e-mails podem não chegar).
+[auth.email.smtp]
+enabled = true
+host = "env(SMTP_HOST)"
+port = 587
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+admin_email = "env(SMTP_ADMIN_EMAIL)"
+sender_name = "Forja"

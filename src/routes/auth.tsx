@@ -50,12 +50,13 @@ function authErrorMessage(err: unknown): string {
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [awaitingConfirm, setAwaitingConfirm] = useState<string | null>(null);
+  const [awaitingReset, setAwaitingReset] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
@@ -72,7 +73,15 @@ function AuthPage() {
     if (loading) return;
     setLoading(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        track("feature_used", { feature: "password_reset_requested" });
+        setAwaitingReset(email);
+        toast.success("Se houver conta com esse e-mail, o link de redefinição foi enviado.");
+      } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -185,6 +194,35 @@ function AuthPage() {
     );
   }
 
+  if (awaitingReset) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
+        <div className="size-12 rounded-xl bg-discipline/15 grid place-items-center mb-5">
+          <MailCheck className="size-6 text-discipline" />
+        </div>
+        <h1 className="text-2xl font-heading font-black leading-tight mb-2">
+          Redefinição de senha
+        </h1>
+        <p className="text-sm text-muted-foreground mb-1">
+          Se existir conta, enviamos um link para
+        </p>
+        <p className="text-sm font-bold mb-6 break-all">{awaitingReset}</p>
+        <p className="text-xs text-muted-foreground mb-6 text-pretty">
+          Abra o link no e-mail para escolher uma nova senha. Verifique também a caixa de spam.
+        </p>
+        <button
+          onClick={() => {
+            setAwaitingReset(null);
+            setMode("signin");
+          }}
+          className="w-full py-3.5 bg-white text-black font-heading font-bold rounded-xl active:scale-[0.98] transition-transform"
+        >
+          Voltar para entrar
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
       <div className="flex items-center gap-2 mb-6">
@@ -200,19 +238,26 @@ function AuthPage() {
           <>
             Entre e continue <span className="text-discipline">dominando</span>.
           </>
-        ) : (
+        ) : mode === "signup" ? (
           <>
             Comece sua <span className="text-discipline">jornada</span>.
+          </>
+        ) : (
+          <>
+            Recuperar <span className="text-discipline">acesso</span>.
           </>
         )}
       </h1>
       <p className="text-muted-foreground text-sm mb-6">
-        Seus dados sincronizam entre todos os seus dispositivos.
+        {mode === "forgot"
+          ? "Informe seu e-mail e enviaremos um link para criar uma nova senha."
+          : "Seus dados sincronizam entre todos os seus dispositivos."}
       </p>
 
       <button
         onClick={google}
         disabled={loading}
+        hidden={mode === "forgot"}
         className="w-full py-3.5 bg-white text-black font-heading font-bold rounded-xl mb-3 active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <svg className="size-5" viewBox="0 0 48 48">
@@ -236,7 +281,7 @@ function AuthPage() {
         Continuar com Google
       </button>
 
-      <div className="flex items-center gap-3 my-4">
+      <div className="flex items-center gap-3 my-4" hidden={mode === "forgot"}>
         <div className="flex-1 h-px bg-border" />
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
           ou e-mail
@@ -266,7 +311,8 @@ function AuthPage() {
         />
         <input
           type="password"
-          required
+          required={mode !== "forgot"}
+          hidden={mode === "forgot"}
           minLength={6}
           placeholder="Senha (mín. 6)"
           value={password}
@@ -274,12 +320,27 @@ function AuthPage() {
           autoComplete={mode === "signin" ? "current-password" : "new-password"}
           className="w-full bg-surface border border-border rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-discipline"
         />
+        {mode === "signin" && (
+          <button
+            type="button"
+            onClick={() => setMode("forgot")}
+            className="text-xs text-muted-foreground hover:text-discipline transition"
+          >
+            Esqueci minha senha
+          </button>
+        )}
         <button
           type="submit"
           disabled={loading}
           className="w-full py-4 bg-discipline text-black font-heading font-black text-lg rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50"
         >
-          {loading ? "…" : mode === "signin" ? "ENTRAR" : "CRIAR CONTA"}
+          {loading
+            ? "…"
+            : mode === "signin"
+              ? "ENTRAR"
+              : mode === "signup"
+                ? "CRIAR CONTA"
+                : "ENVIAR LINK"}
         </button>
       </form>
 
@@ -290,12 +351,14 @@ function AuthPage() {
       )}
 
       <button
-        onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+        onClick={() =>
+          setMode(mode === "signin" ? "signup" : mode === "signup" ? "signin" : "signin")
+        }
         className="mt-6 text-sm text-muted-foreground hover:text-foreground transition"
       >
-        {mode === "signin" ? "Não tem conta? " : "Já tem conta? "}
+        {mode === "signin" ? "Não tem conta? " : mode === "signup" ? "Já tem conta? " : ""}
         <span className="text-discipline font-bold">
-          {mode === "signin" ? "Criar agora" : "Entrar"}
+          {mode === "signin" ? "Criar agora" : mode === "signup" ? "Entrar" : "Voltar para entrar"}
         </span>
       </button>
     </div>

@@ -43,3 +43,7 @@ android/keystore.properties
 android/app/build/
 android/build/
 android/.gradle/
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
