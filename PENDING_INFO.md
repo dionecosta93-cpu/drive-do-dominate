@@ -76,9 +76,14 @@ Nenhum. O app builda, roda e todas as funcionalidades existentes seguem operando
 - `capacitor.config.ts` → `server.url` lê `APP_PUBLIC_URL` (fallback: a URL antiga
   `drive-do-dominate.lovable.app`). Aponte para o seu domínio ao publicar.
 
-### 7. Onde hospedar o app (deploy)
+### 7. Onde hospedar o app (deploy) — ALVO DEFINIDO: Vercel
 
-- **Onde:** build gera servidor Node em `.output/`.
-- **Ação sua:** escolher um host Node (Render, Railway, Fly, VPS, Vercel com
-  `NITRO_PRESET=vercel`, Cloudflare com `NITRO_PRESET=cloudflare-module`) e publicar.
-  Definir as variáveis de ambiente do `.env.example` lá.
+- **Config pronta:** `vercel.json` (`NITRO_PRESET=vercel npm run build`, saída
+  `.vercel/output`). Passo a passo completo em **`DEPLOY.md`**.
+- **Ação sua:**
+  1. Importar o repo na Vercel e setar as env vars (lista em `DEPLOY.md` §1.3).
+  2. Anotar a URL publicada e adicioná-la no Supabase (Auth → Site/Redirect URLs).
+  3. No GitHub, cadastrar os Secrets `VITE_SUPABASE_*` e a Variable `APP_PUBLIC_URL`
+     (a URL da Vercel), depois rodar o workflow **Android APK** para baixar o `.apk`.
+- Outros hosts Node continuam possíveis (Render, Railway, Fly, Cloudflare com
+  `NITRO_PRESET=cloudflare-module`) — basta trocar o preset e as env vars.

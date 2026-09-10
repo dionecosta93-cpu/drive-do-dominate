@@ -11,10 +11,12 @@ e adiciona notificações nativas, cache offline (PWA) e sincronização automá
 ## Como o app carrega o conteúdo
 
 A Forja usa rotas de servidor (Assistente IA, transcrição de voz, busca de livros) e login/banco na nuvem.
-Por isso o app Android abre a versão publicada (`server.url` em `capacitor.config.ts`) e usa um
-**service worker** para guardar a interface no aparelho — assim a tela abre mesmo sem internet.
+Por isso o app Android abre a versão publicada e usa um **service worker** para guardar a interface no
+aparelho — assim a tela abre mesmo sem internet.
 
-Se você publicar em outro endereço (ou domínio próprio), altere `server.url` em `capacitor.config.ts` e rode a sincronização novamente.
+O endereço vem da variável de ambiente **`APP_PUBLIC_URL`**, lida por `capacitor.config.ts` no momento
+do `cap sync`. Publique o app primeiro (ver `DEPLOY.md`), depois gere o APK com essa variável apontando
+para a URL publicada. Trocou de domínio? Basta refazer o APK com o novo `APP_PUBLIC_URL`.
 
 ## Pré-requisitos na sua máquina
 
@@ -23,6 +25,15 @@ Se você publicar em outro endereço (ou domínio próprio), altere `server.url`
 3. Node/npm instalados e as dependências do projeto (`npm install`)
 
 ## Gerar o APK de teste (debug)
+
+### Opção A — na nuvem (recomendado, sem instalar Java/Android SDK)
+
+Workflow **`.github/workflows/android-apk.yml`**. Configure uma vez os Secrets
+`VITE_SUPABASE_*` e a Variable `APP_PUBLIC_URL` no repositório, depois
+**Actions → "Android APK" → Run workflow**. Baixe o `app-debug.apk` em _Artifacts_.
+Passo a passo completo em **`DEPLOY.md`**.
+
+### Opção B — local (precisa de JDK 17/21 + Android SDK)
 
 ```bash
 npm run android:apk
@@ -37,6 +48,9 @@ android/app/build/outputs/apk/debug/app-debug.apk
 Renomeie para `Forja.apk`, transfira para o celular e instale (permita "instalar de fontes desconhecidas").
 
 Alternativa pela interface: `npm run android:open` e depois **Build > Build Bundle(s)/APK(s) > Build APK(s)** no Android Studio.
+
+> Antes de qualquer build, exporte `APP_PUBLIC_URL` com a URL publicada (Vercel).
+> Sem ela o `cap sync` empacota só o bundle local, sem SSR nem rotas `/api`.
 
 ## Versão assinada (Google Play)
 
@@ -58,6 +72,7 @@ npm run android:aab           # AAB assinado para a Play Store
 ```
 
 Saídas:
+
 - `android/app/build/outputs/apk/release/app-release.apk`
 - `android/app/build/outputs/bundle/release/app-release.aab`
 
@@ -82,12 +97,12 @@ Antes de cada envio à Play Store, aumente `versionCode`/`versionName` em `andro
 
 ### Permissões declaradas
 
-| Permissão | Uso |
-| --- | --- |
-| `INTERNET`, `ACCESS_NETWORK_STATE` | banco de dados, login, IA e detecção de conexão |
-| `POST_NOTIFICATIONS`, `VIBRATE`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM` | despertadores e lembretes |
-| `RECEIVE_BOOT_COMPLETED` | restaurar lembretes após reiniciar o aparelho |
-| `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS` | comandos de voz do Assistente IA |
+| Permissão                                                                  | Uso                                             |
+| -------------------------------------------------------------------------- | ----------------------------------------------- |
+| `INTERNET`, `ACCESS_NETWORK_STATE`                                         | banco de dados, login, IA e detecção de conexão |
+| `POST_NOTIFICATIONS`, `VIBRATE`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM` | despertadores e lembretes                       |
+| `RECEIVE_BOOT_COMPLETED`                                                   | restaurar lembretes após reiniciar o aparelho   |
+| `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`                                    | comandos de voz do Assistente IA                |
 
 A permissão de notificação (Android 13+) é pedida em tempo de execução, com explicação amigável, e pode
 ser ativada depois pelo cartão "Notificações desativadas" na tela inicial.
@@ -108,8 +123,8 @@ ser ativada depois pelo cartão "Notificações desativadas" na tela inicial.
 
 ## Limitações conhecidas
 
-- O build Gradle **não roda no ambiente da Lovable** (sem Java/Android SDK). APK/AAB precisam ser gerados
-  na sua máquina com os comandos acima.
+- O build Gradle precisa de **JDK 17/21 + Android SDK**. Se não tiver na máquina, use o workflow do
+  GitHub Actions (Opção A acima), que provisiona tudo na nuvem.
 - Como o WebView carrega a versão publicada, **publique antes de gerar o APK**; e a primeira abertura
   precisa de internet para o service worker guardar os arquivos.
 - Notificações são pré-agendadas em uma janela de 21 dias (limite de alarmes do Android); a janela é
