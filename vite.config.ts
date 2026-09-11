@@ -4,7 +4,6 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
-import { VitePWA } from "vite-plugin-pwa";
 
 // Config standalone (independente da Lovable). Preset do Nitro: node-server —
 // o build gera um servidor Node em .output/server/index.mjs, publicável em
@@ -54,47 +53,14 @@ export default defineConfig(({ mode }) => {
           client: { files: ["**/server/**"], specifiers: ["server-only"] },
         },
       }),
-      nitro({ preset: process.env.NITRO_PRESET || "node-server" }),
       viteReact(),
-      VitePWA({
-        // O registro é feito apenas pelo wrapper guardado (src/lib/pwa.ts).
-        injectRegister: null,
-        registerType: "autoUpdate",
-        devOptions: { enabled: false },
-        filename: "sw.js",
-        outDir: "dist/client",
-        manifest: false, // manifesto estático em public/manifest.webmanifest
-        workbox: {
-          globDirectory: "dist/client",
-          globPatterns: ["**/*.{js,css,woff2,png,svg,ico,webmanifest}"],
-          navigateFallback: "/offline.html",
-          navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/],
-          cleanupOutdatedCaches: true,
-          clientsClaim: true,
-          skipWaiting: true,
-          runtimeCaching: [
-            {
-              // HTML sempre tenta a rede primeiro; offline usa a última versão vista.
-              urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "forja-html",
-                networkTimeoutSeconds: 4,
-                expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              },
-            },
-            {
-              urlPattern: ({ request, sameOrigin }: { request: Request; sameOrigin: boolean }) =>
-                sameOrigin && ["script", "style", "font", "image"].includes(request.destination),
-              handler: "CacheFirst",
-              options: {
-                cacheName: "forja-assets",
-                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 60 },
-              },
-            },
-          ],
-        },
-      }),
+      // O service worker (offline/PWA) é um arquivo estático em public/sw.js,
+      // não gerado pelo vite-plugin-pwa: no pipeline nitro/vite (build multi-ambiente),
+      // o generateSW do plugin escreve num diretório intermediário que o nitro já
+      // esvaziou antes — o sw.js nunca chegava no site publicado (offline não
+      // funcionava). Arquivo estático em public/ é copiado de forma confiável pelo
+      // nitro em qualquer preset. Ver src/lib/pwa.ts (registro) e public/sw.js.
+      nitro({ preset: process.env.NITRO_PRESET || "node-server" }),
     ],
   };
 });
