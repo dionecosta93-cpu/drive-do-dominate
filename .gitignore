@@ -48,3 +48,6 @@ android/.gradle/
 # Supabase CLI
 supabase/.temp/
 supabase/.branches/
+
+.vercel
+.env*
