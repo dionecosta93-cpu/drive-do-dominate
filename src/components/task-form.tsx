@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import type { Category, Priority, Repetition, Task } from "@/lib/store";
+import type { AlarmSound, Category, Priority, Repetition, Task } from "@/lib/store";
 import { useStore } from "@/lib/store";
 import { ensureNotificationPermission } from "@/lib/native";
 
@@ -54,6 +54,21 @@ const icons = ["🎯", "💪", "📚", "💼", "🧘", "🏃", "🍎", "✨", "�
 const alarmOptions = [0, 5, 10, 15, 30, 60, 1440];
 const alarmLabel = (m: number) =>
   m === 0 ? "no horário" : m === 1440 ? "1 dia" : m === 60 ? "1 hora" : `${m} min`;
+const alarmSounds: AlarmSound[] = ["padrao", "suave", "classico", "urgente"];
+const alarmSoundLabel: Record<AlarmSound, string> = {
+  padrao: "padrão",
+  suave: "suave",
+  classico: "clássico",
+  urgente: "urgente",
+};
+function playAlarmSoundPreview(sound: AlarmSound) {
+  if (sound === "padrao") return;
+  try {
+    void new Audio(`/sounds/alarm_${sound}.wav`).play();
+  } catch {
+    /* preview é só um extra, ignora falha */
+  }
+}
 
 const todayStr = () => {
   const d = new Date();
@@ -97,6 +112,7 @@ export function TaskForm({
   const [alarmMinutesBefore, setAlarmMinutesBefore] = useState<number | null>(
     initial?.alarmMinutesBefore ?? null,
   );
+  const [alarmSound, setAlarmSound] = useState<AlarmSound>(initial?.alarmSound ?? "padrao");
   const [color, setColor] = useState<string | undefined>(initial?.color);
   const [icon, setIcon] = useState<string | undefined>(initial?.icon);
   const [notes, setNotes] = useState(initial?.notes ?? "");
@@ -150,6 +166,7 @@ export function TaskForm({
       consequence: consequence.trim(),
       motivation: motivation.trim() || undefined,
       alarmMinutesBefore,
+      alarmSound,
       color,
       icon,
       notes: notes.trim() || undefined,
@@ -345,6 +362,30 @@ export function TaskForm({
             </button>
           ))}
         </div>
+        {alarmMinutesBefore !== null && (
+          <div className="mt-3">
+            <span className="text-[10px] font-bold uppercase text-muted-foreground">Som</span>
+            <div className="mt-1.5 grid grid-cols-4 gap-1">
+              {alarmSounds.map((sound) => (
+                <button
+                  key={sound}
+                  type="button"
+                  onClick={() => {
+                    setAlarmSound(sound);
+                    playAlarmSoundPreview(sound);
+                  }}
+                  className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition ${
+                    alarmSound === sound
+                      ? "bg-discipline/20 border-discipline text-discipline"
+                      : "bg-surface border-border text-muted-foreground"
+                  }`}
+                >
+                  {alarmSoundLabel[sound]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </Field>
 
       <Field label="Repetição">

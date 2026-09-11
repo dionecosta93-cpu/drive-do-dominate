@@ -24,6 +24,8 @@ export type Repetition =
   | "personalizada";
 export type TaskStatus = "nao-iniciada" | "em-andamento" | "concluida" | "adiada" | "cancelada";
 
+export type AlarmSound = "padrao" | "suave" | "classico" | "urgente";
+
 export interface Task {
   id: string;
   name: string;
@@ -46,6 +48,8 @@ export interface Task {
   notes?: string;
   motivation?: string;
   alarmMinutesBefore?: number | null;
+  /** Som do lembrete (canal nativo Android) — "padrao" usa o som padrão de notificação. */
+  alarmSound?: AlarmSound;
   archived?: boolean;
   editCount?: number;
   createdAt: number;

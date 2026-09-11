@@ -12,6 +12,7 @@ import {
   taskAppearsOn,
   taskCompletedOn,
   useStore,
+  type AlarmSound,
   type CompletedSession,
   type Task,
 } from "@/lib/store";
@@ -22,6 +23,18 @@ export const CHANNELS = {
   lembretes: "forja-lembretes",
   motivacao: "forja-motivacao",
 } as const;
+
+/** Canais extras: um por som de alarme (Android prende o som ao canal, não dá pra trocar depois). */
+const ALARM_SOUND_CHANNELS: Record<Exclude<AlarmSound, "padrao">, string> = {
+  suave: "forja-tarefas-suave",
+  classico: "forja-tarefas-classico",
+  urgente: "forja-tarefas-urgente",
+};
+
+function channelForAlarmSound(sound: AlarmSound | undefined): string {
+  if (!sound || sound === "padrao") return CHANNELS.tarefas;
+  return ALARM_SOUND_CHANNELS[sound];
+}
 
 export const TASK_ACTION_TYPE = "FORJA_TAREFA";
 
@@ -162,12 +175,13 @@ export function planNotifications(
       if (remindAt.getTime() > now.getTime()) {
         const title = task.shoppingListId ? "🛒 FORJA — Compras" : "🔥 FORJA";
         const body = `${task.name} às ${task.time}${shoppingSuffix}\n"${antecedencia} ${task.motivation?.trim() || pick(MOTIVATIONAL, task.id + date)}"`;
+        const channelId = channelForAlarmSound(task.alarmSound);
         out.push({
           id: notificationId(task.id, date, "lembrete"),
           title,
           body,
           at: remindAt,
-          channelId: CHANNELS.tarefas,
+          channelId,
           taskId: task.id,
           date,
           kind: "lembrete",
@@ -183,7 +197,7 @@ export function planNotifications(
             title,
             body: `🔁 ${body}`,
             at: echoAt,
-            channelId: CHANNELS.tarefas,
+            channelId,
             taskId: task.id,
             date,
             kind: "lembrete",
@@ -250,6 +264,33 @@ async function plugin() {
         importance: 5,
         visibility: 1,
         vibration: true,
+      });
+      await LocalNotifications.createChannel({
+        id: ALARM_SOUND_CHANNELS.suave,
+        name: "Forja — Tarefas (som suave)",
+        description: "Lembretes das suas missões e compromissos",
+        importance: 5,
+        visibility: 1,
+        vibration: true,
+        sound: "alarm_suave.wav",
+      });
+      await LocalNotifications.createChannel({
+        id: ALARM_SOUND_CHANNELS.classico,
+        name: "Forja — Tarefas (som clássico)",
+        description: "Lembretes das suas missões e compromissos",
+        importance: 5,
+        visibility: 1,
+        vibration: true,
+        sound: "alarm_classico.wav",
+      });
+      await LocalNotifications.createChannel({
+        id: ALARM_SOUND_CHANNELS.urgente,
+        name: "Forja — Tarefas (som urgente)",
+        description: "Lembretes das suas missões e compromissos",
+        importance: 5,
+        visibility: 1,
+        vibration: true,
+        sound: "alarm_urgente.wav",
       });
       await LocalNotifications.createChannel({
         id: CHANNELS.lembretes,
