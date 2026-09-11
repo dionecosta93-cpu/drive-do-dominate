@@ -27,7 +27,13 @@ export const TASK_ACTION_TYPE = "FORJA_TAREFA";
 
 /** Quantos dias à frente pré-agendamos (Android limita a quantidade de alarmes). */
 const HORIZON_DAYS = 21;
-const MAX_NOTIFICATIONS = 60;
+const MAX_NOTIFICATIONS = 90;
+
+/** Horário fixo da mensagem motivacional diária (24h, hora do aparelho). */
+const MOTIVATIONAL_TIME = "07:30";
+
+/** Minutos após o lembrete em que ele repete (insistente), se a tarefa seguir pendente. */
+const ECHO_DELAYS_MIN = [2, 4];
 
 const MOTIVATIONAL = [
   "Você não precisa estar motivado. Precisa cumprir o que decidiu.",
@@ -50,15 +56,30 @@ const pick = (list: string[], seed: string) => {
   return list[h % list.length]!;
 };
 
-/** ID numérico estável (int 32 positivo) por tarefa+data+tipo. */
-export function notificationId(taskId: string, date: string, kind: "lembrete" | "cobranca") {
-  const seed = `${taskId}|${date}|${kind}`;
+/** ID numérico estável (int 32 positivo) a partir de uma semente qualquer. */
+function stableId(seed: string) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
     h ^= seed.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return (h >>> 1) % 2000000000;
+}
+
+/** ID numérico estável por tarefa+data+tipo (inclui os ecos "lembrete-eco1", "lembrete-eco2"...). */
+export function notificationId(taskId: string, date: string, kind: string) {
+  return stableId(`${taskId}|${date}|${kind}`);
+}
+
+/** ID numérico estável da mensagem motivacional de um dia. */
+export function motivationalNotificationId(date: string) {
+  return stableId(`motivacao|${date}`);
+}
+
+/** Notificações de tarefa (lembrete/eco/cobrança) x demais notificações da Forja. */
+function isTaskNotificationExtra(extra: unknown): boolean {
+  const kind = (extra as { kind?: string } | undefined)?.kind;
+  return kind === "lembrete" || kind === "cobranca";
 }
 
 const atLocal = (date: string, time: string, offsetMinutes = 0) => {
@@ -84,6 +105,14 @@ export interface PlannedNotification {
   taskId: string;
   date: string;
   kind: "lembrete" | "cobranca";
+}
+
+export interface PlannedMotivational {
+  id: number;
+  title: string;
+  body: string;
+  at: Date;
+  date: string;
 }
 
 /**
@@ -131,16 +160,35 @@ export function planNotifications(
       }
 
       if (remindAt.getTime() > now.getTime()) {
+        const title = task.shoppingListId ? "🛒 FORJA — Compras" : "🔥 FORJA";
+        const body = `${task.name} às ${task.time}${shoppingSuffix}\n"${antecedencia} ${task.motivation?.trim() || pick(MOTIVATIONAL, task.id + date)}"`;
         out.push({
           id: notificationId(task.id, date, "lembrete"),
-          title: task.shoppingListId ? "🛒 FORJA — Compras" : "🔥 FORJA",
-          body: `${task.name} às ${task.time}${shoppingSuffix}\n"${antecedencia} ${task.motivation?.trim() || pick(MOTIVATIONAL, task.id + date)}"`,
+          title,
+          body,
           at: remindAt,
           channelId: CHANNELS.tarefas,
           taskId: task.id,
           date,
           kind: "lembrete",
         });
+
+        // Ecos: repete o aviso (insistente, mesmo com o app fechado) enquanto a tarefa
+        // não é concluída, sem passar muito do horário de início.
+        for (const [idx, mins] of ECHO_DELAYS_MIN.entries()) {
+          const echoAt = new Date(remindAt.getTime() + mins * 60000);
+          if (echoAt.getTime() > start.getTime() + 15 * 60000) continue;
+          out.push({
+            id: notificationId(task.id, date, `lembrete-eco${idx + 1}`),
+            title,
+            body: `🔁 ${body}`,
+            at: echoAt,
+            channelId: CHANNELS.tarefas,
+            taskId: task.id,
+            date,
+            kind: "lembrete",
+          });
+        }
       }
 
       // Cobrança pós-horário: verifica conclusão quando dispara (recalculada a cada sync).
@@ -165,6 +213,27 @@ export function planNotifications(
   }
 
   return out.sort((a, b) => a.at.getTime() - b.at.getTime()).slice(0, MAX_NOTIFICATIONS);
+}
+
+/**
+ * Calcula a mensagem motivacional de cada dia do horizonte, sempre no mesmo
+ * horário (`MOTIVATIONAL_TIME`). Uma por dia, texto variando por data.
+ */
+export function planMotivationalNotifications(now = new Date()): PlannedMotivational[] {
+  const out: PlannedMotivational[] = [];
+  for (let i = 0; i < HORIZON_DAYS; i++) {
+    const date = dateKey(addDays(now, i));
+    const at = atLocal(date, MOTIVATIONAL_TIME);
+    if (at.getTime() <= now.getTime()) continue;
+    out.push({
+      id: motivationalNotificationId(date),
+      title: "☀️ Forja",
+      body: pick(MOTIVATIONAL, date),
+      at,
+      date,
+    });
+  }
+  return out;
 }
 
 let ready = false;
@@ -247,10 +316,11 @@ export async function syncTaskNotifications(
     const plannedIds = new Set(planned.map((p) => p.id));
 
     const pending = await ln.getPending();
-    const stale = pending.notifications.filter((n) => !plannedIds.has(n.id));
+    const ours = pending.notifications.filter((n) => isTaskNotificationExtra(n.extra));
+    const stale = ours.filter((n) => !plannedIds.has(n.id));
     if (stale.length) await ln.cancel({ notifications: stale.map((n) => ({ id: n.id })) });
 
-    const pendingIds = new Set(pending.notifications.map((n) => n.id));
+    const pendingIds = new Set(ours.map((n) => n.id));
     const toSchedule = planned.filter((p) => !pendingIds.has(p.id));
     if (toSchedule.length) {
       await ln.schedule({
@@ -269,6 +339,50 @@ export async function syncTaskNotifications(
     return planned.length;
   } catch (e) {
     console.warn("[notifications] sync failed", e);
+    return 0;
+  }
+}
+
+/**
+ * Reagenda a mensagem motivacional diária (uma por dia, sempre em MOTIVATIONAL_TIME):
+ * cancela dias que saíram do horizonte e garante os que faltam. Mesma lógica de
+ * sincronização da tarefa, só que sem depender de tarefas/sessões.
+ */
+export async function syncMotivationalNotifications(): Promise<number> {
+  const ln = await plugin();
+  if (!ln) return 0;
+  try {
+    const perm = await ln.checkPermissions();
+    if (perm.display !== "granted") return 0;
+
+    const planned = planMotivationalNotifications();
+    const plannedIds = new Set(planned.map((p) => p.id));
+
+    const pending = await ln.getPending();
+    const ours = pending.notifications.filter(
+      (n) => (n.extra as { kind?: string } | undefined)?.kind === "motivacao",
+    );
+    const stale = ours.filter((n) => !plannedIds.has(n.id));
+    if (stale.length) await ln.cancel({ notifications: stale.map((n) => ({ id: n.id })) });
+
+    const pendingIds = new Set(ours.map((n) => n.id));
+    const toSchedule = planned.filter((p) => !pendingIds.has(p.id));
+    if (toSchedule.length) {
+      await ln.schedule({
+        notifications: toSchedule.map((p) => ({
+          id: p.id,
+          title: p.title,
+          body: p.body,
+          channelId: CHANNELS.motivacao,
+          smallIcon: "ic_stat_forja",
+          schedule: { at: p.at, allowWhileIdle: true },
+          extra: { forja: true, kind: "motivacao", date: p.date },
+        })),
+      });
+    }
+    return planned.length;
+  } catch (e) {
+    console.warn("[notifications] motivational sync failed", e);
     return 0;
   }
 }

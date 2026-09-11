@@ -20,7 +20,11 @@ import { BottomNav } from "@/components/bottom-nav";
 import { AssistantFab } from "@/components/assistant-fab";
 import { OfflineBanner } from "@/components/offline-banner";
 import { initNativeShell, isNativeApp, notify } from "@/lib/native";
-import { syncTaskNotifications, listenNotificationActions } from "@/lib/notifications";
+import {
+  syncTaskNotifications,
+  syncMotivationalNotifications,
+  listenNotificationActions,
+} from "@/lib/notifications";
 import { NotificationPermissionCard } from "@/components/notification-permission";
 import { setupServiceWorker } from "@/lib/pwa";
 import { track, setAnalyticsUser } from "@/lib/track";
@@ -245,14 +249,22 @@ function RootComponent() {
     return () => window.clearTimeout(t);
   }, [tasks, sessions]);
 
+  // Mensagem motivacional diária (horário fixo): agenda no início e reagenda ao reabrir.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    void syncMotivationalNotifications();
+  }, []);
+
   // Reagenda ao abrir/voltar do segundo plano (cobre reinicialização do aparelho).
   useEffect(() => {
     if (!isNativeApp()) return;
     let remove: (() => void) | undefined;
     void import("@capacitor/app").then(({ App }) =>
       App.addListener("appStateChange", ({ isActive }) => {
-        if (isActive)
+        if (isActive) {
           void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
+          void syncMotivationalNotifications();
+        }
       }).then((h) => {
         remove = () => void h.remove();
       }),
