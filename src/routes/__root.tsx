@@ -23,6 +23,7 @@ import { initNativeShell, isNativeApp, notify } from "@/lib/native";
 import {
   syncTaskNotifications,
   syncMotivationalNotifications,
+  syncAlarmClockNotifications,
   listenNotificationActions,
 } from "@/lib/notifications";
 import { NotificationPermissionCard } from "@/components/notification-permission";
@@ -246,7 +247,10 @@ function RootComponent() {
   // Agendamento NATIVO (Android): recalcula tudo a cada mudança de tarefa/conclusão.
   useEffect(() => {
     if (!isNativeApp()) return;
-    const t = window.setTimeout(() => void syncTaskNotifications(tasks, sessions), 800);
+    const t = window.setTimeout(() => {
+      void syncTaskNotifications(tasks, sessions);
+      void syncAlarmClockNotifications(tasks, sessions);
+    }, 800);
     return () => window.clearTimeout(t);
   }, [tasks, sessions]);
 
@@ -265,6 +269,7 @@ function RootComponent() {
         if (isActive) {
           void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
           void syncMotivationalNotifications();
+          void syncAlarmClockNotifications(useStore.getState().tasks, useStore.getState().sessions);
         }
       }).then((h) => {
         remove = () => void h.remove();

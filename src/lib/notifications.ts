@@ -17,6 +17,7 @@ import {
   type Task,
 } from "@/lib/store";
 import { isNativeApp } from "@/lib/native";
+import { scheduleNativeAlarm, cancelNativeAlarm } from "@/lib/native-alarm";
 
 export const CHANNELS = {
   tarefas: "forja-tarefas",
@@ -172,7 +173,7 @@ export function planNotifications(
         }
       }
 
-      if (remindAt.getTime() > now.getTime()) {
+      if (remindAt.getTime() > now.getTime() && task.alarmMode !== "despertador") {
         const title = task.shoppingListId ? "🛒 FORJA — Compras" : "🔥 FORJA";
         const body = `${task.name} às ${task.time}${shoppingSuffix}\n"${antecedencia} ${task.motivation?.trim() || pick(MOTIVATIONAL, task.id + date)}"`;
         const channelId = channelForAlarmSound(task.alarmSound);
@@ -248,6 +249,79 @@ export function planMotivationalNotifications(now = new Date()): PlannedMotivati
     });
   }
   return out;
+}
+
+export interface PlannedAlarm {
+  id: number;
+  title: string;
+  body: string;
+  at: Date;
+  sound: string;
+  taskId: string;
+  date: string;
+}
+
+/**
+ * Tarefas em modo "despertador" (tela cheia nativa, toca em loop) ficam fora do
+ * pipeline de LocalNotifications — usam o AlarmManager.setAlarmClock direto
+ * (ver src/lib/native-alarm.ts). Sem ecos: o loop contínuo já cobre isso.
+ */
+export function planAlarmClockNotifications(
+  tasks: Task[],
+  sessions: CompletedSession[],
+  now = new Date(),
+): PlannedAlarm[] {
+  const out: PlannedAlarm[] = [];
+  for (let i = 0; i < HORIZON_DAYS; i++) {
+    const date = dateKey(addDays(now, i));
+    for (const task of tasks) {
+      if (task.alarmMode !== "despertador") continue;
+      if (task.archived || task.status === "cancelada") continue;
+      if (task.alarmMinutesBefore === null || task.alarmMinutesBefore === undefined) continue;
+      if (!taskAppearsOn(task, date)) continue;
+      if (taskCompletedOn(task.id, sessions, date)) continue;
+
+      const remindAt = atLocal(date, task.time, -task.alarmMinutesBefore);
+      if (remindAt.getTime() <= now.getTime()) continue;
+
+      const sound =
+        task.alarmSound && task.alarmSound !== "padrao" ? `alarm_${task.alarmSound}` : "";
+      out.push({
+        id: notificationId(task.id, date, "despertador"),
+        title: `⏰ ${task.name}`,
+        body: `${task.name} às ${task.time}`,
+        at: remindAt,
+        sound,
+        taskId: task.id,
+        date,
+      });
+    }
+  }
+  return out.sort((a, b) => a.at.getTime() - b.at.getTime()).slice(0, MAX_NOTIFICATIONS);
+}
+
+// Rastreia o que foi agendado nesta sessão do app pra saber o que cancelar depois
+// (AlarmManager não tem uma API pra "listar alarmes pendentes").
+let previousAlarmIds = new Set<number>();
+
+export async function syncAlarmClockNotifications(
+  tasks: Task[],
+  sessions: CompletedSession[],
+): Promise<number> {
+  if (!isNativeApp()) return 0;
+  if (!(await notificationsGranted())) return 0;
+
+  const planned = planAlarmClockNotifications(tasks, sessions);
+  const plannedIds = new Set(planned.map((p) => p.id));
+
+  for (const staleId of previousAlarmIds) {
+    if (!plannedIds.has(staleId)) await cancelNativeAlarm(staleId);
+  }
+  for (const alarm of planned) {
+    await scheduleNativeAlarm(alarm);
+  }
+  previousAlarmIds = plannedIds;
+  return planned.length;
 }
 
 let ready = false;
