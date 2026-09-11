@@ -113,6 +113,25 @@
     <button onclick="location.reload()">Tentar reconectar</button>
     <script>
       (function () {
+        // Tenta primeiro devolver o APP DE VERDADE (com todas as funções) a partir do
+        // cache que o service worker já guardou (public/sw.js, cache "forja-html-v1").
+        // Só cai na lista simples abaixo se não achar nada cacheado ainda.
+        async function tryRestoreRealApp() {
+          if (!("caches" in window)) return false;
+          try {
+            var cache = await caches.open("forja-html-v1");
+            var cached = (await cache.match(location.href)) || (await cache.match("/"));
+            if (!cached) return false;
+            var html = await cached.text();
+            document.open();
+            document.write(html);
+            document.close();
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+
         function render() {
           var root = document.getElementById("root");
           var raw = null;
@@ -171,7 +190,9 @@
           });
         }
 
-        render();
+        tryRestoreRealApp().then(function (restored) {
+          if (!restored) render();
+        });
       })();
     </script>
   </body>
