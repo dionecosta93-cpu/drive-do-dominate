@@ -8,8 +8,9 @@ import { track } from "@/lib/track";
 export const Route = createFileRoute("/auth")({
   ssr: false,
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data.user) throw redirect({ to: "/" });
+    // getSession() (não getUser()) para reconhecer sessão salva mesmo offline.
+    const { data } = await supabase.auth.getSession();
+    if (data.session) throw redirect({ to: "/" });
   },
   component: AuthPage,
 });

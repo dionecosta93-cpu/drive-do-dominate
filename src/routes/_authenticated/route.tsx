@@ -7,9 +7,12 @@ import { reportError } from "@/lib/error-reporting";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+    // getSession() lê a sessão persistida localmente (sem precisar de rede) —
+    // getUser() sempre valida contra o servidor e falhava aqui quando offline,
+    // te chutando de volta pro /auth mesmo com sessão válida salva no aparelho.
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data.session) throw redirect({ to: "/auth" });
+    return { user: data.session.user };
   },
   component: () => <Outlet />,
   pendingComponent: AuthPending,

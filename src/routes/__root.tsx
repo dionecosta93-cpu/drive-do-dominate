@@ -159,10 +159,11 @@ function RootComponent() {
   useEffect(() => {
     track("app_open");
     // Hydrate current session immediately (in case page loaded already signed in).
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setAnalyticsUser(data.user.id);
-        void attachCloudSyncForUser(data.user.id);
+    // getSession() lê a sessão local sem depender de rede (funciona offline).
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setAnalyticsUser(data.session.user.id);
+        void attachCloudSyncForUser(data.session.user.id);
       }
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
