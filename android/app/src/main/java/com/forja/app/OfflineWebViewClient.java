@@ -21,15 +21,19 @@ import java.io.InputStream;
  */
 public class OfflineWebViewClient extends BridgeWebViewClient {
 
+  // "bridge" na classe-mãe é privado — guardamos nossa própria referência.
+  private final Bridge ownBridge;
+
   public OfflineWebViewClient(Bridge bridge) {
     super(bridge);
+    this.ownBridge = bridge;
   }
 
   @Override
   public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
     if (request.isForMainFrame() && !isOnline()) {
       try {
-        InputStream stream = bridge.getContext().getAssets().open("public/offline-app.html");
+        InputStream stream = ownBridge.getContext().getAssets().open("public/offline-app.html");
         return new WebResourceResponse("text/html", "UTF-8", stream);
       } catch (IOException e) {
         // sem o asset local por algum motivo: cai no comportamento padrão abaixo
@@ -40,7 +44,7 @@ public class OfflineWebViewClient extends BridgeWebViewClient {
 
   private boolean isOnline() {
     try {
-      Context context = bridge.getContext();
+      Context context = ownBridge.getContext();
       ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
       if (cm == null) return true; // não deu pra checar: não bloqueia o fluxo normal
       NetworkCapabilities caps = cm.getNetworkCapabilities(cm.getActiveNetwork());
