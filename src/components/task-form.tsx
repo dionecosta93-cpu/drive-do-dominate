@@ -54,17 +54,23 @@ const icons = ["🎯", "💪", "📚", "💼", "🧘", "🏃", "🍎", "✨", "�
 const alarmOptions = [0, 5, 10, 15, 30, 60, 1440];
 const alarmLabel = (m: number) =>
   m === 0 ? "no horário" : m === 1440 ? "1 dia" : m === 60 ? "1 hora" : `${m} min`;
-const alarmSounds: AlarmSound[] = ["padrao", "suave", "classico", "urgente"];
+const alarmSounds: AlarmSound[] = ["padrao", "suave", "classico", "forja"];
 const alarmSoundLabel: Record<AlarmSound, string> = {
   padrao: "padrão",
   suave: "suave",
   classico: "clássico",
-  urgente: "urgente",
+  forja: "Forja",
+};
+const alarmSoundFile: Partial<Record<AlarmSound, string>> = {
+  suave: "alarm_suave.wav",
+  classico: "alarm_classico.wav",
+  forja: "alarm_forja.mp3",
 };
 function playAlarmSoundPreview(sound: AlarmSound) {
-  if (sound === "padrao") return;
+  const file = alarmSoundFile[sound];
+  if (!file) return;
   try {
-    void new Audio(`/sounds/alarm_${sound}.wav`).play();
+    void new Audio(`/sounds/${file}`).play();
   } catch {
     /* preview é só um extra, ignora falha */
   }

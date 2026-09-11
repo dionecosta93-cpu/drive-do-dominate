@@ -24,7 +24,7 @@ export type Repetition =
   | "personalizada";
 export type TaskStatus = "nao-iniciada" | "em-andamento" | "concluida" | "adiada" | "cancelada";
 
-export type AlarmSound = "padrao" | "suave" | "classico" | "urgente";
+export type AlarmSound = "padrao" | "suave" | "classico" | "forja";
 
 export interface Task {
   id: string;

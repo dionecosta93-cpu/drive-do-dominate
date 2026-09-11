@@ -67,16 +67,8 @@ const sounds = {
     silence(0.12),
     tone(800, 0.18, 0.5),
   ]),
-  // Bipes rápidos e agudos, sensação de urgência.
-  alarm_urgente: concat([
-    tone(1200, 0.1, 0.6),
-    silence(0.06),
-    tone(1200, 0.1, 0.6),
-    silence(0.06),
-    tone(1200, 0.1, 0.6),
-    silence(0.06),
-    tone(1400, 0.14, 0.6),
-  ]),
+  // "forja" usa um som real (public/sounds/alarm_forja.mp3, enviado pelo usuário),
+  // não sintetizado — não entra aqui.
 };
 
 const webDir = join("public", "sounds");

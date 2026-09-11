@@ -29,7 +29,7 @@ export const CHANNELS = {
 const ALARM_SOUND_CHANNELS: Record<Exclude<AlarmSound, "padrao">, string> = {
   suave: "forja-tarefas-suave",
   classico: "forja-tarefas-classico",
-  urgente: "forja-tarefas-urgente",
+  forja: "forja-tarefas-forja",
 };
 
 function channelForAlarmSound(sound: AlarmSound | undefined): string {
@@ -309,7 +309,9 @@ export async function syncAlarmClockNotifications(
   sessions: CompletedSession[],
 ): Promise<number> {
   if (!isNativeApp()) return 0;
-  if (!(await notificationsGranted())) return 0;
+  // Diferente do LocalNotifications, o despertador não passa pelo NotificationManager
+  // (é uma Activity de tela cheia via AlarmManager.setAlarmClock) — não depende da
+  // permissão de notificação, então não a exige aqui.
 
   const planned = planAlarmClockNotifications(tasks, sessions);
   const plannedIds = new Set(planned.map((p) => p.id));
@@ -358,13 +360,13 @@ async function plugin() {
         sound: "alarm_classico.wav",
       });
       await LocalNotifications.createChannel({
-        id: ALARM_SOUND_CHANNELS.urgente,
-        name: "Forja — Tarefas (som urgente)",
+        id: ALARM_SOUND_CHANNELS.forja,
+        name: "Forja — Tarefas (som Forja)",
         description: "Lembretes das suas missões e compromissos",
         importance: 5,
         visibility: 1,
         vibration: true,
-        sound: "alarm_urgente.wav",
+        sound: "alarm_forja.mp3",
       });
       await LocalNotifications.createChannel({
         id: CHANNELS.lembretes,
