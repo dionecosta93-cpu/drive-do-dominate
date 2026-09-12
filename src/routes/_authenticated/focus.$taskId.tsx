@@ -7,6 +7,7 @@ import { pickFocusCoachLine } from "@/lib/focus-coach";
 import { Pause, Play, Check, X, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { trackFeature } from "@/lib/track";
+import { apiFetch } from "@/lib/api-fetch";
 
 export const Route = createFileRoute("/_authenticated/focus/$taskId")({
   component: FocusMode,
@@ -77,7 +78,7 @@ function FocusMode() {
   const speakCoach = useCallback(async (line: string) => {
     if (coachMutedRef.current) return;
     try {
-      const res = await fetch("/api/tts", {
+      const res = await apiFetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: line }),

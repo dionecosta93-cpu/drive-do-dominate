@@ -19,9 +19,14 @@ import { Pencil, Plus, Trash2, TrendingDown, TrendingUp, Wallet, X } from "lucid
 import { toast } from "sonner";
 import { useStore, dateKey, type Transaction } from "@/lib/store";
 import { brl, FINANCE_CATEGORIES, financeCategoryColor, financeCategoryLabel } from "@/lib/finance";
+import { RequireFeature } from "@/components/require-feature";
 
 export const Route = createFileRoute("/_authenticated/finance")({
-  component: FinanceScreen,
+  component: () => (
+    <RequireFeature feature="finance">
+      <FinanceScreen />
+    </RequireFeature>
+  ),
   head: () => ({
     meta: [
       { title: "Finanças — Disciplina Absoluta" },

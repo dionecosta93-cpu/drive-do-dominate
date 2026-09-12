@@ -46,12 +46,15 @@ Nenhum. O app builda, roda e todas as funcionalidades existentes seguem operando
   `AI_API_KEY=...` e, se não for um gateway compatível com OpenAI, também
   `AI_GATEWAY_URL=...`. Nenhuma mudança de código necessária.
 
-### 4. Pagamentos (planos PRO/PREMIUM)
+### 4. Pagamentos (planos PRO/PREMIUM) — modo demo REMOVIDO
 
-- **Onde:** `src/lib/plans.ts` (`DEMO_MODE`), rota `/plans`.
-- **Situação:** modo demonstração — telas existem, acesso 100%, R$ 0,00, sem gateway.
-- **Ação futura:** definir gateway (Stripe / Pix / etc.), setar `DEMO_MODE = false` e
-  ligar `getUserPlan()` ao plano real do usuário.
+- **Onde:** `src/lib/plans.ts`, `public.user_plans` (Supabase), rota `/plans`.
+  Detalhe completo em `.claude/rules/planos-e-acesso.md`.
+- **Situação:** plano real por usuário, controle de acesso central (`RequireFeature` /
+  `checkAiAccess`), IA com cota diária por plano. Sem gateway de pagamento ainda —
+  liberação é manual via `node scripts/set-plan.mjs <email> <plano>`.
+- **Ação futura:** integrar um gateway (Stripe / Pix / etc.) cujo webhook faça o mesmo
+  `upsert` em `user_plans` que o script faz hoje (`source: 'pagamento'`).
 
 ### 5. Migração para Expo / React Native (item do prompt de criação)
 

@@ -32,6 +32,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_plans: {
+        Row: {
+          user_id: string;
+          plan: string;
+          source: string;
+          expires_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          plan?: string;
+          source?: string;
+          expires_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          plan?: string;
+          source?: string;
+          expires_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_usage: {
+        Row: {
+          user_id: string;
+          usage_date: string;
+          count: number;
+        };
+        Insert: {
+          user_id: string;
+          usage_date?: string;
+          count?: number;
+        };
+        Update: {
+          user_id?: string;
+          usage_date?: string;
+          count?: number;
+        };
+        Relationships: [];
+      };
       task_occurrences: {
         Row: {
           completed_time: string | null;

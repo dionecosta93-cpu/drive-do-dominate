@@ -86,6 +86,9 @@ export const Route = createFileRoute("/api/book-search")({
       POST: async ({ request }) => {
         const blocked = guardApiRequest(request);
         if (blocked) return blocked;
+        const { checkAiAccess } = await import("@/lib/ai-access.server");
+        const access = await checkAiAccess(request, "reading");
+        if (!access.ok) return Response.json({ error: access.error }, { status: access.status });
         const ai = getAiGateway();
         if (!ai) return aiDisabledResponse();
 

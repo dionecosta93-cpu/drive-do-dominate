@@ -1,13 +1,12 @@
 /**
  * Planos FREE / PRO / PREMIUM.
  *
- * MODO DEMONSTRAÇÃO: `DEMO_MODE = true` → acesso total, R$ 0,00, nenhuma
- * cobrança real. A arquitetura já fica pronta para, no futuro, ligar pagamento
- * de verdade: basta `DEMO_MODE = false` e alimentar `getUserPlan()` com o plano
- * real do usuário (ex.: vindo do Supabase / gateway).
+ * O plano de cada usuário vive em `public.user_plans` (Supabase) — só o
+ * service role escreve lá (ver supabase/migrations/20260912000000_*.sql),
+ * então o cliente nunca consegue se auto-promover. Liberação de plano hoje é
+ * manual (sem gateway de pagamento ainda): ver scripts/set-plan.mjs.
+ * `useUserPlan()` (src/lib/user-plan.ts) busca o plano atual do usuário logado.
  */
-
-export const DEMO_MODE = true;
 
 export type PlanId = "free" | "pro" | "premium";
 
@@ -122,18 +121,14 @@ export const PLANS: Plan[] = [
 
 export const planById = (id: PlanId): Plan => PLANS.find((p) => p.id === id) ?? PLANS[0];
 
-/**
- * Plano atual do usuário. Hoje sempre "premium" em modo demo.
- * Futuro: ler de `user_data` / gateway de pagamento.
- */
-export function getUserPlan(): PlanId {
-  return DEMO_MODE ? "premium" : "free";
+/** Checagem central de acesso a uma funcionalidade — nunca cheque plano "na unha". */
+export function hasFeature(feature: Feature, plan: PlanId): boolean {
+  return planById(plan).features.includes(feature);
 }
 
-/** Checagem de acesso a uma funcionalidade. Em modo demo, sempre liberado. */
-export function hasFeature(feature: Feature, plan: PlanId = getUserPlan()): boolean {
-  if (DEMO_MODE) return true;
-  return planById(plan).features.includes(feature);
+/** O plano mínimo que já libera essa funcionalidade (pra sugerir upgrade). */
+export function minPlanFor(feature: Feature): PlanId {
+  return PLANS.find((p) => p.features.includes(feature))?.id ?? "premium";
 }
 
 export const formatPlanPrice = (cents: number): string =>

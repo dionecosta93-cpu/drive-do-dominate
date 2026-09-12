@@ -46,7 +46,9 @@ Lovable, now fully decoupled: GitHub `main` is the only source of truth. Keep `m
   per user** in Supabase `public.user_data` (RLS-scoped to `auth.uid()`). Last-write-wins,
   debounced ~1.5s, offline-aware (queues and flushes on reconnect). On sign-in it hydrates the store
   from that row via a shallow `useStore.setState`. There is **no relational schema** for domain data
-  — Postgres only has `profiles` + `user_data` (see `supabase/migrations/`).
+  — Postgres only has `profiles`, `user_data`, and `task_occurrences` (per-occurrence mirror, written
+  by `src/lib/task-occurrences.ts`). See `supabase/migrations/`; `supabase/BOOTSTRAP.sql` is those
+  3 migrations concatenated + made idempotent, for bootstrapping a fresh project in one SQL-editor run.
 - When you add a new persisted field to the store, also add its key to **`SYNC_KEYS`** in
   `cloud-sync.ts`, or it will silently not sync.
 
@@ -68,6 +70,10 @@ Business rules live in `store.ts` and pure sibling modules, not in routes/compon
 - `_authenticated/route.tsx` — layout route with `ssr: false`, a `beforeLoad` auth guard that
   redirects to `/auth`, plus `pendingComponent` / `errorComponent` so a single screen crash doesn't
   blank the app.
+- `auth.tsx` (`/auth`) has three modes — `signin` / `signup` / `forgot` (`resetPasswordForEmail`).
+  `reset-password.tsx` (`/reset-password`) is a **top-level** route (deliberately outside `/auth`'s
+  guard) — the target of the recovery email link; it reads the recovery session and calls
+  `updateUser({ password })`. Both need SMTP configured to actually send email.
 - `src/routes/README.md` documents the file-name → URL conventions (bare `$param`, `_layout`, splat).
 - Route files ship to the **client** bundle — never top-level `import` a `.server.ts` module; load it
   with `await import("@/integrations/supabase/client.server")` inside a server handler.
@@ -90,19 +96,25 @@ Business rules live in `store.ts` and pure sibling modules, not in routes/compon
 ### Auth
 
 - Email/password + **native Supabase Google OAuth** (`supabase.auth.signInWithOAuth({ provider:
-  "google" })` in `src/routes/auth.tsx`). Google needs Client ID/Secret + redirect URLs configured
+"google" })` in `src/routes/auth.tsx`). Google needs Client ID/Secret + redirect URLs configured
   in the Supabase dashboard (see `PENDING_INFO.md`).
 - Client access: the lazy-singleton `supabase` proxy from `src/integrations/supabase/client.ts`
   (session in `localStorage`).
 - Server, user-scoped queries: `requireSupabaseAuth` middleware (`auth-middleware.ts`).
   Admin/service-role: `supabaseAdmin` from `client.server.ts`.
-- The connected Supabase project **requires email confirmation** (`mailer_autoconfirm: false`) and
-  has the pwned-password check enabled. For local testing, either confirm the user in the Supabase
-  dashboard or disable "Confirm email" under Authentication → Providers → Email. `auth.tsx` maps all
-  Supabase auth errors to PT-BR messages and has a "confirm your email" state with resend.
+- Which Supabase project is live is set only by `.env` (`VITE_SUPABASE_URL` / `..._PUBLISHABLE_KEY`
+  / `..._PROJECT_ID`) and `supabase/config.toml` `project_id`. The current project has
+  `mailer_autoconfirm: true` (**email confirmation OFF** — signup logs in immediately) and no custom
+  SMTP, so **password-recovery / confirmation emails do not send yet**. `auth.tsx` still maps all
+  Supabase auth errors to PT-BR messages and has "confirm your email" + resend states for when
+  confirmation is turned back on.
+- SMTP scaffold lives in `supabase/config.toml` (`[auth.email.smtp]` reading `env(SMTP_*)`); applied
+  to the hosted project only via `supabase login && supabase link && supabase config push`, or in
+  the dashboard (Authentication → Emails).
 - `.env` is **gitignored** (only `.env.example` is committed). It holds `VITE_SUPABASE_*`
   (public) locally; the SSR/admin path also needs `SUPABASE_SERVICE_ROLE_KEY` from the deploy
-  environment, and AI needs `AI_API_KEY` (see Server routes & AI).
+  environment, and AI needs `AI_API_KEY` (see Server routes & AI). `SUPABASE_ACCESS_TOKEN` (personal
+  token) is only for running `supabase` CLI / Management-API calls.
 
 ### SSR error pipeline
 
@@ -130,13 +142,16 @@ error middleware. `src/lib/error-capture.ts` records the last server error for t
   (`app_open`, `sign_up`, `login`, `onboarding_completed`, `feature_used`, `content_created`, …)
   are already wired in `__root.tsx`, `auth.tsx`, `_authenticated/index.tsx`, `tasks.new.tsx`,
   `focus.$taskId.tsx`, `plans.tsx`. Never pass PII — see `.claude/skills/analytics-event`.
-- **Plans / monetization** — `src/lib/plans.ts` defines FREE/PRO/PREMIUM + `Feature` gates.
-  `DEMO_MODE = true` → `hasFeature()` always allows, `getUserPlan()` returns `"premium"`, no
-  billing anywhere. `/plans` route is the comparison UI. To enable real paid tiers later: set
-  `DEMO_MODE = false` and back `getUserPlan()` with the real plan (e.g. from `user_data`).
-- **`.claude/`** — `rules/` (code, security, git — permanent), `skills/` (`add-synced-field`,
-  `analytics-event`), `agents/` (`reviewer`). Deep code/security review: use the built-in
-  `/code-review` and `/security-review` skills.
+- **Plans / monetization** — real, no demo mode. `src/lib/plans.ts` defines FREE/PRO/PREMIUM +
+  `Feature` gates; the user's actual plan lives in `public.user_plans` (Supabase, write-restricted
+  to service role — the client can only read its own row). Gate UI with `<RequireFeature feature>`
+  (`src/components/require-feature.tsx`) and gate AI-cost routes server-side with `checkAiAccess`
+  (`src/lib/ai-access.server.ts`, also enforces a daily quota per plan). No payment gateway yet —
+  plans are granted manually via `node scripts/set-plan.mjs <email> <plan>`. Full detail in
+  `.claude/rules/planos-e-acesso.md`.
+- **`.claude/`** — `rules/` (code, security, git, planos-e-acesso — permanent), `skills/`
+  (`add-synced-field`, `analytics-event`), `agents/` (`reviewer`). Deep code/security review: use
+  the built-in `/code-review` and `/security-review` skills.
 - **Env** — `.env` is gitignored; only `.env.example` is committed. Local dev reads `.env`;
   deploy provides `SUPABASE_SERVICE_ROLE_KEY` / `AI_API_KEY` / `VITE_*` from its own env.
 
@@ -150,3 +165,7 @@ error middleware. `src/lib/error-capture.ts` records the last server error for t
   names still say `kairos`.
 - Many components call `useStore()` with no selector (re-render on any store change). Acceptable,
   but prefer `useStore((s) => …)` selectors in new code.
+- `.claude/CLAUDE.md` is a stale byte-for-byte copy of this file (untracked). Claude Code already
+  loads the repo-root `CLAUDE.md`; delete the `.claude/` copy rather than editing it.
+- `PENDING_INFO.md` tracks the owner-only setup still outstanding (SMTP, Google OAuth Client
+  ID/Secret + redirect URLs, choosing a Node host for deploy).

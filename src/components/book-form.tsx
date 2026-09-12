@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sparkles, Loader2, Search } from "lucide-react";
 import type { Book, BookStatus } from "@/lib/store";
 import { bookStatusLabel } from "@/lib/store";
+import { apiFetch } from "@/lib/api-fetch";
 
 export type BookFormValues = Partial<Book> & { title: string };
 
@@ -78,7 +79,7 @@ export function BookForm({
     setAiError("");
     setAiResults([]);
     try {
-      const res = await fetch("/api/book-search", {
+      const res = await apiFetch("/api/book-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q }),

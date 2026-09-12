@@ -3,14 +3,14 @@ import { useState } from "react";
 import { Check, Minus, Crown, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import {
-  DEMO_MODE,
   FEATURE_LABEL,
   PLANS,
   formatPlanPrice,
-  getUserPlan,
+  planById,
   type Feature,
   type PlanId,
 } from "@/lib/plans";
+import { useUserPlan } from "@/lib/user-plan";
 import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/_authenticated/plans")({
@@ -29,17 +29,14 @@ export const Route = createFileRoute("/_authenticated/plans")({
 const ALL_FEATURES = Object.keys(FEATURE_LABEL) as Feature[];
 
 function PlansScreen() {
-  const current = getUserPlan();
+  const current = useUserPlan();
   const [selected, setSelected] = useState<PlanId>(PLANS.find((p) => p.highlight)?.id ?? "pro");
 
   const choose = (id: PlanId) => {
     setSelected(id);
     track("feature_used", { feature: "plans_selected", plan: id });
-    if (DEMO_MODE) {
-      toast("Modo demonstração: todos os recursos já estão liberados, sem cobrança.");
-      return;
-    }
-    toast("Pagamentos ainda não disponíveis nesta versão.");
+    if (id === current) return;
+    toast("Pagamentos ainda não disponíveis — fale com o suporte pra liberar upgrade manualmente.");
   };
 
   return (
@@ -56,21 +53,9 @@ function PlansScreen() {
         <h1 className="text-2xl font-heading font-extrabold uppercase">Planos</h1>
       </div>
       <p className="text-sm text-muted-foreground mb-4">
-        Escolha o nível de acompanhamento. A arquitetura já está pronta para planos pagos.
+        Seu plano atual: <span className="font-bold text-foreground">{planById(current).name}</span>
+        .
       </p>
-
-      {DEMO_MODE && (
-        <div className="mb-6 rounded-2xl border border-discipline/30 bg-discipline/10 p-4">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-discipline mb-1">
-            Modo demonstração
-          </p>
-          <p className="text-sm text-pretty">
-            Acesso <span className="font-black">100%</span> liberado ·{" "}
-            <span className="font-black">R$ 0,00</span>. Nenhuma cobrança, cartão ou assinatura
-            real.
-          </p>
-        </div>
-      )}
 
       <div className="space-y-3 mb-8">
         {PLANS.map((plan) => {
@@ -120,7 +105,7 @@ function PlansScreen() {
                   active ? "bg-discipline text-black" : "border border-border text-muted-foreground"
                 }`}
               >
-                {DEMO_MODE ? "Liberado no modo demo" : isCurrent ? "Plano atual" : "Escolher"}
+                {isCurrent ? "Plano atual" : "Escolher"}
               </span>
             </button>
           );
@@ -162,8 +147,8 @@ function PlansScreen() {
       </div>
 
       <p className="mt-4 text-[11px] text-muted-foreground text-pretty">
-        Esta é uma versão de demonstração — as telas de plano existem, mas não há cobrança. Os
-        recursos acima já estão todos disponíveis para você agora.
+        Pagamento ainda não está disponível — upgrades e testes de plano são liberados manualmente
+        por enquanto.
       </p>
     </div>
   );

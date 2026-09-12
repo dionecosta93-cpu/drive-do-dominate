@@ -2,9 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BookMarked, Plus, BarChart3, Target, Star } from "lucide-react";
 import { bookProgress, bookStatusLabel, useStore, type Book, type BookStatus } from "@/lib/store";
+import { RequireFeature } from "@/components/require-feature";
 
 export const Route = createFileRoute("/_authenticated/reading/")({
-  component: ReadingLibrary,
+  component: () => (
+    <RequireFeature feature="reading">
+      <ReadingLibrary />
+    </RequireFeature>
+  ),
   head: () => ({
     meta: [
       { title: "Leitura — Disciplina Absoluta" },

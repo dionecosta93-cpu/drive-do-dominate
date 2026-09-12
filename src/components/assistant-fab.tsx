@@ -8,6 +8,7 @@ import {
 import { WavRecorder } from "@/lib/wav-recorder";
 import { Bot, Mic, Send, Square, X, Check, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { apiFetch, aiAccessErrorMessage } from "@/lib/api-fetch";
 
 export function AssistantFab() {
   const [open, setOpen] = useState(false);
@@ -41,7 +42,7 @@ export function AssistantFab() {
         .getState()
         .assistantMessages.slice(-20)
         .map((m) => ({ role: m.role, content: m.content }));
-      const res = await fetch("/api/assistant", {
+      const res = await apiFetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: history, context: buildAssistantContext() }),
@@ -49,8 +50,18 @@ export function AssistantFab() {
       if (!res.ok) {
         const detail = await res.json().catch(() => ({}));
         if (res.status === 503) throw new Error("O assistente de IA ainda não foi ativado.");
-        if (res.status === 429) throw new Error("Muitas solicitações. Tente em instantes.");
+        if (res.status === 429) {
+          const err = (detail as { error?: string }).error;
+          throw new Error(
+            err === "daily_limit_reached"
+              ? aiAccessErrorMessage(err)
+              : "Muitas solicitações. Tente em instantes.",
+          );
+        }
         if (res.status === 402) throw new Error("Créditos de IA esgotados.");
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(aiAccessErrorMessage((detail as { error?: string }).error));
+        }
         throw new Error((detail as { error?: string }).error ?? "Falha na IA");
       }
       const data = (await res.json()) as { reply: string; actions?: AssistantAction[] };
@@ -78,9 +89,15 @@ export function AssistantFab() {
         setBusy(true);
         const form = new FormData();
         form.append("file", blob, filename);
-        const res = await fetch("/api/transcribe", { method: "POST", body: form });
+        const res = await apiFetch("/api/transcribe", { method: "POST", body: form });
         setBusy(false);
-        if (!res.ok) return toast.error("Não consegui entender o áudio.");
+        if (!res.ok) {
+          const detail = await res.json().catch(() => ({}));
+          if (res.status === 401 || res.status === 403 || res.status === 429) {
+            return toast.error(aiAccessErrorMessage((detail as { error?: string }).error));
+          }
+          return toast.error("Não consegui entender o áudio.");
+        }
         const { text } = (await res.json()) as { text: string };
         if (!text.trim()) return toast.error("Nada foi captado.");
         void send(text);

@@ -5,9 +5,14 @@ import { toast } from "sonner";
 import { useStore, dateKey } from "@/lib/store";
 import { brl } from "@/lib/finance";
 import { listTotals, SHOPPING_CATEGORIES, shoppingCategoryLabel } from "@/lib/shopping";
+import { RequireFeature } from "@/components/require-feature";
 
 export const Route = createFileRoute("/_authenticated/shopping/")({
-  component: ShoppingHome,
+  component: () => (
+    <RequireFeature feature="shopping">
+      <ShoppingHome />
+    </RequireFeature>
+  ),
   head: () => ({
     meta: [
       { title: "Lista de Compras — Disciplina Absoluta" },

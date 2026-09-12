@@ -8,6 +8,9 @@ export const Route = createFileRoute("/api/transcribe")({
       POST: async ({ request }) => {
         const blocked = guardApiRequest(request);
         if (blocked) return blocked;
+        const { checkAiAccess } = await import("@/lib/ai-access.server");
+        const access = await checkAiAccess(request, "ai_assistant");
+        if (!access.ok) return Response.json({ error: access.error }, { status: access.status });
         const ai = getAiGateway();
         if (!ai) return aiDisabledResponse();
 

@@ -12,6 +12,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { attachCloudSyncForUser, detachCloudSync } from "@/lib/cloud-sync";
+import { refreshUserPlan } from "@/lib/user-plan";
 import { dateKey, taskCompletedOn, todaysTasks, useStore } from "@/lib/store";
 
 import appCss from "../styles.css?url";
@@ -165,6 +166,7 @@ function RootComponent() {
       if (data.session) {
         setAnalyticsUser(data.session.user.id);
         void attachCloudSyncForUser(data.session.user.id);
+        void refreshUserPlan(data.session.user.id);
       }
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
@@ -173,12 +175,14 @@ function RootComponent() {
         setAnalyticsUser(null);
         detachCloudSync();
         useStore.getState().reset();
+        void refreshUserPlan(null);
         router.invalidate();
         return;
       }
       if (session?.user) {
         setAnalyticsUser(session.user.id);
         void attachCloudSyncForUser(session.user.id);
+        void refreshUserPlan(session.user.id);
       }
       router.invalidate();
     });
