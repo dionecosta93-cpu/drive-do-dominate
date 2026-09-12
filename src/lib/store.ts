@@ -50,8 +50,6 @@ export interface Task {
   alarmMinutesBefore?: number | null;
   /** Som do lembrete (canal nativo Android) — "padrao" usa o som padrão de notificação. */
   alarmSound?: AlarmSound;
-  /** "despertador" = tela cheia, toca em loop até desligar (mesmo bloqueado). */
-  alarmMode?: "notificacao" | "despertador";
   archived?: boolean;
   editCount?: number;
   createdAt: number;

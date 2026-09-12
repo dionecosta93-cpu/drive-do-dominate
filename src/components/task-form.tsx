@@ -119,9 +119,6 @@ export function TaskForm({
     initial?.alarmMinutesBefore ?? null,
   );
   const [alarmSound, setAlarmSound] = useState<AlarmSound>(initial?.alarmSound ?? "padrao");
-  const [alarmMode, setAlarmMode] = useState<"notificacao" | "despertador">(
-    initial?.alarmMode ?? "notificacao",
-  );
   const [color, setColor] = useState<string | undefined>(initial?.color);
   const [icon, setIcon] = useState<string | undefined>(initial?.icon);
   const [notes, setNotes] = useState(initial?.notes ?? "");
@@ -176,7 +173,6 @@ export function TaskForm({
       motivation: motivation.trim() || undefined,
       alarmMinutesBefore,
       alarmSound,
-      alarmMode,
       color,
       icon,
       notes: notes.trim() || undefined,
@@ -394,25 +390,6 @@ export function TaskForm({
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() =>
-                setAlarmMode((m) => (m === "despertador" ? "notificacao" : "despertador"))
-              }
-              className={`mt-3 w-full py-2.5 rounded-lg text-[11px] font-bold uppercase border transition ${
-                alarmMode === "despertador"
-                  ? "bg-discipline/20 border-discipline text-discipline"
-                  : "bg-surface border-border text-muted-foreground"
-              }`}
-            >
-              ⏰{" "}
-              {alarmMode === "despertador" ? "modo despertador ativo" : "ativar modo despertador"}
-            </button>
-            {alarmMode === "despertador" && (
-              <p className="mt-1.5 text-[11px] text-muted-foreground">
-                Toca em loop na tela, mesmo com o aparelho bloqueado, até você desligar.
-              </p>
-            )}
           </div>
         )}
       </Field>
