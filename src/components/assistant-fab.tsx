@@ -148,23 +148,23 @@ export function AssistantFab() {
                 <p className="text-[10px] text-muted-foreground">Tarefas · Agenda · Finanças</p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   clearChat();
                   setPending([]);
                 }}
-                className="p-2 text-muted-foreground"
+                className="size-9 grid place-items-center rounded-full border border-border bg-surface-2 text-muted-foreground hover:text-foreground hover:border-discipline/40 transition"
                 aria-label="Limpar conversa"
               >
                 <Trash2 className="size-4" />
               </button>
               <button
                 onClick={() => setOpen(false)}
-                className="p-2 text-muted-foreground"
+                className="size-9 grid place-items-center rounded-full border border-border bg-surface-2 text-muted-foreground hover:text-struggle hover:border-struggle/40 transition"
                 aria-label="Fechar"
               >
-                <X className="size-5" />
+                <X className="size-4" />
               </button>
             </div>
           </header>
