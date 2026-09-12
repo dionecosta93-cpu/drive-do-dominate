@@ -16,6 +16,7 @@ import {
   BookOpen,
   Check,
   Crown,
+  Menu,
 } from "lucide-react";
 import { devotionalOfTheDay } from "@/lib/devotional";
 import { toast } from "sonner";
@@ -27,6 +28,13 @@ import { DayReview } from "@/components/day-review";
 import { CompleteTaskDialog } from "@/components/complete-task-dialog";
 import { saveTaskOccurrence } from "@/lib/task-occurrences";
 import { track } from "@/lib/track";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Home,
@@ -167,16 +175,67 @@ function Dashboard() {
               />
             </div>
           </Link>
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate({ to: "/auth" });
-            }}
-            aria-label="Sair"
-            className="size-9 grid place-items-center rounded-full border border-border bg-surface text-muted-foreground hover:text-struggle hover:border-struggle/40 transition"
-          >
-            <LogOut className="size-4" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                aria-label="Menu"
+                className="size-9 grid place-items-center rounded-full border border-border bg-surface text-muted-foreground hover:text-foreground hover:border-discipline/40 transition"
+              >
+                <Menu className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem asChild>
+                <Link to="/goals" className="flex items-center gap-2.5">
+                  <Target className="size-4 text-discipline" />
+                  Metas de Vida & Propósito
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/vault" className="flex items-center gap-2.5">
+                  <Trophy className="size-4 text-warning" />
+                  Cofre de Vitórias
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/achievements" className="flex items-center gap-2.5">
+                  <Trophy className="size-4 text-warning" />
+                  Conquistas & Evolução
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/plans"
+                  onClick={() => track("feature_used", { feature: "plans_opened" })}
+                  className="flex items-center gap-2.5"
+                >
+                  <Crown className="size-4 text-warning" />
+                  Planos & Premium
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/settings"
+                  onClick={() => track("feature_used", { feature: "settings_opened" })}
+                  className="flex items-center gap-2.5"
+                >
+                  <Sparkles className="size-4 text-warning" />
+                  Aparência (temas)
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-struggle focus:bg-struggle/10 focus:text-struggle"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate({ to: "/auth" });
+                }}
+              >
+                <LogOut className="size-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -541,63 +600,6 @@ function Dashboard() {
           </p>
         </Link>
       </div>
-
-      <Link
-        to="/goals"
-        className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4"
-      >
-        <div className="flex items-center gap-3">
-          <Target className="size-5 text-discipline" />
-          <span className="text-sm font-bold">Metas de Vida & Propósito</span>
-        </div>
-        <ChevronRight className="size-4 text-muted-foreground" />
-      </Link>
-
-      <Link
-        to="/vault"
-        className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4"
-      >
-        <div className="flex items-center gap-3">
-          <Trophy className="size-5 text-warning" />
-          <span className="text-sm font-bold">Cofre de Vitórias</span>
-        </div>
-        <ChevronRight className="size-4 text-muted-foreground" />
-      </Link>
-
-      <Link
-        to="/achievements"
-        className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4"
-      >
-        <div className="flex items-center gap-3">
-          <Trophy className="size-5 text-warning" />
-          <span className="text-sm font-bold">Conquistas & Evolução</span>
-        </div>
-        <ChevronRight className="size-4 text-muted-foreground" />
-      </Link>
-
-      <Link
-        to="/plans"
-        onClick={() => track("feature_used", { feature: "plans_opened" })}
-        className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4"
-      >
-        <div className="flex items-center gap-3">
-          <Crown className="size-5 text-warning" />
-          <span className="text-sm font-bold">Planos & Premium</span>
-        </div>
-        <ChevronRight className="size-4 text-muted-foreground" />
-      </Link>
-
-      <Link
-        to="/settings"
-        onClick={() => track("feature_used", { feature: "settings_opened" })}
-        className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4"
-      >
-        <div className="flex items-center gap-3">
-          <Sparkles className="size-5 text-warning" />
-          <span className="text-sm font-bold">Aparência (temas)</span>
-        </div>
-        <ChevronRight className="size-4 text-muted-foreground" />
-      </Link>
     </div>
   );
 }
