@@ -1,5 +1,8 @@
 package com.forja.app;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -30,6 +33,20 @@ public class AlarmPlugin extends Plugin {
     String taskId = call.getString("taskId", "");
     String date = call.getString("date", "");
     AlarmScheduler.schedule(getContext(), id, atMillis, title, body, sound, taskId, date);
+    call.resolve();
+  }
+
+  /**
+   * Salva a lista completa de despertadores planejados em SharedPreferences (JSON),
+   * pra o BootReceiver conseguir re-agendar tudo sem depender do WebView/JS caso o
+   * aparelho reinicie (ou o Android limpe os alarmes agendados, comum em alguns
+   * fabricantes). Chamado toda vez que o app recalcula os despertadores.
+   */
+  @PluginMethod
+  public void persistPlanned(PluginCall call) {
+    JSArray items = call.getArray("items");
+    SharedPreferences prefs = getContext().getSharedPreferences("forja_alarms", Context.MODE_PRIVATE);
+    prefs.edit().putString("planned", items != null ? items.toString() : "[]").apply();
     call.resolve();
   }
 

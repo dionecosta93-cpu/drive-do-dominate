@@ -17,7 +17,7 @@ import {
   type Task,
 } from "@/lib/store";
 import { isNativeApp } from "@/lib/native";
-import { scheduleNativeAlarm, cancelNativeAlarm } from "@/lib/native-alarm";
+import { scheduleNativeAlarm, cancelNativeAlarm, persistPlannedAlarms } from "@/lib/native-alarm";
 
 export const CHANNELS = {
   tarefas: "forja-tarefas",
@@ -323,6 +323,9 @@ export async function syncAlarmClockNotifications(
     await scheduleNativeAlarm(alarm);
   }
   previousAlarmIds = plannedIds;
+  // Guarda a lista pro BootReceiver conseguir re-agendar sozinho após reiniciar
+  // o aparelho (AlarmManager esquece tudo nesse caso).
+  await persistPlannedAlarms(planned);
   return planned.length;
 }
 
