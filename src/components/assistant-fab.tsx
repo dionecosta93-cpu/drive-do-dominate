@@ -175,7 +175,7 @@ export function AssistantFab() {
                 <p className="font-heading font-bold text-foreground uppercase">Fale comigo.</p>
                 <p>Exemplos:</p>
                 <ul className="space-y-1 text-xs">
-                  <li>• “Criar treino de força amanhã às 6h com alarme 15 min antes”</li>
+                  <li>• “Criar treino de força amanhã às 6h com lembrete 15 min antes”</li>
                   <li>• “Gastei 45 reais no almoço hoje”</li>
                   <li>• “Como estão minhas finanças este mês?”</li>
                   <li>• “Reorganize minha agenda de hoje”</li>
