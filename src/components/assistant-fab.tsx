@@ -136,7 +136,7 @@ export function AssistantFab() {
 
       {open && (
         <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl flex flex-col">
-          <header className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <header className="flex items-center justify-between px-4 pb-3 border-b border-border pt-[calc(env(safe-area-inset-top)+0.75rem)]">
             <div className="flex items-center gap-2">
               <span className="size-8 rounded-xl bg-discipline/15 border border-discipline/30 flex items-center justify-center">
                 <Bot className="size-4 text-discipline" />

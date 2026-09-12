@@ -400,7 +400,7 @@ function FocusMode() {
   // RUNNING / PAUSED
   return (
     <FullScreen>
-      <div className="absolute top-6 left-0 right-0 text-center">
+      <div className="absolute top-[calc(env(safe-area-inset-top)+1.5rem)] left-0 right-0 text-center">
         <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
           Modo Foco
         </p>
@@ -500,7 +500,7 @@ function FocusMode() {
             return next;
           });
         }}
-        className="absolute top-4 left-4 text-muted-foreground/60 p-2"
+        className="absolute top-[calc(env(safe-area-inset-top)+1rem)] left-4 text-muted-foreground/60 p-2"
         aria-label={coachMuted ? "Ativar voz do coach" : "Silenciar voz do coach"}
       >
         {coachMuted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
@@ -508,7 +508,7 @@ function FocusMode() {
 
       <button
         onClick={() => navigate({ to: "/" })}
-        className="absolute top-4 right-4 text-muted-foreground/60 p-2"
+        className="absolute top-[calc(env(safe-area-inset-top)+1rem)] right-4 text-muted-foreground/60 p-2"
         aria-label="Fechar"
       >
         <X className="size-5" />
