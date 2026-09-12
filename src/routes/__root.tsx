@@ -156,7 +156,12 @@ function RootComponent() {
   const hideNav = pathname.startsWith("/focus") || pathname.startsWith("/auth");
   const tasks = useStore((s) => s.tasks);
   const sessions = useStore((s) => s.sessions);
+  const theme = useStore((s) => s.theme);
   const firedAlarms = useRef(new Set<string>());
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     track("app_open");

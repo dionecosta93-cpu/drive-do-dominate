@@ -57,7 +57,14 @@ export const FEATURE_LABEL: Record<Feature, string> = {
   cloud_sync: "Sincronização na nuvem",
   priority_sync: "Sincronização prioritária + backup",
   pdf_export: "Exportar relatórios em PDF",
-  custom_themes: "Temas (claro, escuro, AMOLED)",
+  custom_themes: "Temas (claro, escuro, divertido)",
+};
+
+/** Limite de comandos no chat do assistente por dia — ajuste livremente. */
+export const CHAT_DAILY_LIMIT: Record<PlanId, number> = {
+  free: 5,
+  pro: 15,
+  premium: 30,
 };
 
 const FREE: Feature[] = [
@@ -67,6 +74,7 @@ const FREE: Feature[] = [
   "calendar",
   "devotional",
   "cloud_sync",
+  "ai_assistant",
 ];
 const PRO: Feature[] = [
   ...FREE,
@@ -77,7 +85,7 @@ const PRO: Feature[] = [
   "unlimited_goals",
   "voice_coach",
 ];
-const PREMIUM: Feature[] = [...PRO, "ai_assistant", "priority_sync", "pdf_export", "custom_themes"];
+const PREMIUM: Feature[] = [...PRO, "priority_sync", "pdf_export", "custom_themes"];
 
 export const PLANS: Plan[] = [
   {

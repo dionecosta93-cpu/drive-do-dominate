@@ -60,16 +60,19 @@ export type Database = {
         Row: {
           user_id: string;
           usage_date: string;
+          feature: string;
           count: number;
         };
         Insert: {
           user_id: string;
           usage_date?: string;
+          feature?: string;
           count?: number;
         };
         Update: {
           user_id?: string;
           usage_date?: string;
+          feature?: string;
           count?: number;
         };
         Relationships: [];

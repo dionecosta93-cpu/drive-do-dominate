@@ -586,6 +586,18 @@ function Dashboard() {
         </div>
         <ChevronRight className="size-4 text-muted-foreground" />
       </Link>
+
+      <Link
+        to="/settings"
+        onClick={() => track("feature_used", { feature: "settings_opened" })}
+        className="flex items-center justify-between bg-surface border border-border rounded-2xl p-4 mb-4"
+      >
+        <div className="flex items-center gap-3">
+          <Sparkles className="size-5 text-warning" />
+          <span className="text-sm font-bold">Aparência (temas)</span>
+        </div>
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </Link>
     </div>
   );
 }

@@ -134,9 +134,13 @@ CREATE POLICY "Users read own plan" ON public.user_plans FOR SELECT USING (auth.
 CREATE TABLE IF NOT EXISTS public.ai_usage (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   usage_date DATE NOT NULL DEFAULT current_date,
+  feature TEXT NOT NULL DEFAULT 'ai_assistant',
   count INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (user_id, usage_date)
+  PRIMARY KEY (user_id, usage_date, feature)
 );
+ALTER TABLE public.ai_usage ADD COLUMN IF NOT EXISTS feature TEXT NOT NULL DEFAULT 'ai_assistant';
+ALTER TABLE public.ai_usage DROP CONSTRAINT IF EXISTS ai_usage_pkey;
+ALTER TABLE public.ai_usage ADD PRIMARY KEY (user_id, usage_date, feature);
 ALTER TABLE public.ai_usage ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.ai_usage TO authenticated;
 GRANT ALL ON public.ai_usage TO service_role;

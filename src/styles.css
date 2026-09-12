@@ -93,6 +93,88 @@
   color-scheme: dark;
 }
 
+/* Tema Claro — RequireFeature "custom_themes" (Premium). Ver src/lib/store.ts (theme). */
+:root[data-theme="claro"] {
+  --background: #f7f7f6;
+  --foreground: #0a0a0a;
+  --surface: #ffffff;
+  --surface-2: #eeeeec;
+
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --secondary: #eeeeec;
+  --secondary-foreground: #0a0a0a;
+  --muted: #eeeeec;
+  --muted-foreground: #6b6b6b;
+  --accent: #eeeeec;
+  --accent-foreground: #0a0a0a;
+
+  --discipline: #16a34a;
+  --struggle: #dc2626;
+  --warning: #b45309;
+  --info: #2563eb;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.14);
+  --ring: #16a34a;
+
+  --chart-1: #16a34a;
+  --chart-2: #b45309;
+  --chart-3: #dc2626;
+  --chart-4: #2563eb;
+  --chart-5: #7c3aed;
+
+  color-scheme: light;
+}
+
+/* Tema Divertido — RequireFeature "custom_themes" (Premium). */
+:root[data-theme="divertido"] {
+  --background: #1a1025;
+  --foreground: #fdf4ff;
+  --surface: #2a1b3d;
+  --surface-2: #3d2a54;
+
+  --card: #2a1b3d;
+  --card-foreground: #fdf4ff;
+  --popover: #2a1b3d;
+  --popover-foreground: #fdf4ff;
+
+  --primary: #fdf4ff;
+  --primary-foreground: #1a1025;
+  --secondary: #3d2a54;
+  --secondary-foreground: #fdf4ff;
+  --muted: #3d2a54;
+  --muted-foreground: #c4b5d4;
+  --accent: #3d2a54;
+  --accent-foreground: #fdf4ff;
+
+  --discipline: #22d3ee;
+  --struggle: #fb7185;
+  --warning: #fbbf24;
+  --info: #38bdf8;
+
+  --destructive: #fb7185;
+  --destructive-foreground: #1a1025;
+  --border: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.18);
+  --ring: #22d3ee;
+
+  --chart-1: #22d3ee;
+  --chart-2: #fbbf24;
+  --chart-3: #fb7185;
+  --chart-4: #a78bfa;
+  --chart-5: #4ade80;
+
+  color-scheme: dark;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

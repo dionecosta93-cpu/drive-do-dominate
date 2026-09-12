@@ -363,8 +363,11 @@ export interface ShoppingList {
   updatedAt: number;
 }
 
+export type AppTheme = "escuro" | "claro" | "divertido";
+
 interface State {
   userName: string;
+  theme: AppTheme;
   tasks: Task[];
   completedToday: string[];
   sessions: CompletedSession[];
@@ -498,6 +501,7 @@ interface State {
   removeObjective: (goalId: string, objectiveId: string) => void;
 
   setUserName: (n: string) => void;
+  setTheme: (theme: AppTheme) => void;
   setOnboarded: (b: boolean) => void;
   addTask: (
     t: Omit<Task, "id" | "createdAt" | "scheduledDate"> & { scheduledDate?: string },
@@ -561,6 +565,7 @@ export const useStore = create<State>()(
   persist(
     (set, get) => ({
       userName: "",
+      theme: "escuro",
       tasks: [],
       completedToday: [],
       sessions: [],
@@ -1175,6 +1180,7 @@ export const useStore = create<State>()(
         })),
 
       setUserName: (userName) => set({ userName }),
+      setTheme: (theme) => set({ theme }),
       setOnboarded: (onboarded) => set({ onboarded }),
 
       addTask: (t) => {
@@ -1509,6 +1515,7 @@ export const useStore = create<State>()(
           transactions: [],
           assistantMessages: [],
           userName: "",
+          theme: "escuro",
 
           tasks: [],
           completedToday: [],

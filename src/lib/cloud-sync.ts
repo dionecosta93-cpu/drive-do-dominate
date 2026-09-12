@@ -5,6 +5,7 @@ import { isOnline, setSyncState } from "@/lib/sync-status";
 // Fields we sync to the cloud (mirrors zustand persisted state).
 const SYNC_KEYS = [
   "userName",
+  "theme",
   "tasks",
   "completedToday",
   "sessions",

@@ -6,13 +6,17 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { hasFeature, type Feature, type PlanId } from "@/lib/plans";
+import { hasFeature, CHAT_DAILY_LIMIT, type Feature, type PlanId } from "@/lib/plans";
 
-/** Cota diária de chamadas de IA por plano — ajuste livremente. */
-const DAILY_LIMIT: Record<PlanId, number> = {
-  free: 0,
-  pro: 30,
-  premium: 100,
+/**
+ * Cota diária por feature — cada uma conta separado (ai_usage.feature), então
+ * usar o assistente de chat não consome a cota do coach de voz nem da busca de
+ * livro, e vice-versa. Ajuste livremente.
+ */
+const DAILY_LIMIT: Partial<Record<Feature, Record<PlanId, number>>> = {
+  ai_assistant: CHAT_DAILY_LIMIT,
+  voice_coach: { free: 0, pro: 20, premium: 60 },
+  reading: { free: 0, pro: 20, premium: 60 },
 };
 
 export interface AiAccessResult {
@@ -51,7 +55,7 @@ export async function checkAiAccess(request: Request, feature: Feature): Promise
     .maybeSingle();
   const plan = (planRow?.plan as PlanId | undefined) ?? "free";
 
-  const limit = DAILY_LIMIT[plan];
+  const limit = DAILY_LIMIT[feature]?.[plan] ?? 0;
   if (limit <= 0 || !hasFeature(feature, plan)) {
     return { ok: false, status: 403, error: "plan_required", userId };
   }
@@ -62,6 +66,7 @@ export async function checkAiAccess(request: Request, feature: Feature): Promise
     .select("count")
     .eq("user_id", userId)
     .eq("usage_date", today)
+    .eq("feature", feature)
     .maybeSingle();
   const used = usageRow?.count ?? 0;
   if (used >= limit) {
@@ -71,8 +76,8 @@ export async function checkAiAccess(request: Request, feature: Feature): Promise
   await admin
     .from("ai_usage")
     .upsert(
-      { user_id: userId, usage_date: today, count: used + 1 },
-      { onConflict: "user_id,usage_date" },
+      { user_id: userId, usage_date: today, feature, count: used + 1 },
+      { onConflict: "user_id,usage_date,feature" },
     );
 
   return { ok: true, status: 200, userId };
