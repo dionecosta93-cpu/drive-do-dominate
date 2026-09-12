@@ -75,6 +75,7 @@ const FREE: Feature[] = [
   "devotional",
   "cloud_sync",
   "ai_assistant",
+  "custom_themes",
 ];
 const PRO: Feature[] = [
   ...FREE,
@@ -85,7 +86,7 @@ const PRO: Feature[] = [
   "unlimited_goals",
   "voice_coach",
 ];
-const PREMIUM: Feature[] = [...PRO, "priority_sync", "pdf_export", "custom_themes"];
+const PREMIUM: Feature[] = [...PRO, "priority_sync", "pdf_export"];
 
 export const PLANS: Plan[] = [
   {
