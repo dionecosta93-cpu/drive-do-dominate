@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
 import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
+const GEMINI_MODEL = "gemini-3.6-flash";
+
 const SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -101,66 +103,21 @@ export const Route = createFileRoute("/api/book-search")({
         }
         if (!query) return Response.json({ error: "empty" }, { status: 400 });
 
-        const upstream = await fetch(`${ai.base}/v1/responses`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...ai.authHeaders,
-          },
-          body: JSON.stringify({
-            model: "openai/gpt-5.6-sol",
-            input: [
-              { role: "developer", content: [{ type: "input_text", text: SYSTEM }] },
-              { role: "user", content: [{ type: "input_text", text: `Livro: ${query}` }] },
-            ],
-            stream: true,
-            store: false,
-            reasoning: { effort: "low" },
-            text: { format: { type: "json_schema", name: "livros", strict: true, schema: SCHEMA } },
-          }),
-        });
-
-        if (!upstream.ok || !upstream.body) {
-          const detail = await upstream.text().catch(() => "");
-          return Response.json({ error: "ai_failed", detail }, { status: upstream.status || 500 });
-        }
-
-        const reader = upstream.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        let text = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-          for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
-            const raw = line.slice(5).trim();
-            if (!raw || raw === "[DONE]") continue;
-            try {
-              const evt = JSON.parse(raw) as {
-                type?: string;
-                delta?: string;
-                response?: { output_text?: string };
-              };
-              if (evt.type === "response.output_text.delta" && typeof evt.delta === "string")
-                text += evt.delta;
-              else if (evt.type === "response.completed" && evt.response?.output_text && !text)
-                text = evt.response.output_text;
-            } catch {
-              /* ignora evento malformado */
-            }
-          }
-        }
-
+        const { geminiGenerateJson, toGeminiSchema } = await import("@/lib/gemini.server");
         try {
-          const parsed = JSON.parse(text || "{}") as { results?: Candidate[] };
+          const text = await geminiGenerateJson(
+            ai,
+            GEMINI_MODEL,
+            SYSTEM,
+            [{ role: "user", parts: [{ text: `Livro: ${query}` }] }],
+            toGeminiSchema(SCHEMA),
+          );
+          const parsed = JSON.parse(text) as { results?: Candidate[] };
           const results = Array.isArray(parsed.results) ? parsed.results.slice(0, 4) : [];
           await attachCovers(results);
           return Response.json({ results });
-        } catch {
+        } catch (e) {
+          console.error("[book-search] gemini failed", e);
           return Response.json({ results: [] });
         }
       },

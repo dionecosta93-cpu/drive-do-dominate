@@ -2,6 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
 import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
+const GEMINI_MODEL = "gemini-2.5-flash-preview-tts";
+const VOICE_INSTRUCTIONS =
+  "Fale em português brasileiro com voz masculina firme, grave, intensa e impactante — como um treinador militar motivando o atleta a não parar. Ritmo confiante, tom decisivo, sem gritar.";
+
 export const Route = createFileRoute("/api/tts")({
   server: {
     handlers: {
@@ -30,36 +34,19 @@ export const Route = createFileRoute("/api/tts")({
           });
         }
 
-        const upstream = await fetch(`${ai.base}/v1/audio/speech`, {
-          method: "POST",
-          headers: {
-            ...ai.authHeaders,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "openai/gpt-4o-mini-tts",
-            input: text,
-            voice: "onyx",
-            response_format: "mp3",
-            instructions:
-              "Fale em português brasileiro com voz masculina firme, grave, intensa e impactante — como um treinador militar motivando o atleta a não parar. Ritmo confiante, tom decisivo, sem gritar.",
-          }),
-        });
-
-        if (!upstream.ok) {
-          const errText = await upstream.text().catch(() => "");
-          return new Response(
-            JSON.stringify({ error: "tts_failed", status: upstream.status, detail: errText }),
-            { status: upstream.status, headers: { "Content-Type": "application/json" } },
-          );
+        const { geminiSynthesizeSpeech } = await import("@/lib/gemini.server");
+        try {
+          const wav = await geminiSynthesizeSpeech(ai, GEMINI_MODEL, text, VOICE_INSTRUCTIONS);
+          return new Response(new Uint8Array(wav), {
+            headers: { "Content-Type": "audio/wav", "Cache-Control": "no-store" },
+          });
+        } catch (e) {
+          console.error("[tts] gemini failed", e);
+          return new Response(JSON.stringify({ error: "tts_failed" }), {
+            status: 502,
+            headers: { "Content-Type": "application/json" },
+          });
         }
-
-        return new Response(upstream.body, {
-          headers: {
-            "Content-Type": "audio/mpeg",
-            "Cache-Control": "no-store",
-          },
-        });
       },
     },
   },

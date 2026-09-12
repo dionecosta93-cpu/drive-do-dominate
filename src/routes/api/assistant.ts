@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
 import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
+const GEMINI_MODEL = "gemini-3.6-flash";
+
 const ACTION_TYPES = [
   "criar_tarefa",
   "atualizar_tarefa",
@@ -146,88 +148,31 @@ export const Route = createFileRoute("/api/assistant")({
         if (!messages.length) return Response.json({ error: "empty" }, { status: 400 });
 
         const today = new Date().toISOString().slice(0, 10);
-        const input = [
-          {
-            role: "developer",
-            content: [{ type: "input_text", text: `${SYSTEM}\n\nHoje é ${today}.` }],
-          },
-          ...messages.map((m) =>
-            m.role === "assistant"
-              ? { role: "assistant", content: [{ type: "output_text", text: m.content }] }
-              : { role: "user", content: [{ type: "input_text", text: m.content }] },
-          ),
-          {
-            role: "user",
-            content: [{ type: "input_text", text: `CONTEXTO ATUAL (JSON):\n${context}` }],
-          },
+        const contents = [
+          ...messages.map((m) => ({
+            role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
+            parts: [{ text: m.content }],
+          })),
+          { role: "user" as const, parts: [{ text: `CONTEXTO ATUAL (JSON):\n${context}` }] },
         ];
 
-        const upstream = await fetch(`${ai.base}/v1/responses`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...ai.authHeaders,
-          },
-          body: JSON.stringify({
-            model: "openai/gpt-5.6-sol",
-            input,
-            stream: true,
-            store: false,
-            reasoning: { effort: "low" },
-            text: {
-              format: { type: "json_schema", name: "resposta", strict: true, schema: SCHEMA },
-            },
-          }),
-        });
-
-        if (!upstream.ok || !upstream.body) {
-          const detail = await upstream.text().catch(() => "");
-          return Response.json(
-            { error: "ai_failed", status: upstream.status, detail },
-            { status: upstream.status || 500 },
-          );
-        }
-
-        // Consume the SSE stream and accumulate the final JSON text.
-        const reader = upstream.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        let text = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-          for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
-            const raw = line.slice(5).trim();
-            if (!raw || raw === "[DONE]") continue;
-            try {
-              const evt = JSON.parse(raw) as {
-                type?: string;
-                delta?: string;
-                response?: { output_text?: string };
-              };
-              if (evt.type === "response.output_text.delta" && typeof evt.delta === "string") {
-                text += evt.delta;
-              } else if (evt.type === "response.completed" && evt.response?.output_text) {
-                if (!text) text = evt.response.output_text;
-              }
-            } catch {
-              /* ignore malformed event */
-            }
-          }
-        }
-
+        const { geminiGenerateJson, toGeminiSchema } = await import("@/lib/gemini.server");
         try {
-          const parsed = JSON.parse(text || "{}") as { reply?: string; actions?: unknown[] };
+          const text = await geminiGenerateJson(
+            ai,
+            GEMINI_MODEL,
+            `${SYSTEM}\n\nHoje é ${today}.`,
+            contents,
+            toGeminiSchema(SCHEMA),
+          );
+          const parsed = JSON.parse(text) as { reply?: string; actions?: unknown[] };
           return Response.json({
             reply: parsed.reply ?? "Não consegui formular uma resposta agora.",
             actions: Array.isArray(parsed.actions) ? parsed.actions : [],
           });
-        } catch {
-          return Response.json({ reply: text || "Não consegui responder agora.", actions: [] });
+        } catch (e) {
+          console.error("[assistant] gemini failed", e);
+          return Response.json({ error: "ai_failed" }, { status: 502 });
         }
       },
     },

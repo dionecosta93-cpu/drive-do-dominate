@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { guardApiRequest } from "@/lib/api-guard";
 import { getAiGateway, aiDisabledResponse } from "@/lib/ai-gateway";
 
+const GEMINI_MODEL = "gemini-3.5-transcribe";
+
 export const Route = createFileRoute("/api/transcribe")({
   server: {
     handlers: {
@@ -27,23 +29,14 @@ export const Route = createFileRoute("/api/transcribe")({
         if (file.size > 20 * 1024 * 1024)
           return Response.json({ error: "too_large" }, { status: 413 });
 
-        const upstream = new FormData();
-        upstream.append("model", "openai/gpt-4o-transcribe");
-        upstream.append("language", "pt");
-        upstream.append("file", file, file.name || "recording.webm");
-
-        const res = await fetch(`${ai.base}/v1/audio/transcriptions`, {
-          method: "POST",
-          headers: ai.authHeaders,
-          body: upstream,
-        });
-
-        if (!res.ok) {
-          const detail = await res.text().catch(() => "");
-          return Response.json({ error: "stt_failed", detail }, { status: res.status });
+        const { geminiTranscribe } = await import("@/lib/gemini.server");
+        try {
+          const text = await geminiTranscribe(ai, GEMINI_MODEL, file);
+          return Response.json({ text });
+        } catch (e) {
+          console.error("[transcribe] gemini failed", e);
+          return Response.json({ error: "stt_failed" }, { status: 502 });
         }
-        const data = (await res.json()) as { text?: string };
-        return Response.json({ text: data.text ?? "" });
       },
     },
   },
