@@ -113,6 +113,14 @@ function attachConnectivityListeners() {
     void flushPendingSync();
   });
   window.addEventListener("offline", () => setSyncState("offline"));
+
+  // navigator.onLine só diz se a interface de rede está ativa, não se o
+  // Supabase está de fato alcançável — sem isso, uma falha de push ficava
+  // "pendente" e só tentava de novo no próximo evento "online" do navegador
+  // ou na próxima mudança de dado (podia ficar preso por muito tempo).
+  window.setInterval(() => {
+    if (pendingLocalChanges && isOnline()) void flushPendingSync();
+  }, 30_000);
 }
 
 export async function attachCloudSyncForUser(userId: string) {
@@ -137,10 +145,21 @@ export async function attachCloudSyncForUser(userId: string) {
       if (data?.data && typeof data.data === "object") {
         useStore.setState(data.data as never);
         setSyncState("sincronizado");
-      } else {
-        // First sign-in: seed cloud row with current local state.
+      } else if (!useStore.getState().onboarded) {
+        // Nenhuma linha na nuvem, e o app local nunca passou do onboarding —
+        // é mesmo um primeiro login: semeia a nuvem com o estado local.
         hydrating = false;
         await pushNow(userId);
+      } else {
+        // Nenhuma linha na nuvem, mas o app local já tem uso (onboarded) —
+        // não é um "primeiro login" normal, então não sobrescreve a nuvem
+        // (que pode ter dados reais por trás de um erro/linha apagada).
+        // Mantém os dados locais na tela e tenta de novo depois.
+        console.warn(
+          "[cloud-sync] sem linha na nuvem para usuário já onboarded — não sobrescrevendo",
+        );
+        pendingLocalChanges = true;
+        setSyncState("pendente");
       }
     } catch (e) {
       console.warn("[cloud-sync] hydrate failed", e);
