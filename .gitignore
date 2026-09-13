@@ -41,6 +41,10 @@ dist-ssr
 android/keystore.properties
 *.keystore
 *.jks
+# Exceção: keystore de DEBUG é fixo e versionado de propósito (senha/alias públicos
+# da convenção Android) para toda build de CI assinar com a mesma chave -- sem isso
+# o Android recusa instalar um APK novo por cima do anterior (assinaturas diferentes).
+!android/app/debug.keystore
 android/app/build/
 android/build/
 android/.gradle/
