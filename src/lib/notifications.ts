@@ -455,13 +455,21 @@ export async function listenNotificationActions(
 ): Promise<() => void> {
   const ln = await plugin();
   if (!ln) return () => {};
-  const sub = await ln.addListener("localNotificationActionPerformed", (event) => {
-    const extra = (event.notification.extra ?? {}) as {
-      taskId?: string;
-      date?: string;
-      kind?: string;
-    };
-    handler({ ...extra, actionId: event.actionId });
-  });
-  return () => void sub.remove();
+  try {
+    const sub = await ln.addListener("localNotificationActionPerformed", (event) => {
+      const extra = (event.notification.extra ?? {}) as {
+        taskId?: string;
+        date?: string;
+        kind?: string;
+      };
+      handler({ ...extra, actionId: event.actionId });
+    });
+    return () => void sub.remove();
+  } catch (e) {
+    // Ponte nativa indisponível (ex.: contexto restaurado offline sem
+    // reinicialização completa do Capacitor) — sem isso, essa promise
+    // rejeitada ficava sem dono e virava um erro não tratado.
+    console.warn("[notifications] addListener failed", e);
+    return () => {};
+  }
 }

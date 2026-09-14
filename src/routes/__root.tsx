@@ -281,16 +281,22 @@ function RootComponent() {
   useEffect(() => {
     if (!isNativeApp()) return;
     let remove: (() => void) | undefined;
-    void import("@capacitor/app").then(({ App }) =>
-      App.addListener("appStateChange", ({ isActive }) => {
-        if (isActive) {
-          void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
-          void syncMotivationalNotifications();
-        }
-      }).then((h) => {
-        remove = () => void h.remove();
-      }),
-    );
+    void import("@capacitor/app")
+      .then(({ App }) =>
+        App.addListener("appStateChange", ({ isActive }) => {
+          if (isActive) {
+            void syncTaskNotifications(useStore.getState().tasks, useStore.getState().sessions);
+            void syncMotivationalNotifications();
+          }
+        }).then((h) => {
+          remove = () => void h.remove();
+        }),
+      )
+      .catch((e) => {
+        // Ponte nativa indisponível (ex.: contexto restaurado offline) — sem
+        // isso, essa promise rejeitada ficava sem dono.
+        console.warn("[app] addListener appStateChange failed", e);
+      });
     return () => remove?.();
   }, []);
 
@@ -313,9 +319,13 @@ function RootComponent() {
       }
       // "reagendar" e toque simples abrem os detalhes da tarefa.
       void router.navigate({ to: "/tasks/$id/edit", params: { id: taskId } });
-    }).then((c) => {
-      cleanup = c;
-    });
+    })
+      .then((c) => {
+        cleanup = c;
+      })
+      .catch((e) => {
+        console.warn("[notifications] listenNotificationActions failed", e);
+      });
     return () => cleanup?.();
   }, [router]);
 
