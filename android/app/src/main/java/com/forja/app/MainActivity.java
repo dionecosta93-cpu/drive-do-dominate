@@ -47,11 +47,21 @@ public class MainActivity extends BridgeActivity {
   private boolean isOnline() {
     try {
       ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-      if (cm == null) return true; // não deu pra checar: não bloqueia o fluxo normal
+      if (cm == null) return false; // não deu pra checar: assume offline (mais seguro aqui --
+      // servir a página local por engano é inofensivo, servir a URL remota por engano
+      // é o próprio bug que estamos evitando).
       NetworkCapabilities caps = cm.getNetworkCapabilities(cm.getActiveNetwork());
-      return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+      if (caps == null) return false;
+      // NET_CAPABILITY_INTERNET só diz que a rede DEVERIA ter internet (propriedade
+      // estática do transporte); NET_CAPABILITY_VALIDATED é o Android confirmando de
+      // fato o acesso (probe periódico) -- exigir os dois evita falso positivo com
+      // wifi "conectado" mas sem internet real.
+      return (
+        caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+        caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+      );
     } catch (Exception e) {
-      return true;
+      return false;
     }
   }
 }
