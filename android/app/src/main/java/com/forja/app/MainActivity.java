@@ -30,9 +30,16 @@ public class MainActivity extends BridgeActivity {
       }
     }
     super.onCreate(savedInstanceState);
+    OfflineAssetStore assetStore = new OfflineAssetStore(this);
+    // Ponte pro JS avisar quais arquivos (CSS/JS da página atual) guardar em disco
+    // enquanto está online -- ver src/lib/html-snapshot.ts. shouldInterceptRequest
+    // sozinho não basta pra servir esses arquivos offline; precisa de uma cópia
+    // salva de antemão.
+    this.bridge.getWebView().addJavascriptInterface(new OfflineBridge(assetStore), "AndroidOffline");
     // Troca o cliente padrão por um que sabe servir a tela offline local
-    // (public/offline-app.html) se a internet cair DEPOIS do app já aberto.
-    this.bridge.getWebView().setWebViewClient(new OfflineWebViewClient(this.bridge));
+    // (public/offline-app.html) e os arquivos guardados acima, se a internet cair
+    // depois do app já aberto.
+    this.bridge.getWebView().setWebViewClient(new OfflineWebViewClient(this.bridge, assetStore));
   }
 
   private static String hostFromServerUrl(String serverUrl) {
