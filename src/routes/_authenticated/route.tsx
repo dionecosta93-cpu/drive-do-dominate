@@ -4,13 +4,30 @@ import { RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/error-reporting";
 
+const AUTH_CHECK_TIMEOUT_MS = 2500;
+
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    // getSession() lê a sessão persistida localmente (sem precisar de rede) —
+    // getSession() lê a sessão persistida localmente na maioria das vezes —
     // getUser() sempre valida contra o servidor e falhava aqui quando offline,
     // te chutando de volta pro /auth mesmo com sessão válida salva no aparelho.
-    const { data, error } = await supabase.auth.getSession();
+    // Mas getSession() pode tentar renovar o token pela rede se ele estiver
+    // perto de expirar, e esse beforeLoad roda em TODA navegação dentro de
+    // /_authenticated — sem internet (ou com rede lenta), isso travava a troca
+    // de tela por vários segundos, presa na tela anterior. Não vale a pena
+    // esperar mais que isso: se não resolver a tempo, segue em frente em vez
+    // de travar a navegação (sem deslogar à toa — a sessão local continua lá,
+    // só não deu tempo de confirmar/renovar agora).
+    const timedOut = Symbol("auth-check-timeout");
+    const result = await Promise.race([
+      supabase.auth.getSession(),
+      new Promise<typeof timedOut>((resolve) =>
+        setTimeout(() => resolve(timedOut), AUTH_CHECK_TIMEOUT_MS),
+      ),
+    ]);
+    if (result === timedOut) return {};
+    const { data, error } = result;
     if (error || !data.session) throw redirect({ to: "/auth" });
     return { user: data.session.user };
   },

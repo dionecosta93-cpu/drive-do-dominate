@@ -29,7 +29,12 @@ import {
 import { NotificationPermissionCard } from "@/components/notification-permission";
 import { setupServiceWorker } from "@/lib/pwa";
 import { startHtmlSnapshots } from "@/lib/html-snapshot";
+import { installGlobalErrorOverlay } from "@/lib/error-overlay";
 import { track, setAnalyticsUser } from "@/lib/track";
+
+// Registrado no escopo do módulo (não dentro de um efeito React) -- assim
+// pega erro mesmo se o React não conseguir nem montar. Ver src/lib/error-overlay.ts.
+installGlobalErrorOverlay();
 
 function NotFoundComponent() {
   return (

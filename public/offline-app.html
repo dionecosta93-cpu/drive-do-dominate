@@ -134,7 +134,13 @@
         try {
           var el = document.getElementById("diag");
           if (el)
-            el.textContent = (el.textContent ? el.textContent + "\n" : "") + "ERRO JS: " + msg + " (linha " + line + ")";
+            el.textContent =
+              (el.textContent ? el.textContent + "\n" : "") +
+              "ERRO JS: " +
+              msg +
+              " (linha " +
+              line +
+              ")";
         } catch (e) {
           /* nada a fazer */
         }
