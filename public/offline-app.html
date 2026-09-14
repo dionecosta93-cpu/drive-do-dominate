@@ -109,19 +109,52 @@
       <h1>📡 Forja offline</h1>
       <p>Sem internet agora — mostrando o que já está salvo no aparelho.</p>
     </header>
+    <p style="font-size: 10px; color: #3f3f46; text-align: center; margin: 0 0 12px">
+      build offline-app: 2026-09-14a
+    </p>
     <div id="root"></div>
     <button onclick="location.reload()">Tentar reconectar</button>
-    <p id="diag" style="margin-top: 24px; font-size: 10px; color: #52525b; text-align: center"></p>
+    <p
+      id="diag"
+      style="
+        margin-top: 24px;
+        font-size: 12px;
+        color: #d4d4d8;
+        text-align: center;
+        white-space: pre-wrap;
+        padding: 0 16px;
+      "
+    ></p>
+    <script>
+      // Registrado ANTES de qualquer outra coisa, num <script> separado -- se o
+      // script principal (abaixo) tiver qualquer erro de sintaxe ou lançar algo
+      // fora dos try/catch, ainda assim isso aparece na tela em vez de ficar tudo
+      // em branco sem pista nenhuma.
+      window.onerror = function (msg, src, line, col, err) {
+        try {
+          var el = document.getElementById("diag");
+          if (el)
+            el.textContent = (el.textContent ? el.textContent + "\n" : "") + "ERRO JS: " + msg + " (linha " + line + ")";
+        } catch (e) {
+          /* nada a fazer */
+        }
+      };
+      (function () {
+        var el = document.getElementById("diag");
+        if (el) el.textContent = "diagnóstico: iniciando...";
+      })();
+    </script>
     <script>
       (function () {
         function diag(msg) {
           try {
             var el = document.getElementById("diag");
-            if (el) el.textContent = (el.textContent ? el.textContent + " · " : "") + msg;
+            if (el) el.textContent = (el.textContent ? el.textContent + "\n" : "") + msg;
           } catch (e) {
             /* nada a fazer */
           }
         }
+        diag("script principal iniciado");
 
         // Tenta primeiro devolver o APP DE VERDADE (com todas as funções) a partir do
         // cache que o service worker já guardou (public/sw.js, cache "forja-html-v1").
