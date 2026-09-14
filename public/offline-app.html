@@ -111,23 +111,58 @@
     </header>
     <div id="root"></div>
     <button onclick="location.reload()">Tentar reconectar</button>
+    <p id="diag" style="margin-top: 24px; font-size: 10px; color: #52525b; text-align: center"></p>
     <script>
       (function () {
+        function diag(msg) {
+          try {
+            var el = document.getElementById("diag");
+            if (el) el.textContent = (el.textContent ? el.textContent + " · " : "") + msg;
+          } catch (e) {
+            /* nada a fazer */
+          }
+        }
+
         // Tenta primeiro devolver o APP DE VERDADE (com todas as funções) a partir do
         // cache que o service worker já guardou (public/sw.js, cache "forja-html-v1").
         // Só cai na lista simples abaixo se não achar nada cacheado ainda.
+        // Tenta várias chaves possíveis (a exata, a raiz com/sem barra) e, na falta
+        // delas, qualquer página HTML que já esteja cacheada -- ainda é melhor que a
+        // lista simples, porque é o app de verdade (o React troca de rota sozinho).
         async function tryRestoreRealApp() {
-          if (!("caches" in window)) return false;
+          if (!("caches" in window)) {
+            diag("cache: indisponível neste WebView");
+            return false;
+          }
           try {
             var cache = await caches.open("forja-html-v1");
-            var cached = (await cache.match(location.href)) || (await cache.match("/"));
-            if (!cached) return false;
+            var keys = await cache.keys();
+            diag("cache: " + keys.length + " página(s) salva(s)");
+
+            var candidates = [location.href, location.origin + "/", "/"];
+            var cached = null;
+            for (var i = 0; i < candidates.length && !cached; i++) {
+              cached = await cache.match(candidates[i]);
+            }
+            if (!cached && keys.length > 0) {
+              // Nenhuma das chaves óbvias bateu -- usa a primeira página HTML salva.
+              cached = await cache.match(keys[0]);
+            }
+            if (!cached) {
+              diag("nenhuma página em cache ainda");
+              return false;
+            }
             var html = await cached.text();
+            if (!html || html.length < 200) {
+              diag("página em cache vazia/curta (" + html.length + " chars)");
+              return false;
+            }
             document.open();
             document.write(html);
             document.close();
             return true;
           } catch (e) {
+            diag("erro ao ler cache: " + (e && e.message ? e.message : e));
             return false;
           }
         }

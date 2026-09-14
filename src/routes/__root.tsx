@@ -28,6 +28,7 @@ import {
 } from "@/lib/notifications";
 import { NotificationPermissionCard } from "@/components/notification-permission";
 import { setupServiceWorker } from "@/lib/pwa";
+import { startHtmlSnapshots } from "@/lib/html-snapshot";
 import { track, setAnalyticsUser } from "@/lib/track";
 
 function NotFoundComponent() {
@@ -250,6 +251,10 @@ function RootComponent() {
   useEffect(() => {
     void initNativeShell();
     setupServiceWorker();
+    // Garante que a tela offline (public/offline-app.html) tenha uma cópia
+    // recente do app pra restaurar — ver src/lib/html-snapshot.ts sobre por
+    // que isso não pode depender só do service worker no WebView Android.
+    startHtmlSnapshots();
   }, []);
 
   // Agendamento NATIVO (Android): recalcula tudo a cada mudança de tarefa/conclusão.
