@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Flame, MailCheck } from "lucide-react";
+import { MailCheck } from "lucide-react";
+import forjaLogo from "@/assets/forja-logo.png";
 import { track } from "@/lib/track";
 import { canTrustStoredSession } from "@/lib/offline-session";
 
@@ -227,10 +228,14 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center px-6 py-10 animate-rise">
-      <div className="flex items-center gap-2 mb-6">
-        <div className="size-9 rounded-lg bg-discipline grid place-items-center">
-          <Flame className="size-5 text-black" fill="currentColor" />
-        </div>
+      <div className="flex items-center gap-4 mb-6">
+        <img
+          src={forjaLogo}
+          alt="Forja"
+          width={96}
+          height={96}
+          className="size-24 rounded-[1.4rem] shadow-lg shadow-black/50"
+        />
         <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-discipline">
           Disciplina Absoluta
         </span>

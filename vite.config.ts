@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
         generateBundle(_options, bundle) {
           if (this.environment?.name !== "client") return;
           const files = Object.keys(bundle)
-            .filter((f) => /\.(js|css)$/.test(f))
+            .filter((f) => /\.(js|css|png|svg|woff2?)$/.test(f))
             .sort()
             .map((f) => `/${f}`);
           this.emitFile({
