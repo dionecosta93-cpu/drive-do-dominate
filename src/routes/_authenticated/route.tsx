@@ -3,13 +3,15 @@ import { useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/error-reporting";
+import { canTrustStoredSession } from "@/lib/offline-session";
 
 const AUTH_CHECK_TIMEOUT_MS = 2500;
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    // getSession() lê a sessão persistida localmente na maioria das vezes —
+    // getSession() lê a sessão persistida localmente na maioria das vezes (com token
+    // expirado ele tenta renovar pela rede; ver canTrustStoredSession) —
     // getUser() sempre valida contra o servidor e falhava aqui quando offline,
     // te chutando de volta pro /auth mesmo com sessão válida salva no aparelho.
     // Mas getSession() pode tentar renovar o token pela rede se ele estiver
@@ -28,8 +30,11 @@ export const Route = createFileRoute("/_authenticated")({
     ]);
     if (result === timedOut) return {};
     const { data, error } = result;
-    if (error || !data.session) throw redirect({ to: "/auth" });
-    return { user: data.session.user };
+    if (data.session) return { user: data.session.user };
+    // Sem internet + access token expirado, getSession() falha ao renovar e devolve
+    // sessão nula — mas a sessão salva continua válida; não expulsa pro login.
+    if (canTrustStoredSession(error)) return {};
+    throw redirect({ to: "/auth" });
   },
   component: () => <Outlet />,
   pendingComponent: AuthPending,

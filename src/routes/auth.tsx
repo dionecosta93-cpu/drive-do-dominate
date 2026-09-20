@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Flame, MailCheck } from "lucide-react";
 import { track } from "@/lib/track";
+import { canTrustStoredSession } from "@/lib/offline-session";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
   beforeLoad: async () => {
     // getSession() (não getUser()) para reconhecer sessão salva mesmo offline.
-    const { data } = await supabase.auth.getSession();
-    if (data.session) throw redirect({ to: "/" });
+    const { data, error } = await supabase.auth.getSession();
+    if (data.session || canTrustStoredSession(error)) throw redirect({ to: "/" });
   },
   component: AuthPage,
 });

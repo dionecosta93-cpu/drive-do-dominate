@@ -252,6 +252,9 @@ export function planMotivationalNotifications(now = new Date()): PlannedMotivati
 
 let ready = false;
 
+// Devolve o plugin dentro de um objeto ({ ln }), NUNCA direto: retornar o plugin do
+// Capacitor (um Proxy) de uma função async faz a promessa chamar `.then` nele, e no
+// Android isso lança "LocalNotifications.then() is not implemented on android".
 async function plugin() {
   if (!isNativeApp()) return null;
   try {
@@ -321,7 +324,7 @@ async function plugin() {
       });
       ready = true;
     }
-    return LocalNotifications;
+    return { ln: LocalNotifications };
   } catch {
     return null;
   }
@@ -329,7 +332,7 @@ async function plugin() {
 
 /** Permissão concedida? (sem pedir) */
 export async function notificationsGranted(): Promise<boolean> {
-  const ln = await plugin();
+  const ln = (await plugin())?.ln;
   if (!ln) {
     if (typeof window === "undefined" || !("Notification" in window)) return false;
     return Notification.permission === "granted";
@@ -347,7 +350,7 @@ export async function syncTaskNotifications(
   tasks: Task[],
   sessions: CompletedSession[],
 ): Promise<number> {
-  const ln = await plugin();
+  const ln = (await plugin())?.ln;
   if (!ln) return 0;
   try {
     const perm = await ln.checkPermissions();
@@ -390,7 +393,7 @@ export async function syncTaskNotifications(
  * sincronização da tarefa, só que sem depender de tarefas/sessões.
  */
 export async function syncMotivationalNotifications(): Promise<number> {
-  const ln = await plugin();
+  const ln = (await plugin())?.ln;
   if (!ln) return 0;
   try {
     const perm = await ln.checkPermissions();
@@ -430,7 +433,7 @@ export async function syncMotivationalNotifications(): Promise<number> {
 
 /** Cancela tudo que a Forja agendou (ex.: logout). */
 export async function cancelAllTaskNotifications() {
-  const ln = await plugin();
+  const ln = (await plugin())?.ln;
   if (!ln) return;
   try {
     const pending = await ln.getPending();
@@ -453,7 +456,7 @@ export interface NotificationTap {
 export async function listenNotificationActions(
   handler: (t: NotificationTap) => void,
 ): Promise<() => void> {
-  const ln = await plugin();
+  const ln = (await plugin())?.ln;
   if (!ln) return () => {};
   try {
     const sub = await ln.addListener("localNotificationActionPerformed", (event) => {

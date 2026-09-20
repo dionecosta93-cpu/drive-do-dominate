@@ -52,10 +52,18 @@ function render() {
   el.textContent = shown.join("\n---\n");
 }
 
+// Erros de hidratação que o React JÁ resolve sozinho (refaz a árvore no cliente) —
+// #418 texto diferente do servidor, #423 falha de hidratação recuperada, #425 texto
+// divergente. Acontecem normalmente ao restaurar o app offline (o DOM restaurado nem
+// sempre é idêntico ao que o cliente renderiza) e não quebram nada, então não valem
+// um banner vermelho. O erro continua no console.
+const RECOVERABLE_HYDRATION = new RegExp("react[.]dev[/]errors[/](418|423|425)([^0-9]|$)");
+
 export function installGlobalErrorOverlay() {
   if (installed || typeof window === "undefined") return;
   installed = true;
   window.addEventListener("error", (e) => {
+    if (RECOVERABLE_HYDRATION.test(e.message)) return;
     showBanner(`ERRO: ${e.message}\n${e.filename}:${e.lineno}:${e.colno}`);
   });
   window.addEventListener("unhandledrejection", (e) => {
