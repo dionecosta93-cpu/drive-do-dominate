@@ -1,14 +1,14 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { WifiOff, RefreshCw, Check, Wifi } from "lucide-react";
+import { RefreshCw, Check, Wifi } from "lucide-react";
 import { getSyncState, subscribeSyncState } from "@/lib/sync-status";
 import { flushPendingSync } from "@/lib/cloud-sync";
 
 /**
  * Indicador de conexão e sincronização.
- * 📡 Offline → 🔄 Sincronizando... → ✓ Tudo sincronizado (some sozinho).
+ * 🔄 Sincronizando... → ✓ Tudo sincronizado (some sozinho). Sem aviso de "offline":
+ * o app funciona normal sem internet, então a barra vermelha só atrapalhava.
  */
 export function OfflineBanner() {
-  const [offline, setOffline] = useState(false);
   const [justReconnected, setJustReconnected] = useState(false);
   const syncState = useSyncExternalStore(
     subscribeSyncState,
@@ -17,38 +17,23 @@ export function OfflineBanner() {
   );
 
   useEffect(() => {
-    const setFrom = (isOffline: boolean) => {
-      setOffline(isOffline);
-      if (!isOffline) {
-        setJustReconnected(true);
-        void flushPendingSync();
-        window.setTimeout(() => setJustReconnected(false), 4000);
-      }
+    let timer: number | undefined;
+    const onOnline = () => {
+      setJustReconnected(true);
+      void flushPendingSync();
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setJustReconnected(false), 4000);
     };
-    setOffline(!navigator.onLine);
-    const on = () => setFrom(false);
-    const off = () => setFrom(true);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", off);
+    window.addEventListener("online", onOnline);
     return () => {
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", off);
+      window.removeEventListener("online", onOnline);
+      window.clearTimeout(timer);
     };
   }, []);
 
-  if (offline) {
-    return (
-      <div
-        role="status"
-        className="sticky top-0 z-[70] flex items-center justify-center gap-2 bg-struggle px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-white"
-      >
-        <WifiOff className="size-3.5" />
-        📡 Offline — suas alterações ficam salvas e sincronizam depois.
-      </div>
-    );
-  }
-
-  if (syncState === "sincronizando" || syncState === "pendente") {
+  // Sem internet a sincronização fica pendente por natureza — não mostra spinner à toa.
+  const offline = typeof navigator !== "undefined" && !navigator.onLine;
+  if (!offline && (syncState === "sincronizando" || syncState === "pendente")) {
     return (
       <div
         role="status"
