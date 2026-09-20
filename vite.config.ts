@@ -54,6 +54,25 @@ export default defineConfig(({ mode }) => {
         },
       }),
       viteReact(),
+      // Lista de TODOS os JS/CSS do build cliente (/asset-manifest.json). O app usa isso
+      // pra guardar a cópia offline completa (src/lib/html-snapshot.ts): o HTML só
+      // referencia o entry + os modulepreload da página atual, mas as outras telas são
+      // chunks carregados sob demanda — sem eles offline a navegação quebra.
+      {
+        name: "forja-asset-manifest",
+        generateBundle(_options, bundle) {
+          if (this.environment?.name !== "client") return;
+          const files = Object.keys(bundle)
+            .filter((f) => /\.(js|css)$/.test(f))
+            .sort()
+            .map((f) => `/${f}`);
+          this.emitFile({
+            type: "asset",
+            fileName: "asset-manifest.json",
+            source: JSON.stringify({ files }),
+          });
+        },
+      },
       // O service worker (offline/PWA) é um arquivo estático em public/sw.js,
       // não gerado pelo vite-plugin-pwa: no pipeline nitro/vite (build multi-ambiente),
       // o generateSW do plugin escreve num diretório intermediário que o nitro já

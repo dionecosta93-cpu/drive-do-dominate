@@ -110,7 +110,7 @@
       <p>Sem internet agora — mostrando o que já está salvo no aparelho.</p>
     </header>
     <p style="font-size: 10px; color: #3f3f46; text-align: center; margin: 0 0 12px">
-      build offline-app: 2026-09-14a
+      build offline-app: 2026-09-19a
     </p>
     <div id="root"></div>
     <button onclick="location.reload()">Tentar reconectar</button>
@@ -165,9 +165,6 @@
         // Tenta primeiro devolver o APP DE VERDADE (com todas as funções) a partir do
         // cache que o service worker já guardou (public/sw.js, cache "forja-html-v1").
         // Só cai na lista simples abaixo se não achar nada cacheado ainda.
-        // Tenta várias chaves possíveis (a exata, a raiz com/sem barra) e, na falta
-        // delas, qualquer página HTML que já esteja cacheada -- ainda é melhor que a
-        // lista simples, porque é o app de verdade (o React troca de rota sozinho).
         async function tryRestoreRealApp() {
           if (!("caches" in window)) {
             diag("cache: indisponível neste WebView");
@@ -178,15 +175,10 @@
             var keys = await cache.keys();
             diag("cache: " + keys.length + " página(s) salva(s)");
 
-            var candidates = [location.href, location.origin + "/", "/"];
-            var cached = null;
-            for (var i = 0; i < candidates.length && !cached; i++) {
-              cached = await cache.match(candidates[i]);
-            }
-            if (!cached && keys.length > 0) {
-              // Nenhuma das chaves óbvias bateu -- usa a primeira página HTML salva.
-              cached = await cache.match(keys[0]);
-            }
+            // Só a raiz: é o HTML ORIGINAL do servidor (com os dados de hidratação do
+            // TanStack), guardado por src/lib/html-snapshot.ts. Restaurar outra rota com ele
+            // não hidrataria — então sempre volta pra "/" (o app navega dali normalmente).
+            var cached = await cache.match(location.origin + "/");
             if (!cached) {
               diag("nenhuma página em cache ainda");
               return false;
@@ -195,6 +187,11 @@
             if (!html || html.length < 200) {
               diag("página em cache vazia/curta (" + html.length + " chars)");
               return false;
+            }
+            try {
+              history.replaceState(null, "", "/");
+            } catch (e) {
+              /* segue mesmo assim */
             }
             document.open();
             document.write(html);

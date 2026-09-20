@@ -20,8 +20,8 @@ public class MainActivity extends BridgeActivity {
     // (então o localStorage continua sendo o mesmo) — o Capacitor passa a servir o
     // index.html local (assets/public/index.html = offline-app.html, ver
     // scripts/sync-android-assets.mjs) em vez de tentar buscar a URL remota.
+    String host = hostFromServerUrl(CapConfig.loadDefault(this).getServerUrl());
     if (!isOnline()) {
-      String host = hostFromServerUrl(CapConfig.loadDefault(this).getServerUrl());
       if (host != null) {
         this.config = new CapConfig.Builder(this)
           .setHostname(host)
@@ -30,8 +30,8 @@ public class MainActivity extends BridgeActivity {
       }
     }
     super.onCreate(savedInstanceState);
-    OfflineAssetStore assetStore = new OfflineAssetStore(this);
-    // Ponte pro JS avisar quais arquivos (CSS/JS da página atual) guardar em disco
+    OfflineAssetStore assetStore = new OfflineAssetStore(this, host);
+    // Ponte pro JS avisar quais arquivos (todos os JS/CSS do build) guardar em disco
     // enquanto está online -- ver src/lib/html-snapshot.ts. shouldInterceptRequest
     // sozinho não basta pra servir esses arquivos offline; precisa de uma cópia
     // salva de antemão.
