@@ -24,18 +24,24 @@ Nenhum. O app builda, roda e todas as funcionalidades existentes seguem operando
   - Configurar SMTP em _Authentication → Emails → SMTP Settings_ (ex.: Resend).
 - **Formato esperado:** alteração no painel; nada muda no código.
 
-### 2. Analytics central
+### 2. Analytics central (Codane Analytics)
 
-- **Onde:** `.env` → `VITE_APP_ID`, `VITE_ANALYTICS_API_URL`. Camada em `src/lib/track.ts`.
-- **Situação:** sem esses valores a camada fica desligada (nenhum evento é enviado).
-- **Formato esperado:**
-  - `VITE_APP_ID` = string curta identificando o app (ex.: `forja`)
-  - `VITE_ANALYTICS_API_URL` = URL base do ingest (ex.: `https://analytics.seudominio.com`);
-    os eventos vão para `<URL>/events` via POST JSON.
+- **Onde:** `.env` → `VITE_APP_ID`, `VITE_ANALYTICS_API_URL`, `VITE_ANALYTICS_INGEST_KEY`.
+  Camada em `src/lib/track.ts`.
+- **Situação:** já está adaptado para o contrato do painel `codane-hub`; só falta você
+  preencher as três variáveis — sem elas a camada fica desligada (nenhum evento é enviado).
+- **Como obter os valores:** rode `supabase/registrar-apps.sql` no projeto Supabase do
+  `codane-hub` (ou cadastre o app pela tela do painel) — ele devolve `app_id` e
+  `ingest_key` do app "Forja".
+  - `VITE_APP_ID` = o `app_id` retornado (ex.: `forja_app`)
+  - `VITE_ANALYTICS_API_URL` = URL do `codane-hub` publicado (ex.: `https://codane-hub.vercel.app`);
+    os eventos vão para `<URL>/api/events` via POST JSON.
+  - `VITE_ANALYTICS_INGEST_KEY` = o `ingest_key` retornado (segredo do app — não é secreto o
+    bastante para dispensar cuidado, mas é seguro para o cliente pois só permite gravar
+    eventos desse app, nunca ler dados de outros apps).
 - **Contrato do evento enviado:**
-  `{ app_id, event, ts, session_id, user_id, props }` — sem dados pessoais.
-  Se o seu ingest espera outro formato/rota/autenticação (ex.: header `x-ingest-key`),
-  me diga o contrato e eu adapto `track.ts`.
+  `{ app_id, ingest_key, event, user_id, timestamp, platform, properties }` — sem dados
+  pessoais (`properties` inclui `session_id`).
 
 ### 3. IA (assistente, voz, busca de livros) — DESLIGADA de propósito
 

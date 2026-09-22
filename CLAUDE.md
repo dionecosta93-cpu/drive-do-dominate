@@ -136,9 +136,10 @@ error middleware. `src/lib/error-capture.ts` records the last server error for t
 
 ## Product infrastructure
 
-- **Analytics** — `src/lib/track.ts` is a decoupled event layer (no in-app dashboard). It
-  **only sends** when `VITE_APP_ID` **and** `VITE_ANALYTICS_API_URL` are set (POST to
-  `<API_URL>/events` via `sendBeacon`); otherwise it's a silent no-op. Standard events
+- **Analytics** — `src/lib/track.ts` is a decoupled event layer (no in-app dashboard) that
+  speaks the Codane Analytics hub contract. It **only sends** when `VITE_APP_ID`,
+  `VITE_ANALYTICS_API_URL` **and** `VITE_ANALYTICS_INGEST_KEY` are set (POST to
+  `<API_URL>/api/events` via `sendBeacon`); otherwise it's a silent no-op. Standard events
   (`app_open`, `sign_up`, `login`, `onboarding_completed`, `feature_used`, `content_created`, …)
   are already wired in `__root.tsx`, `auth.tsx`, `_authenticated/index.tsx`, `tasks.new.tsx`,
   `focus.$taskId.tsx`, `plans.tsx`. Never pass PII — see `.claude/skills/analytics-event`.
